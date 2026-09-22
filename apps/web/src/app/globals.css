@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --primary: #0284C7;
+  --primary-foreground: #FFFFFF;
+  --border: #E2E8F0;
+  --muted: #64748B;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: #121212;
+  --card-foreground: #FFFFFF;
+  --border: #FFFFFF;
+  --muted: #E2E8F0;
+}
+
+.high-contrast body {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+.high-contrast .card-panel {
+  border: 2px solid #FFFFFF !important;
+  background-color: #121212 !important;
+  color: #FFFFFF !important;
+}
+
+/* Large Text Mode */
+.text-large {
+  font-size: 115% !important;
+}
+
+.text-large h1 {
+  font-size: 2.5rem !important;
+}
+
+.text-large h2 {
+  font-size: 2rem !important;
+}
+
+.text-large p, .text-large button, .text-large span {
+  font-size: 1.15rem !important;
+}
+
+/* Clinical Glow and Skeleton animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+/* Custom crisp scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}

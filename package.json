@@ -1,0 +1,20 @@
+{
+  "name": "rehabsense-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace=apps/web run dev",
+    "build:web": "npm --workspace=apps/web run build",
+    "dev:api": "cd apps/api && python3 -m uvicorn main:app --reload --port 8000",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "seed": "cd apps/api && python3 seed.py",
+    "test:engine": "node packages/exercise-engine/test.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
