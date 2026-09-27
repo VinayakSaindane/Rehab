@@ -38,9 +38,14 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (typeof document !== 'undefined') {
       if (highContrast) {
-        document.documentElement.classList.add('contrast-125');
+        document.documentElement.classList.add('dark', 'high-contrast');
       } else {
-        document.documentElement.classList.remove('contrast-125');
+        document.documentElement.classList.remove('high-contrast');
+        // Only remove 'dark' if it was added by high-contrast (not user preference)
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (!prefersDark) {
+          document.documentElement.classList.remove('dark');
+        }
       }
 
       if (largeText) {

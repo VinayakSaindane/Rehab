@@ -1,11 +1,22 @@
 import asyncio
+import sys
+import io
+import uuid
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from database import get_db_collection
+
+# Fix Windows console encoding for Unicode output
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ('utf-8', 'utf8'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+def utcnow() -> datetime:
+    """Return timezone-aware UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 async def seed_database():
     users_col = get_db_collection("users")
@@ -15,15 +26,18 @@ async def seed_database():
     prescriptions_col = get_db_collection("prescriptions")
     sessions_col = get_db_collection("sessions")
     reviews_col = get_db_collection("therapist_reviews")
+    notifications_col = get_db_collection("notifications")
 
     # Clear existing demo data
-    for col in [users_col, patients_col, therapists_col, exercises_col, prescriptions_col, sessions_col, reviews_col]:
+    for col in [users_col, patients_col, therapists_col, exercises_col,
+                prescriptions_col, sessions_col, reviews_col, notifications_col]:
         if hasattr(col, "documents"):
             col.documents = []
         elif hasattr(col, "delete_many"):
             await col.delete_many({})
 
     demo_pw_hash = hash_password("Demo@123")
+    now = utcnow()
 
     # 1. Users
     patient_user = {
@@ -32,7 +46,7 @@ async def seed_database():
         "hashed_password": demo_pw_hash,
         "name": "Aarav Mehta",
         "role": "PATIENT",
-        "created_at": (datetime.utcnow() - timedelta(days=15)).isoformat()
+        "created_at": (now - timedelta(days=15)).isoformat()
     }
     therapist_user = {
         "id": "user-therapist-1",
@@ -40,7 +54,7 @@ async def seed_database():
         "hashed_password": demo_pw_hash,
         "name": "Dr. Ananya Sharma",
         "role": "THERAPIST",
-        "created_at": (datetime.utcnow() - timedelta(days=60)).isoformat()
+        "created_at": (now - timedelta(days=60)).isoformat()
     }
     await users_col.insert_one(patient_user)
     await users_col.insert_one(therapist_user)
@@ -57,7 +71,7 @@ async def seed_database():
         "therapist_name": "Dr. Ananya Sharma",
         "current_streak_days": 6,
         "total_sessions_completed": 10,
-        "created_at": (datetime.utcnow() - timedelta(days=15)).isoformat()
+        "created_at": (now - timedelta(days=15)).isoformat()
     }
     therapist_profile = {
         "id": "therapist-1",
@@ -71,7 +85,7 @@ async def seed_database():
     await patients_col.insert_one(patient_profile)
     await therapists_col.insert_one(therapist_profile)
 
-    # 3. Exercises Library
+    # 3. Exercises Library (all 3 types)
     exercises_data = [
         {
             "id": "elbow-flexion",
@@ -104,7 +118,7 @@ async def seed_database():
         },
         {
             "id": "shoulder-flexion",
-            "name": "Shoulder Flexion",
+            "name": "Shoulder Flexion (Elevations)",
             "description": "Forward elevation of the arm in the sagittal plane to restore glenohumeral mobility and functional reach.",
             "body_region": "Upper Limb",
             "difficulty": "Intermediate",
@@ -164,7 +178,7 @@ async def seed_database():
     for ex in exercises_data:
         await exercises_col.insert_one(ex)
 
-    # 4. Prescription
+    # 4. Active Prescription (Elbow Flexion)
     presc = {
         "id": "presc-1",
         "patient_id": "patient-1",
@@ -179,22 +193,22 @@ async def seed_database():
         "tempo_seconds": {"concentric": 2.0, "eccentric": 2.0},
         "hold_duration_seconds": 1.0,
         "frequency_per_day": 2,
-        "notes": "Focus on smooth eccentric control. Do not force past onset of discomfort. Target ROM set to 120°.",
+        "notes": "Focus on smooth eccentric control. Do not force past onset of discomfort. Target ROM set to 120 degrees.",
         "camera_orientation": "Frontal (Full Body)",
         "feedback_enabled": True,
         "status": "ACTIVE",
-        "updated_at": (datetime.utcnow() - timedelta(days=2)).isoformat()
+        "updated_at": (now - timedelta(days=2)).isoformat()
     }
     await prescriptions_col.insert_one(presc)
 
-    # 5. Historical Sessions (10 sessions)
+    # 5. Historical Sessions (10 sessions over 10 days)
     historical_roms = [82, 86, 91, 95, 98, 104, 108, 112, 110, 114]
-    base_date = datetime.utcnow() - timedelta(days=9)
+    base_date = now - timedelta(days=9)
 
     for i, avg_rom in enumerate(historical_roms):
         session_date = base_date + timedelta(days=i)
-        is_flagged_session = (i == 5) # Session #6 has flagged repetition
-        
+        is_flagged_session = (i == 5)  # Session #6 has flagged repetition
+
         reps_data = []
         target_r = 10
         comp_r = 8 if is_flagged_session else 10
@@ -202,7 +216,7 @@ async def seed_database():
 
         for r_num in range(1, comp_r + 1):
             if is_flagged_session and r_num == 6:
-                # Flagged rep: reached 108° vs target 120°
+                # Flagged rep: achieved 108° vs prescribed 120°
                 reps_data.append({
                     "rep_number": r_num,
                     "peak_rom": 108.0,
@@ -240,7 +254,7 @@ async def seed_database():
             "valid_reps": valid_r,
             "average_rom": float(avg_rom),
             "max_rom": float(avg_rom + 6),
-            "tracking_confidence": 0.91 + (i * 0.005),
+            "tracking_confidence": round(0.91 + (i * 0.005), 4),
             "form_flags": form_flags,
             "joint_metrics": reps_data,
             "patient_notes": "Mild tightness at end range" if is_flagged_session else "Movement felt smooth today",
@@ -249,7 +263,20 @@ async def seed_database():
         }
         await sessions_col.insert_one(session_doc)
 
-    print("✓ Successfully seeded RehabSense database with demo accounts, prescriptions, and 10 realistic sessions!")
+    # 6. Seed a demo notification (therapist override pending)
+    notification = {
+        "id": f"notif-{uuid.uuid4().hex[:8]}",
+        "patient_id": "patient-1",
+        "type": "SESSION_REVIEWED",
+        "title": "Session #6 Flagged for Review",
+        "message": "Dr. Ananya Sharma has flagged Rep #6 in your session on Sep 16 for clinical review. No action needed — your care team is monitoring your progress.",
+        "is_read": False,
+        "created_at": (now - timedelta(hours=2)).isoformat(),
+        "meta": {"session_id": "session-hist-6", "flagged_rep": 6}
+    }
+    await notifications_col.insert_one(notification)
+
+    print("[OK] Successfully seeded RehabSense database with demo accounts, all 3 exercises, prescriptions, 10 sessions, and notifications!")
 
 if __name__ == "__main__":
     asyncio.run(seed_database())

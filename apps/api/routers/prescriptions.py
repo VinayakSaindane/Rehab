@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from database import get_db_collection
@@ -28,7 +28,7 @@ async def create_prescription(presc_in: PrescriptionCreate, current_user: dict =
     prescriptions_col = get_db_collection("prescriptions")
     doc = presc_in.dict()
     doc["id"] = f"presc-{uuid.uuid4().hex[:8]}"
-    doc["updated_at"] = datetime.utcnow().isoformat()
+    doc["updated_at"] = datetime.now(timezone.utc).isoformat()
     await prescriptions_col.insert_one(doc)
     return doc
 
@@ -44,7 +44,7 @@ async def update_prescription(
         raise HTTPException(status_code=404, detail="Prescription not found")
 
     update_data = {k: v for k, v in update_in.dict().items() if v is not None}
-    update_data["updated_at"] = datetime.utcnow().isoformat()
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     await prescriptions_col.update_one({"id": prescription_id}, {"$set": update_data})
     updated = await prescriptions_col.find_one({"id": prescription_id})

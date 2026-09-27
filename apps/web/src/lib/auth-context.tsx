@@ -17,9 +17,11 @@ interface AuthContextType {
   role: UserRole;
   token: string | null;
   isLoading: boolean;
+  isOnboardingComplete: boolean;
   switchRole: (newRole: UserRole) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  completeOnboarding: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(DEMO_PATIENT);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean>(true);
 
   // Initialize auth state from localStorage or demo default
   useEffect(() => {
@@ -66,6 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedToken) {
         setToken(storedToken);
       }
+
+      // Check onboarding completion flag
+      const onboardingDone = localStorage.getItem('rehab_onboarding_complete');
+      setIsOnboardingComplete(!!onboardingDone);
     } catch {
       // Storage access blocked or SSR
       setRole('PATIENT');
@@ -73,6 +80,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  // Listen for token expiry events from the API client
+  useEffect(() => {
+    const handleTokenExpired = () => {
+      setToken(null);
+      setUser(DEMO_PATIENT);
+      setRole('PATIENT');
+    };
+    window.addEventListener('rehabsense:token-expired', handleTokenExpired);
+    return () => window.removeEventListener('rehabsense:token-expired', handleTokenExpired);
   }, []);
 
   const switchRole = useCallback(async (newRole: UserRole) => {
@@ -144,6 +162,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
+  const completeOnboarding = useCallback(() => {
+    setIsOnboardingComplete(true);
+    try {
+      localStorage.setItem('rehab_onboarding_complete', 'true');
+    } catch {}
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -151,9 +176,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role,
         token,
         isLoading,
+        isOnboardingComplete,
         switchRole,
         login,
         logout,
+        completeOnboarding,
       }}
     >
       {children}

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 import { 
   CheckCircle2, 
   Camera, 
@@ -21,6 +22,7 @@ import {
 
 export default function PatientOnboardingPage() {
   const router = useRouter();
+  const { completeOnboarding } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [cameraStreamActive, setCameraStreamActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -424,7 +426,10 @@ export default function PatientOnboardingPage() {
               </button>
             ) : (
               <button
-                onClick={() => router.push('/patient/exercise/elbow-flexion')}
+                onClick={() => {
+                  completeOnboarding();
+                  router.push('/patient/exercise/elbow-flexion');
+                }}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 transition-all cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-current" />

@@ -1,0 +1,79 @@
+name: RehabSense CI
+
+on:
+  push:
+    branches: [main, raj]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        run: pip install -r apps/api/requirements.txt
+
+      - name: Build frontend
+        run: npm run build:web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api
+
+      - name: Validate Python backend imports
+        run: |
+          cd apps/api
+          python -c "
+          import main
+          import seed
+          from routers import auth, patients, exercises, prescriptions, sessions, therapist, demo, notifications
+          from models.schemas import SessionCreate, PrescriptionCreate, NotificationResponse
+          print('[OK] All backend modules imported successfully')
+          "
+
+      - name: Check for TypeScript errors
+        run: npx --workspace=apps/web tsc --noEmit --pretty
+        continue-on-error: true
+
+      - name: Validate Pydantic schemas
+        run: |
+          cd apps/api
+          python -c "
+          from models.schemas import SessionCreate, PrescriptionCreate
+          
+          # Verify ROM validation works
+          try:
+              SessionCreate(
+                  exercise_id='test', exercise_name='Test', started_at='2024-01-01T00:00:00Z',
+                  completed_at='2024-01-01T00:10:00Z', duration_seconds=600,
+                  target_reps=10, completed_reps=10, valid_reps=9,
+                  average_rom=999, max_rom=120, tracking_confidence=0.95
+              )
+              print('[FAIL] Should have rejected ROM=999')
+              exit(1)
+          except Exception as e:
+              print(f'[OK] ROM validation correctly rejected invalid value: {e}')
+          
+          print('[OK] All schema validations passed')
+          "

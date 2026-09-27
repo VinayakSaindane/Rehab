@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any, Literal
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 
 UserRole = Literal["PATIENT", "THERAPIST", "SUPER_ADMIN"]
 
@@ -116,6 +116,20 @@ class PrescriptionBase(BaseModel):
     feedback_enabled: bool = True
     status: Literal["ACTIVE", "ADJUSTED", "COMPLETED", "ARCHIVED"] = "ACTIVE"
 
+    @field_validator('target_rom', 'min_rom', 'max_rom')
+    @classmethod
+    def validate_rom_range(cls, v: float) -> float:
+        if not (0.0 <= v <= 180.0):
+            raise ValueError(f'ROM value {v} must be between 0° and 180°')
+        return v
+
+    @field_validator('target_reps')
+    @classmethod
+    def validate_reps(cls, v: int) -> int:
+        if v < 1 or v > 100:
+            raise ValueError('target_reps must be between 1 and 100')
+        return v
+
 class PrescriptionCreate(PrescriptionBase):
     pass
 
@@ -126,6 +140,13 @@ class PrescriptionUpdate(BaseModel):
     status: Optional[str] = None
     frequency_per_day: Optional[int] = None
 
+    @field_validator('target_rom')
+    @classmethod
+    def validate_target_rom(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and not (0.0 <= v <= 180.0):
+            raise ValueError(f'target_rom {v} must be between 0° and 180°')
+        return v
+
 class PrescriptionResponse(PrescriptionBase):
     id: str
     updated_at: str
@@ -134,11 +155,25 @@ class PrescriptionResponse(PrescriptionBase):
 class SessionRepMetricSchema(BaseModel):
     rep_number: int
     peak_rom: float
-    start_rom: float
+    start_rom: float = 0.0
     duration_seconds: float
     is_valid: bool
     flag: Optional[str] = None
     confidence_score: float
+
+    @field_validator('peak_rom', 'start_rom')
+    @classmethod
+    def validate_rep_rom(cls, v: float) -> float:
+        if not (0.0 <= v <= 180.0):
+            raise ValueError(f'Rep ROM value {v} must be between 0° and 180°')
+        return v
+
+    @field_validator('confidence_score')
+    @classmethod
+    def validate_confidence(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError('confidence_score must be between 0.0 and 1.0')
+        return round(v, 4)
 
 class SessionCreate(BaseModel):
     patient_id: Optional[str] = None
@@ -159,6 +194,34 @@ class SessionCreate(BaseModel):
     patient_notes: Optional[str] = None
     is_manual_log: Optional[bool] = False
 
+    @field_validator('average_rom', 'max_rom')
+    @classmethod
+    def validate_session_rom(cls, v: float) -> float:
+        if not (0.0 <= v <= 180.0):
+            raise ValueError(f'ROM value {v} must be between 0° and 180°')
+        return round(v, 2)
+
+    @field_validator('tracking_confidence')
+    @classmethod
+    def validate_tracking_confidence(cls, v: float) -> float:
+        if not (0.0 <= v <= 1.0):
+            raise ValueError('tracking_confidence must be between 0.0 and 1.0')
+        return round(v, 4)
+
+    @field_validator('completed_reps', 'valid_reps', 'target_reps')
+    @classmethod
+    def validate_rep_counts(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError('Rep count cannot be negative')
+        return v
+
+    @field_validator('duration_seconds')
+    @classmethod
+    def validate_duration(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError('duration_seconds cannot be negative')
+        return v
+
 class SessionResponse(SessionCreate):
     id: str
     review_status: Literal["PENDING_REVIEW", "REVIEWED", "OVERRIDDEN"] = "PENDING_REVIEW"
@@ -169,6 +232,13 @@ class TherapistReviewCreate(BaseModel):
     clinical_reason: Optional[str] = None
     new_target_rom: Optional[float] = None
     notes: Optional[str] = None
+
+    @field_validator('new_target_rom')
+    @classmethod
+    def validate_new_rom(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and not (0.0 <= v <= 180.0):
+            raise ValueError(f'new_target_rom {v} must be between 0° and 180°')
+        return v
 
 class TherapistReviewResponse(BaseModel):
     id: str
@@ -181,3 +251,14 @@ class TherapistReviewResponse(BaseModel):
     previous_target_rom: Optional[float] = None
     new_target_rom: Optional[float] = None
     notes: Optional[str] = None
+
+# ----------------- Notification Schemas -----------------
+class NotificationResponse(BaseModel):
+    id: str
+    patient_id: str
+    type: str  # "PRESCRIPTION_UPDATED" | "SESSION_REVIEWED" | "GENERAL"
+    title: str
+    message: str
+    is_read: bool = False
+    created_at: str
+    meta: Optional[Dict[str, Any]] = None

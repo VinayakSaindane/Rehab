@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   RotateCcw
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 export default function TopNavbar() {
   const pathname = usePathname();
@@ -192,6 +193,9 @@ export default function TopNavbar() {
                 <Type className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Notification Bell */}
+            {role === 'PATIENT' && <NotificationBell />}
 
             {/* Quick 1-Click Role Switcher */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">

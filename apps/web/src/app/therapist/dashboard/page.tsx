@@ -67,10 +67,32 @@ export default function TherapistDashboardPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <div className="w-5 h-5 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
-          <span>Loading clinical therapist census...</span>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
+            <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded-full mb-3" />
+            <div className="h-7 w-56 bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
+            <div className="h-3 w-44 bg-slate-200 dark:bg-slate-700 rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+            ))}
+          </div>
+          {[1,2].map(i => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+              <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+            </div>
+          ))}
         </div>
       </div>
     );

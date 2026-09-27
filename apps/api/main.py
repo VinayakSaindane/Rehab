@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from database import db_manager, get_db_collection
 from seed import seed_database
-from routers import auth, patients, exercises, prescriptions, sessions, therapist, demo
+from routers import auth, patients, exercises, prescriptions, sessions, therapist, demo, notifications
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("rehabsense")
@@ -34,10 +34,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable permissive CORS for seamless hackathon local development & demoing
+# CORS — allow local dev origins (expand this list for production domains)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,6 +54,7 @@ app.include_router(exercises.router, prefix=settings.API_PREFIX)
 app.include_router(prescriptions.router, prefix=settings.API_PREFIX)
 app.include_router(sessions.router, prefix=settings.API_PREFIX)
 app.include_router(therapist.router, prefix=settings.API_PREFIX)
+app.include_router(notifications.router, prefix=settings.API_PREFIX)
 app.include_router(demo.router, prefix=settings.API_PREFIX)
 
 @app.get("/")

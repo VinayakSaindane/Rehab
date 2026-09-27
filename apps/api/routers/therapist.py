@@ -1,10 +1,11 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from database import get_db_collection
 from models.schemas import TherapistReviewCreate, TherapistReviewResponse
 from routers.auth import get_current_user
+from routers.notifications import create_notification
 
 router = APIRouter(prefix="/therapist", tags=["Therapist Operations"])
 
@@ -136,7 +137,7 @@ async def review_session(
                     "target_rom": float(new_target_rom),
                     "notes": f"Therapist Override: {review_in.clinical_reason or 'Adjusted for recovery progression'}",
                     "status": "ADJUSTED",
-                    "updated_at": datetime.utcnow().isoformat()
+                    "updated_at": datetime.now(timezone.utc).isoformat()
                 }
             }
         )
@@ -155,7 +156,7 @@ async def review_session(
         "session_id": session_id,
         "patient_id": patient_id,
         "therapist_id": current_user.get("id", "therapist-1"),
-        "reviewed_at": datetime.utcnow().isoformat(),
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
         "action": review_in.action,
         "clinical_reason": review_in.clinical_reason,
         "previous_target_rom": previous_target_rom,
@@ -163,5 +164,34 @@ async def review_session(
         "notes": review_in.notes
     }
     await reviews_col.insert_one(review_doc)
+
+    # Notify patient about the review action
+    if review_in.action == "OVERRIDDEN" and new_target_rom is not None:
+        await create_notification(
+            patient_id=patient_id,
+            notif_type="PRESCRIPTION_UPDATED",
+            title="Your Exercise Target Has Been Updated",
+            message=(
+                f"Dr. {current_user.get('name', 'Your therapist')} has reviewed your session "
+                f"and adjusted your prescribed ROM target to {new_target_rom}°. "
+                f"Reason: {review_in.clinical_reason or 'Progressive recovery adjustment'}."
+            ),
+            meta={
+                "session_id": session_id,
+                "previous_rom": previous_target_rom,
+                "new_rom": new_target_rom
+            }
+        )
+    else:
+        await create_notification(
+            patient_id=patient_id,
+            notif_type="SESSION_REVIEWED",
+            title="Session Reviewed by Your Care Team",
+            message=(
+                f"Dr. {current_user.get('name', 'Your therapist')} has reviewed your recent session. "
+                f"Your current prescription remains unchanged."
+            ),
+            meta={"session_id": session_id}
+        )
 
     return review_doc

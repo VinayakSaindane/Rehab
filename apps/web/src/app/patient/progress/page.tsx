@@ -63,10 +63,28 @@ export default function PatientProgressPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <div className="w-5 h-5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
-          <span>Loading rehabilitation progress metrics...</span>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
+            <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded-full mb-3" />
+            <div className="h-7 w-60 bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-8 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+            ))}
+          </div>
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 h-64">
+            <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded-full mb-6" />
+            <div className="flex items-end gap-2 h-40">
+              {[40,65,55,80,70,90,85,95,88,100].map((h,i) => (
+                <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-t-lg" style={{height: h + '%'}} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
