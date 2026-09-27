@@ -27,10 +27,11 @@ async def seed_database():
     sessions_col = get_db_collection("sessions")
     reviews_col = get_db_collection("therapist_reviews")
     notifications_col = get_db_collection("notifications")
+    custom_exercises_col = get_db_collection("custom_exercises")
 
     # Clear existing demo data
     for col in [users_col, patients_col, therapists_col, exercises_col,
-                prescriptions_col, sessions_col, reviews_col, notifications_col]:
+                prescriptions_col, sessions_col, reviews_col, notifications_col, custom_exercises_col]:
         if hasattr(col, "documents"):
             col.documents = []
         elif hasattr(col, "delete_many"):
@@ -172,6 +173,93 @@ async def seed_database():
                 "target_angle": 160.0,
                 "return_angle": 105.0,
                 "hysteresis_buffer": 10.0
+            }
+        },
+        {
+            "id": "knee-extension",
+            "name": "Seated Knee Extension (Quad Strengthening)",
+            "description": "Seated active knee extension to rebuild quadriceps control, patellar tracking, and end-range extension.",
+            "body_region": "Lower Limb",
+            "difficulty": "Beginner",
+            "camera_view": "Sagittal (Side Profile)",
+            "target_joint": "Knee",
+            "required_landmarks": ["left_hip", "left_knee", "left_ankle"],
+            "instructions": [
+                "Sit upright in a firm chair with knees bent at 90 degrees.",
+                "Position the camera side-on to clearly view your thigh and calf.",
+                "Slowly kick your foot forward, straightening your knee as far as comfortable.",
+                "Squeeze your thigh muscle for 1 second at full extension.",
+                "Lower your foot smoothly back down under control."
+            ],
+            "common_feedback": [
+                "Keep your back upright against the chair; avoid slouching.",
+                "Control the descent; do not let your leg drop suddenly.",
+                "Keep foot pointing straight forward without inward rotation."
+            ],
+            "default_rom": {"min": 90.0, "max": 180.0, "target": 170.0, "unit": "degrees"},
+            "rep_state_machine": {
+                "start_angle": 95.0,
+                "target_angle": 165.0,
+                "return_angle": 110.0,
+                "hysteresis_buffer": 8.0
+            }
+        },
+        {
+            "id": "shoulder-abduction",
+            "name": "Shoulder Abduction (Lateral Raise)",
+            "description": "Coronal plane arm elevation to restore middle deltoid strength and scapulohumeral rhythm.",
+            "body_region": "Upper Limb",
+            "difficulty": "Intermediate",
+            "camera_view": "Frontal (Full Body)",
+            "target_joint": "Shoulder",
+            "required_landmarks": ["left_hip", "left_shoulder", "left_elbow"],
+            "instructions": [
+                "Stand facing your camera with arms resting at your sides.",
+                "Keep your torso tall and shoulders relaxed away from your ears.",
+                "Smoothly lift your arm out to the side up to shoulder level (90 degrees).",
+                "Hold for 1 second with palm facing downward.",
+                "Slowly return your arm to your side under control."
+            ],
+            "common_feedback": [
+                "Keep both shoulders level — avoid hiking the working shoulder.",
+                "Do not lean your torso to the opposite side to assist the lift.",
+                "Move smoothly and avoid jerky motions."
+            ],
+            "default_rom": {"min": 20.0, "max": 120.0, "target": 90.0, "unit": "degrees"},
+            "rep_state_machine": {
+                "start_angle": 25.0,
+                "target_angle": 85.0,
+                "return_angle": 35.0,
+                "hysteresis_buffer": 6.0
+            }
+        },
+        {
+            "id": "trunk-mobility",
+            "name": "Standing Trunk Lateral Mobility",
+            "description": "Lateral trunk mobility exercise to restore lateral spinal flexion and thoracic spine mobility.",
+            "body_region": "Spine & Core",
+            "difficulty": "Beginner",
+            "camera_view": "Frontal (Full Body)",
+            "target_joint": "Spine",
+            "required_landmarks": ["left_shoulder", "left_hip", "left_knee"],
+            "instructions": [
+                "Stand with feet shoulder-width apart and arms resting by your sides.",
+                "Engage your abdominal core gently.",
+                "Slide one hand down the side of your thigh, bending sideways at the waist.",
+                "Hold momentarily at the comfortable end range.",
+                "Return upright to center before switching sides."
+            ],
+            "common_feedback": [
+                "Bend purely sideways without twisting or leaning forward.",
+                "Keep both feet firmly grounded on the floor.",
+                "Breathe normally throughout the movement."
+            ],
+            "default_rom": {"min": 0.0, "max": 45.0, "target": 28.0, "unit": "degrees"},
+            "rep_state_machine": {
+                "start_angle": 5.0,
+                "target_angle": 25.0,
+                "return_angle": 10.0,
+                "hysteresis_buffer": 3.0
             }
         }
     ]

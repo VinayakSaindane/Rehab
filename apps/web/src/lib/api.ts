@@ -130,6 +130,22 @@ export const api = {
   // ── Exercise & Prescriptions ──────────────────────────────────
   getExercises: () => request<any[]>('/exercises'),
   getExercise: (id: string) => request<any>(`/exercises/${id}`),
+  getExerciseLibrary: () =>
+    request<{ platform_exercises: any[]; custom_exercises: any[]; total: number }>('/exercises/library'),
+  createCustomExercise: (payload: any) =>
+    request<any>('/exercises/custom', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  updateCustomExercise: (id: string, payload: any) =>
+    request<any>(`/exercises/custom/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  deleteCustomExercise: (id: string) =>
+    request<any>(`/exercises/custom/${id}`, {
+      method: 'DELETE',
+    }),
   getPrescriptions: (patientId?: string) =>
     request<any[]>(`/prescriptions${patientId ? `?patient_id=${patientId}` : ''}`),
   updatePrescription: (prescriptionId: string, payload: {
@@ -168,6 +184,13 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  reviewSessionWithFeedback: (sessionId: string, payload: any) =>
+    request<any>(`/therapist/sessions/${sessionId}/review-with-feedback`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  getTherapistSessionSummary: (sessionId: string) =>
+    request<any>(`/therapist/sessions/${sessionId}/summary`),
 
   // ── Notifications ─────────────────────────────────────────────
   getNotifications: () => request<any[]>('/notifications'),

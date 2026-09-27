@@ -342,12 +342,34 @@ export default function PatientDashboardPage() {
               </div>
 
               <div className="p-4 rounded-2xl bg-teal-50/50 dark:bg-teal-950/20 border border-teal-200/60 dark:border-teal-800/40">
+                {data.therapist_message?.has_guidance && (
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200 text-[10px] font-bold mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping" />
+                    <span>New Guidance Received</span>
+                  </div>
+                )}
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic">
                   &quot;{data.therapist_message?.content || 'Focus on smooth eccentric extension. Targets are calibrated to your current recovery phase.'}&quot;
                 </p>
                 <p className="text-xs font-bold text-teal-800 dark:text-teal-300 mt-3">
                   — {data.therapist_message?.from || 'Dr. Ananya Sharma'}
                 </p>
+
+                {data.therapist_message?.coaching_cues?.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-teal-200/50 dark:border-teal-800/50 space-y-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+                      Doctor's Coaching Cues:
+                    </p>
+                    <ul className="space-y-1">
+                      {data.therapist_message.coaching_cues.map((cue: string, i: number) => (
+                        <li key={i} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-1.5">
+                          <span className="text-teal-600 font-bold">•</span>
+                          <span>{cue}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               <p className="text-[11px] text-slate-500 leading-relaxed">

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from database import get_db_collection
-from models.schemas import TherapistReviewCreate, TherapistReviewResponse
+from models.schemas import TherapistReviewCreate, TherapistReviewResponse, TherapistReviewWithFeedback, TherapistFeedback
 from routers.auth import get_current_user
 from routers.notifications import create_notification
 
@@ -195,3 +195,162 @@ async def review_session(
         )
 
     return review_doc
+
+@router.post("/sessions/{session_id}/review-with-feedback")
+async def review_session_with_feedback(
+    session_id: str,
+    review_in: TherapistReviewWithFeedback,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Extended review endpoint — does everything review_session does, PLUS:
+    - Sends a rich THERAPIST_GUIDANCE notification with the therapist's message
+      and coaching cues directly visible in the patient app.
+    - Also chains into the existing review flow (updates prescription if OVERRIDDEN).
+    """
+    sessions_col = get_db_collection("sessions")
+    prescriptions_col = get_db_collection("prescriptions")
+    reviews_col = get_db_collection("therapist_reviews")
+
+    session = await sessions_col.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    patient_id = session.get("patient_id", "patient-1")
+    prescription_id = session.get("prescription_id", "presc-1")
+    presc = await prescriptions_col.find_one({"id": prescription_id})
+
+    previous_target_rom = presc.get("target_rom", 120.0) if presc else 120.0
+    new_target_rom = review_in.new_target_rom
+
+    if review_in.action == "OVERRIDDEN" and new_target_rom is not None:
+        await prescriptions_col.update_one(
+            {"id": prescription_id},
+            {"$set": {
+                "target_rom": float(new_target_rom),
+                "notes": f"Therapist Override: {review_in.clinical_reason or 'Adjusted for recovery progression'}",
+                "status": "ADJUSTED",
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        new_status = "OVERRIDDEN"
+    else:
+        new_status = "REVIEWED"
+
+    await sessions_col.update_one({"id": session_id}, {"$set": {"review_status": new_status}})
+
+    review_doc = {
+        "id": f"review-{uuid.uuid4().hex[:8]}",
+        "session_id": session_id,
+        "patient_id": patient_id,
+        "therapist_id": current_user.get("id", "therapist-1"),
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
+        "action": review_in.action,
+        "clinical_reason": review_in.clinical_reason,
+        "previous_target_rom": previous_target_rom,
+        "new_target_rom": new_target_rom,
+        "notes": review_in.notes,
+        "feedback_sent": review_in.feedback is not None
+    }
+    await reviews_col.insert_one(review_doc)
+
+    therapist_name = current_user.get("name", "Your therapist")
+
+    # 1. Always send a standard review notification
+    if review_in.action == "OVERRIDDEN" and new_target_rom is not None:
+        await create_notification(
+            patient_id=patient_id,
+            notif_type="PRESCRIPTION_UPDATED",
+            title="Your Exercise Target Has Been Updated",
+            message=(
+                f"Dr. {therapist_name} has reviewed your session and adjusted your "
+                f"prescribed ROM target to {new_target_rom}°. "
+                f"Reason: {review_in.clinical_reason or 'Progressive recovery adjustment'}."
+            ),
+            meta={"session_id": session_id, "previous_rom": previous_target_rom, "new_rom": new_target_rom}
+        )
+    else:
+        await create_notification(
+            patient_id=patient_id,
+            notif_type="SESSION_REVIEWED",
+            title="Session Reviewed by Your Care Team",
+            message=f"Dr. {therapist_name} has reviewed your recent session. Your prescription remains unchanged.",
+            meta={"session_id": session_id}
+        )
+
+    # 2. If therapist included a feedback message, send it as a separate THERAPIST_GUIDANCE notification
+    if review_in.feedback:
+        fb = review_in.feedback
+        # Format coaching cues as a numbered list appended to the message
+        cues_text = ""
+        if fb.coaching_cues:
+            cues_text = " Tips: " + " | ".join(f"({i+1}) {cue}" for i, cue in enumerate(fb.coaching_cues))
+
+        await create_notification(
+            patient_id=patient_id,
+            notif_type="THERAPIST_GUIDANCE",
+            title=f"Guidance from Dr. {therapist_name}",
+            message=fb.message + cues_text,
+            meta={
+                "session_id": session_id,
+                "coaching_cues": fb.coaching_cues,
+                "priority": fb.priority,
+                "from_therapist": therapist_name
+            }
+        )
+
+    return review_doc
+
+@router.get("/sessions/{session_id}/summary")
+async def get_session_summary_for_therapist(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Returns the AI-generated session summary from the therapist's perspective.
+    Calls the same LLM summary endpoint used by the patient progress page,
+    but returns the clinician_summary field prominently.
+    Also returns the full session doc for the therapist review page.
+    """
+    sessions_col = get_db_collection("sessions")
+    session = await sessions_col.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # If cached summary exists, return it
+    cached = session.get("llm_summary")
+
+    # Build deterministic clinician summary as fallback
+    comp_flags = session.get("compensation_flags", [])
+    form_flags = session.get("form_flags", [])
+    all_flags = list(set(form_flags + comp_flags))
+    flags_str = ", ".join(all_flags) if all_flags else "none"
+    avg_rom = session.get("average_rom", 0)
+    tracking_pct = round(session.get("tracking_confidence", 0) * 100)
+    completed = session.get("completed_reps", 0)
+    target = session.get("target_reps", 0)
+    ex_name = session.get("exercise_name", "Exercise")
+
+    clinician_summary = cached["clinician_summary"] if cached else (
+        f"Patient completed {completed}/{target} reps of {ex_name} "
+        f"with avg ROM {avg_rom:.0f}°, {tracking_pct}% tracking confidence, flags: {flags_str}."
+    )
+
+    # Human-readable flag analysis for the therapist review page
+    flag_analysis = []
+    if "trunk_lean" in all_flags:
+        flag_analysis.append({"flag": "trunk_lean", "label": "Trunk Lean", "guidance": "Patient is laterally flexing the spine during the movement. Cue: keep the back straight, brace the core, and avoid leaning into the exercise."})
+    if "shoulder_hike" in all_flags:
+        flag_analysis.append({"flag": "shoulder_hike", "label": "Shoulder Hike", "guidance": "Ipsilateral shoulder is elevating to assist the movement. Cue: relax the shoulder blade down, keep both shoulders level throughout the rep."})
+    if "pelvic_shift" in all_flags:
+        flag_analysis.append({"flag": "pelvic_shift", "label": "Pelvic Shift", "guidance": "Lateral hip drift detected. Cue: keep weight evenly distributed, avoid shifting weight to one side during the movement."})
+    if "range_below_target" in all_flags:
+        flag_analysis.append({"flag": "range_below_target", "label": "Short ROM", "guidance": "Patient is not achieving the prescribed range. Review whether ROM target needs adjusting or if pain/stiffness is limiting full range."})
+
+    return {
+        "session": session,
+        "clinician_summary": clinician_summary,
+        "flag_analysis": flag_analysis,
+        "all_flags": all_flags,
+        "summary_cached": bool(cached)
+    }

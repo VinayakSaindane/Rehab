@@ -108,9 +108,9 @@ export default function FindTherapistPage() {
         })
       });
       // Success regardless of backend reachability (demo-safe)
-      setRequested(prev => new Set([...prev, therapistId]));
+      setRequested(prev => new Set([...Array.from(prev), therapistId]));
     } catch {
-      setRequested(prev => new Set([...prev, therapistId]));
+      setRequested(prev => new Set([...Array.from(prev), therapistId]));
     } finally {
       setRequesting(null);
     }

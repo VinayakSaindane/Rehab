@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, CheckCheck, Info, AlertTriangle } from 'lucide-react';
+import { Bell, X, CheckCheck, Info, AlertTriangle, Stethoscope } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Notification {
@@ -78,6 +78,7 @@ export default function NotificationBell() {
   }
 
   function getIcon(type: string) {
+    if (type === 'THERAPIST_GUIDANCE') return <Stethoscope className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />;
     if (type === 'PRESCRIPTION_UPDATED') return <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />;
     return <Info className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />;
   }

@@ -81,51 +81,9 @@ export default function PatientProgressPage() {
     fetchSummary();
   }, []);
 
-  // Client-side PDF report via jsPDF (no backend round-trip needed for hackathon)
-  const handleDownloadReport = async () => {
-    setDownloadingReport(true);
-    try {
-      // Dynamically import jsPDF to keep initial bundle small
-      const { jsPDF } = await import('jspdf' as any).catch(() => ({ jsPDF: null }));
-      if (!jsPDF) {
-        // jsPDF not installed — open print dialog as fallback
-        window.print();
-        return;
-      }
-      const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text('RehabSense — Progress Report', 14, 20);
-      doc.setFontSize(11);
-      doc.text('Patient: Aarav Mehta  |  Exercise: Elbow Flexion & Extension', 14, 32);
-      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 14, 40);
-      doc.setLineWidth(0.3);
-      doc.line(14, 44, 196, 44);
-      doc.setFontSize(12);
-      doc.text('Session Timeline', 14, 52);
-      let y = 60;
-      (data?.timeline || []).forEach((s: any, i: number) => {
-        doc.setFontSize(10);
-        doc.text(
-          `${i + 1}. ${s.date}  |  Avg ROM: ${Math.round(s.averageRom)}°  |  Reps: ${s.completedReps}/${s.targetReps}  |  Confidence: ${s.trackingConfidence}%${s.hasFlags ? '  ⚠ Flagged' : ''}`,
-          14, y
-        );
-        y += 8;
-        if (y > 270) { doc.addPage(); y = 20; }
-      });
-      if (latestSummary?.patient_summary) {
-        doc.setFontSize(12);
-        doc.text('AI Session Summary (Latest)', 14, y + 6);
-        doc.setFontSize(10);
-        const lines = doc.splitTextToSize(latestSummary.patient_summary, 180);
-        doc.text(lines, 14, y + 14);
-      }
-      doc.save('rehabsense-progress-report.pdf');
-    } catch (e) {
-      // Fallback: open print dialog
-      window.print();
-    } finally {
-      setDownloadingReport(false);
-    }
+  // Client-side report generation (opens browser print / save-as-PDF dialog)
+  const handleDownloadReport = () => {
+    window.print();
   };
 
   if (loading || !data) {

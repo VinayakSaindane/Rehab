@@ -86,12 +86,37 @@ class ExerciseBase(BaseModel):
     common_feedback: List[str]
     default_rom: ExerciseRomDefinition
     rep_state_machine: ExerciseRepThresholds
+    is_custom: Optional[bool] = False
+    source: Optional[str] = "platform"
+    created_by_therapist_id: Optional[str] = None
 
 class ExerciseCreate(ExerciseBase):
     pass
 
 class ExerciseResponse(ExerciseBase):
     pass
+
+class CustomExerciseCreate(BaseModel):
+    """
+    Simplified exercise creation form for therapists.
+    Therapists only need to fill the clinically important fields;
+    the rep state machine parameters are auto-derived from ROM values.
+    """
+    name: str
+    description: str
+    body_region: str                        # e.g. "Upper Limb", "Lower Limb", "Core"
+    difficulty: Literal["Beginner", "Intermediate", "Advanced"] = "Beginner"
+    camera_view: str = "Frontal (Full Body)"
+    target_joint: str                       # e.g. "Elbow", "Shoulder", "Knee"
+    required_landmarks: List[str]           # e.g. ["left_shoulder", "left_elbow", "left_wrist"]
+    instructions: List[str] = []
+    common_feedback: List[str] = []
+    target_rom: float                       # Prescribed peak ROM in degrees
+    min_rom: float = 0.0                    # Starting / rest angle
+    max_rom: float = 180.0
+    is_angle_decreasing_on_flex: bool = True
+    created_by_therapist_id: Optional[str] = None
+    is_custom: bool = True                  # Marks as therapist-added, not seeded
 
 # ----------------- Prescription Schemas -----------------
 class PrescriptionTempo(BaseModel):
@@ -381,3 +406,23 @@ class ExerciseTemplateCreate(BaseModel):
     derivation_confidence: float = 0.0
     landmark_summary: Optional[List[Dict[str, float]]] = None
     notes: Optional[str] = None
+
+# ----------------- Therapist Feedback / Guidance (Session Review Extension) -----------------
+class TherapistFeedback(BaseModel):
+    """
+    A plain-language guidance message sent from a therapist to a patient after
+    reviewing their session data and compensation/form flags.
+    Stored as a notification on the patient's account.
+    """
+    message: str              # The therapist's plain-language guidance for the patient
+    coaching_cues: List[str] = []  # Short bullet-point coaching tips shown in the patient app
+    priority: Literal["INFO", "WARNING", "URGENT"] = "INFO"
+
+class TherapistReviewWithFeedback(BaseModel):
+    """Extended session review payload that includes a feedback message to the patient."""
+    action: Literal["ACCEPTED", "OVERRIDDEN"]
+    clinical_reason: Optional[str] = None
+    new_target_rom: Optional[float] = None
+    notes: Optional[str] = None
+    feedback: Optional[TherapistFeedback] = None  # If provided, sent as patient notification
+

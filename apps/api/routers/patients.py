@@ -56,6 +56,23 @@ async def get_patient_dashboard(current_user: dict = Depends(get_current_user)):
                 "prescription_id": prescription["id"]
             })
 
+    # Check for recent therapist guidance notification
+    notifications_col = get_db_collection("notifications")
+    guidance_notifs = await notifications_col.find(
+        {"patient_id": patient_id, "type": "THERAPIST_GUIDANCE"}
+    ).sort("created_at", -1).limit(1).to_list(length=1)
+
+    latest_guidance = guidance_notifs[0] if guidance_notifs else None
+    therapist_msg_content = prescription.get("notes", "Focus on smooth eccentric control. Targets are calibrated to your current recovery phase.") if prescription else "Focus on smooth eccentric control."
+    therapist_msg_date = "Today, 11:30 AM"
+    coaching_cues = []
+
+    if latest_guidance:
+        therapist_msg_content = latest_guidance.get("message", therapist_msg_content)
+        therapist_msg_date = "Recent Clinical Guidance"
+        if latest_guidance.get("meta") and isinstance(latest_guidance["meta"], dict):
+            coaching_cues = latest_guidance["meta"].get("coaching_cues", [])
+
     return {
         "greeting": f"Good evening, {patient['name'].split()[0] if patient else 'Aarav'}",
         "patient": patient,
@@ -74,8 +91,10 @@ async def get_patient_dashboard(current_user: dict = Depends(get_current_user)):
         "recent_session": recent_sessions[0] if recent_sessions else None,
         "therapist_message": {
             "from": patient.get("therapist_name", "Dr. Ananya Sharma") if patient else "Dr. Ananya Sharma",
-            "content": prescription.get("notes", "Focus on smooth eccentric control. Targets are calibrated to your current recovery phase.") if prescription else "Focus on smooth eccentric control.",
-            "date": "Today, 11:30 AM"
+            "content": therapist_msg_content,
+            "date": therapist_msg_date,
+            "coaching_cues": coaching_cues,
+            "has_guidance": latest_guidance is not None
         },
         "next_session": {
             "scheduled": "Today, Evening Session",
