@@ -17,7 +17,9 @@ def utcnow() -> str:
 async def list_notifications(current_user: dict = Depends(get_current_user)):
     """Return all unread (and recent) notifications for the authenticated patient."""
     notifications_col = get_db_collection("notifications")
-    patient_id = current_user.get("patient_id") or "patient-1"
+    patients_col = get_db_collection("patients")
+    patient = await patients_col.find_one({"user_id": current_user.get("id")}) or await patients_col.find_one({"id": "patient-1"})
+    patient_id = patient["id"] if patient else "patient-1"
     cursor = notifications_col.find({"patient_id": patient_id})
     results = await cursor.to_list(length=50)
     # Sort newest first
@@ -48,7 +50,9 @@ async def mark_notification_read(
 async def mark_all_read(current_user: dict = Depends(get_current_user)):
     """Mark all notifications as read for the current patient."""
     notifications_col = get_db_collection("notifications")
-    patient_id = current_user.get("patient_id") or "patient-1"
+    patients_col = get_db_collection("patients")
+    patient = await patients_col.find_one({"user_id": current_user.get("id")}) or await patients_col.find_one({"id": "patient-1"})
+    patient_id = patient["id"] if patient else "patient-1"
     await notifications_col.update_many(
         {"patient_id": patient_id, "is_read": False},
         {"$set": {"is_read": True}}

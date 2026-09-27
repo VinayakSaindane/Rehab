@@ -12,11 +12,15 @@ class InMemoryCollection:
         self.name = name
         self.documents: List[Dict[str, Any]] = []
 
-    async def find_one(self, filter_query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        for doc in self.documents:
-            if self._matches(doc, filter_query):
-                return copy.deepcopy(doc)
-        return None
+    async def find_one(self, filter_query: Dict[str, Any], sort: Any = None) -> Optional[Dict[str, Any]]:
+        matches = [doc for doc in self.documents if self._matches(doc, filter_query)]
+        if not matches:
+            return None
+        if sort and isinstance(sort, list) and len(sort) > 0:
+            key, direction = sort[0]
+            reverse = direction == -1
+            matches.sort(key=lambda x: str(x.get(key, "")), reverse=reverse)
+        return copy.deepcopy(matches[0])
 
     def find(self, filter_query: Optional[Dict[str, Any]] = None):
         filter_query = filter_query or {}
@@ -43,6 +47,24 @@ class InMemoryCollection:
                     doc[key] = copy.deepcopy(val)
                 modified_count += 1
                 break
+
+        class UpdateResult:
+            def __init__(self, m_count, mod_count):
+                self.matched_count = m_count
+                self.modified_count = mod_count
+        return UpdateResult(matched_count, modified_count)
+
+    async def update_many(self, filter_query: Dict[str, Any], update_query: Dict[str, Any]):
+        matched_count = 0
+        modified_count = 0
+        set_fields = update_query.get("$set", {})
+
+        for doc in self.documents:
+            if self._matches(doc, filter_query):
+                matched_count += 1
+                for key, val in set_fields.items():
+                    doc[key] = copy.deepcopy(val)
+                modified_count += 1
 
         class UpdateResult:
             def __init__(self, m_count, mod_count):
@@ -119,8 +141,8 @@ class MongoCollectionWrapper:
     def __init__(self, collection):
         self.collection = collection
 
-    async def find_one(self, filter_query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        doc = await self.collection.find_one(filter_query)
+    async def find_one(self, filter_query: Dict[str, Any], **kwargs) -> Optional[Dict[str, Any]]:
+        doc = await self.collection.find_one(filter_query, **kwargs)
         return sanitize_doc(doc)
 
     def find(self, filter_query: Optional[Dict[str, Any]] = None):
@@ -133,6 +155,9 @@ class MongoCollectionWrapper:
 
     async def update_one(self, filter_query: Dict[str, Any], update_query: Dict[str, Any]):
         return await self.collection.update_one(filter_query, update_query)
+
+    async def update_many(self, filter_query: Dict[str, Any], update_query: Dict[str, Any]):
+        return await self.collection.update_many(filter_query, update_query)
 
     async def delete_one(self, filter_query: Dict[str, Any]):
         return await self.collection.delete_one(filter_query)
