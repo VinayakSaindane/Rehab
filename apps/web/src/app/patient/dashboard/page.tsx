@@ -151,7 +151,16 @@ export default function PatientDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href="/patient/find-therapist"
+              id="find-therapist-link"
+              className="px-4 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-700 dark:text-sky-300 text-xs font-bold transition-all border border-sky-200 dark:border-sky-800 flex items-center gap-2"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Find Therapist
+            </Link>
+
             <Link
               href="/patient/onboarding"
               className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"

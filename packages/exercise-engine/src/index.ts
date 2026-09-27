@@ -1,5 +1,7 @@
 export * from './angle-calculator';
 export * from './confidence-gate';
+export * from './compensation-detector';
+export * from './template-deriver';
 export * from './rep-state-machine';
 export * from './feedback-engine';
 export * from './simulation-engine';

@@ -153,6 +153,12 @@ export const api = {
 
   getSession: (sessionId: string) => request<any>(`/sessions/${sessionId}`),
 
+  getSessionSummary: (sessionId: string) =>
+    request<any>(`/sessions/${sessionId}/summary`, { method: 'POST' }),
+
+  downloadProgressReport: (patientId?: string) =>
+    request<any>(`/patients/me/progress/report?format=pdf`),
+
   // ── Therapist Operations ──────────────────────────────────────
   getTherapistDashboard: () => request<any>('/therapist/dashboard'),
   getTherapistPatientDetail: (patientId: string) =>
@@ -174,6 +180,34 @@ export const api = {
   resetDemo: () =>
     request<any>('/demo/reset', { method: 'POST' }),
   getDemoInfo: () => request<any>('/demo/info'),
+
+  // ── Hospital & Marketplace ────────────────────────────────────
+  getHospitalDashboard: () => request<any>('/hospital/dashboard'),
+  onboardPatient: (payload: any) =>
+    request<any>('/hospital/onboard', { method: 'POST', body: JSON.stringify(payload) }),
+  getTherapistProfiles: (specialization?: string, maxRate?: number) => {
+    const params = new URLSearchParams();
+    if (specialization) params.set('specialization', specialization);
+    if (maxRate !== undefined) params.set('max_rate', String(maxRate));
+    const qs = params.toString();
+    return request<any[]>(`/hospital/marketplace/therapists${qs ? `?${qs}` : ''}`);
+  },
+  createCaseRequest: (payload: any) =>
+    request<any>('/hospital/case-requests', { method: 'POST', body: JSON.stringify(payload) }),
+  getMyCaseRequests: () => request<any[]>('/hospital/case-requests/mine'),
+  getTherapistCaseRequests: () => request<any[]>('/hospital/case-requests/therapist'),
+  submitQuote: (caseId: string, payload: { quoted_charge: number; therapist_notes?: string }) =>
+    request<any>(`/hospital/case-requests/${caseId}/quote`, { method: 'POST', body: JSON.stringify(payload) }),
+  acceptQuote: (caseId: string) =>
+    request<any>(`/hospital/case-requests/${caseId}/accept`, { method: 'POST' }),
+
+  // ── Exercise Templates (Priority 7) ──────────────────────────
+  createExerciseTemplate: (payload: any) =>
+    request<any>('/exercises/templates', { method: 'POST', body: JSON.stringify(payload) }),
+  listExerciseTemplates: () => request<any[]>('/exercises/templates'),
+  getExerciseTemplate: (id: string) => request<any>(`/exercises/templates/${id}`),
+  assignTemplate: (templateId: string, patientId: string, reps = 10) =>
+    request<any>(`/exercises/templates/${templateId}/assign?patient_id=${patientId}&reps_target=${reps}`, { method: 'POST' }),
 };
 
 export { ApiError };

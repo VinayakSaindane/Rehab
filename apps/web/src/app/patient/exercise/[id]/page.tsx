@@ -16,6 +16,7 @@ import PoseCanvas from '@/components/PoseCanvas';
 import JointAngleGauge from '@/components/JointAngleGauge';
 import RepProgressCard from '@/components/RepProgressCard';
 import ConfidenceGateBanner from '@/components/ConfidenceGateBanner';
+import CompensationWarningBanner from '@/components/CompensationWarningBanner';
 import { 
   Camera, 
   Volume2, 
@@ -72,6 +73,13 @@ export default function LiveExerciseScreen() {
   const [statusMessage, setStatusMessage] = useState('Maintain starting posture to calibrate');
   const [landmarks, setLandmarks] = useState<Point2D[]>([]);
   const [activeJointIndices, setActiveJointIndices] = useState<number[]>([11, 13, 15]);
+
+  // Compensation detection state
+  const [hasCompensation, setHasCompensation] = useState(false);
+  const [compensationFlags, setCompensationFlags] = useState<string[]>([]);
+  const [compensationReasons, setCompensationReasons] = useState<string[]>([]);
+  // Aggregated compensation flags across this session (sent in payload)
+  const sessionCompensationFlagsRef = React.useRef<Set<string>>(new Set());
 
   // Session Completed State
   const [isSessionCompleted, setIsSessionCompleted] = useState(false);
@@ -232,6 +240,14 @@ export default function LiveExerciseScreen() {
       setValidReps(analysis.repResult.validReps);
       setStatusMessage(analysis.feedbackEvent.message);
 
+      // Update compensation HUD state
+      const comp = analysis.compensationResult;
+      setHasCompensation(comp.hasCompensation);
+      setCompensationFlags(comp.compensation_flags);
+      setCompensationReasons(comp.reasons);
+      // Accumulate unique flags for session payload
+      comp.compensation_flags.forEach((f: string) => sessionCompensationFlagsRef.current.add(f));
+
       // Auto-finish if prescribed target reps completed
       if (analysis.repResult.completedReps >= exerciseMeta.targetReps && !isSessionCompleted) {
         handleFinishSession();
@@ -285,6 +301,7 @@ export default function LiveExerciseScreen() {
       max_rom: maxRom,
       tracking_confidence: trackingConfidence,
       form_flags: summary.flags,
+      compensation_flags: Array.from(sessionCompensationFlagsRef.current),
       joint_metrics: detailedMetrics,
       patient_notes: 'Completed home session via camera exercise coach.'
     };
@@ -424,6 +441,13 @@ export default function LiveExerciseScreen() {
             confidenceScore={trackingConfidence}
             reason={gatedReason}
             missingLandmarks={missingLandmarks}
+          />
+
+          {/* Compensation Warning Banner (Appears when compensatory movement is detected) */}
+          <CompensationWarningBanner
+            hasCompensation={hasCompensation && !isGated}
+            compensationFlags={compensationFlags}
+            reasons={compensationReasons}
           />
 
           {/* Floating HUD Side Panel (Desktop Overlay) */}

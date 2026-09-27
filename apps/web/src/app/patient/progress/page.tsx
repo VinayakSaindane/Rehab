@@ -25,12 +25,18 @@ import {
   AlertTriangle,
   ArrowLeft,
   Flame,
-  Award
+  Award,
+  Download,
+  FileText,
+  Sparkles,
+  Activity
 } from 'lucide-react';
 
 export default function PatientProgressPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [latestSummary, setLatestSummary] = useState<any>(null);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -60,6 +66,67 @@ export default function PatientProgressPage() {
     };
     fetchProgress();
   }, []);
+
+  // Fetch LLM summary for the most recent flagged session (best UX demo)
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        // Use the pre-seeded historical flagged session for the demo
+        const summary = await api.getSessionSummary('session-hist-6');
+        setLatestSummary(summary);
+      } catch {
+        // Graceful fallback — don't block if summary unavailable
+      }
+    };
+    fetchSummary();
+  }, []);
+
+  // Client-side PDF report via jsPDF (no backend round-trip needed for hackathon)
+  const handleDownloadReport = async () => {
+    setDownloadingReport(true);
+    try {
+      // Dynamically import jsPDF to keep initial bundle small
+      const { jsPDF } = await import('jspdf' as any).catch(() => ({ jsPDF: null }));
+      if (!jsPDF) {
+        // jsPDF not installed — open print dialog as fallback
+        window.print();
+        return;
+      }
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('RehabSense — Progress Report', 14, 20);
+      doc.setFontSize(11);
+      doc.text('Patient: Aarav Mehta  |  Exercise: Elbow Flexion & Extension', 14, 32);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 14, 40);
+      doc.setLineWidth(0.3);
+      doc.line(14, 44, 196, 44);
+      doc.setFontSize(12);
+      doc.text('Session Timeline', 14, 52);
+      let y = 60;
+      (data?.timeline || []).forEach((s: any, i: number) => {
+        doc.setFontSize(10);
+        doc.text(
+          `${i + 1}. ${s.date}  |  Avg ROM: ${Math.round(s.averageRom)}°  |  Reps: ${s.completedReps}/${s.targetReps}  |  Confidence: ${s.trackingConfidence}%${s.hasFlags ? '  ⚠ Flagged' : ''}`,
+          14, y
+        );
+        y += 8;
+        if (y > 270) { doc.addPage(); y = 20; }
+      });
+      if (latestSummary?.patient_summary) {
+        doc.setFontSize(12);
+        doc.text('AI Session Summary (Latest)', 14, y + 6);
+        doc.setFontSize(10);
+        const lines = doc.splitTextToSize(latestSummary.patient_summary, 180);
+        doc.text(lines, 14, y + 14);
+      }
+      doc.save('rehabsense-progress-report.pdf');
+    } catch (e) {
+      // Fallback: open print dialog
+      window.print();
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
 
   if (loading || !data) {
     return (
@@ -119,6 +186,21 @@ export default function PatientProgressPage() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Prescribed Target</span>
               <p className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">120° ROM</p>
             </div>
+
+            {/* Priority 3: Download Report Button */}
+            <button
+              id="download-report-btn"
+              onClick={handleDownloadReport}
+              disabled={downloadingReport}
+              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-sm"
+              title="Download PDF progress report"
+            >
+              {downloadingReport ? (
+                <><Clock className="w-3.5 h-3.5 animate-spin" /><span>Generating...</span></>
+              ) : (
+                <><Download className="w-3.5 h-3.5" /><span>Download Report</span></>
+              )}
+            </button>
           </div>
         </div>
 
@@ -340,6 +422,23 @@ export default function PatientProgressPage() {
             </table>
           </div>
         </div>
+
+        {/* Priority 2: AI Session Summary Panel */}
+        {latestSummary && (
+          <div className="bg-gradient-to-br from-sky-950/80 to-indigo-950/80 rounded-3xl p-6 border border-sky-800/60 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <h2 className="text-sm font-bold text-white">AI Session Summary</h2>
+              {latestSummary.is_cached && (
+                <span className="text-[10px] bg-sky-900/60 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full font-mono">cached</span>
+              )}
+            </div>
+            <p className="text-sm text-sky-100 leading-relaxed">{latestSummary.patient_summary}</p>
+            <p className="text-[11px] text-sky-400 mt-2 italic">Generated by AI — not a medical diagnosis. Review with your therapist.</p>
+          </div>
+        )}
 
       </div>
     </div>

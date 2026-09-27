@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field, EmailStr, field_validator
 
-UserRole = Literal["PATIENT", "THERAPIST", "SUPER_ADMIN"]
+UserRole = Literal["PATIENT", "THERAPIST", "HOSPITAL_ADMIN", "SUPER_ADMIN"]
 
 # ----------------- Auth Schemas -----------------
 class LoginRequest(BaseModel):
@@ -160,6 +160,7 @@ class SessionRepMetricSchema(BaseModel):
     is_valid: bool
     flag: Optional[str] = None
     confidence_score: float
+    compensation_flags: List[str] = []  # e.g. ["trunk_lean", "shoulder_hike"]
 
     @field_validator('peak_rom', 'start_rom')
     @classmethod
@@ -190,6 +191,7 @@ class SessionCreate(BaseModel):
     max_rom: float
     tracking_confidence: float
     form_flags: List[str] = []
+    compensation_flags: List[str] = []  # Aggregate compensation flags across all reps e.g. ["trunk_lean"]
     joint_metrics: List[SessionRepMetricSchema] = []
     patient_notes: Optional[str] = None
     is_manual_log: Optional[bool] = False
@@ -262,3 +264,120 @@ class NotificationResponse(BaseModel):
     is_read: bool = False
     created_at: str
     meta: Optional[Dict[str, Any]] = None
+
+# ----------------- Session Summary (LLM Narrative) -----------------
+class SessionSummaryResponse(BaseModel):
+    session_id: str
+    patient_summary: str  # 2-sentence plain-language summary for the patient
+    clinician_summary: str  # 1-sentence summary for the therapist
+    generated_at: str
+    is_cached: bool = False  # True if loaded from stored cache, False if freshly generated
+
+# ----------------- Hospital / Marketplace Models (Priority 4) -----------------
+class HospitalOnboardingRecord(BaseModel):
+    """Created when a hospital registers a new patient into the system."""
+    id: str
+    patient_id: str
+    hospital_id: str
+    hospital_name: Optional[str] = None
+    operation_type: str                  # e.g. "Total Knee Replacement"
+    injury_description: str
+    surgery_date: Optional[str] = None   # ISO 8601 date string
+    uploaded_report_urls: List[str] = [] # TODO: integrate with real file storage (S3/GCS) for production
+    status: Literal["unassigned", "awaiting_quote", "active"] = "unassigned"
+    created_at: str
+
+class HospitalOnboardingCreate(BaseModel):
+    patient_name: str
+    patient_email: str
+    hospital_id: str
+    hospital_name: Optional[str] = None
+    operation_type: str
+    injury_description: str
+    surgery_date: Optional[str] = None
+    uploaded_report_urls: List[str] = []
+
+class TherapistProfile(BaseModel):
+    """Extended profile for therapists browsable on the marketplace."""
+    id: str
+    user_id: str
+    name: str
+    email: str
+    title: str
+    bio: Optional[str] = None
+    specializations: List[str] = []       # e.g. ["Musculoskeletal", "Post-op"]
+    years_experience: Optional[int] = None
+    per_program_rate: Optional[float] = None  # Rate in INR per rehabilitation program
+    availability: Optional[str] = None   # e.g. "Mon-Fri, 9AM-5PM" (free text, no calendar system)
+    clinic_name: Optional[str] = None
+    active_patients_count: int = 0
+
+class CaseRequest(BaseModel):
+    """A patient's request to a specific therapist, following the marketplace selection flow."""
+    id: str
+    patient_id: str
+    therapist_id: str
+    hospital_record_id: Optional[str] = None  # links to HospitalOnboardingRecord
+    # TODO: payment gateway integration required before production — quoted_charge is a stub
+    status: Literal["pending_quote", "quoted", "accepted", "declined"] = "pending_quote"
+    quoted_charge: Optional[float] = None     # Therapist's quoted fee (display only, no real payment)
+    therapist_notes: Optional[str] = None
+    patient_notes: Optional[str] = None
+    created_at: str
+    updated_at: Optional[str] = None
+
+class CaseRequestCreate(BaseModel):
+    therapist_id: str
+    hospital_record_id: Optional[str] = None
+    patient_notes: Optional[str] = None
+
+class CaseRequestQuote(BaseModel):
+    quoted_charge: float
+    therapist_notes: Optional[str] = None
+
+# ----------------- Exercise Template (Priority 7 — Therapist Video Derivation) -----------------
+class ExerciseTemplate(BaseModel):
+    """
+    Auto-derived exercise tracking template created from a therapist's recorded demonstration.
+    Stores only the numeric landmark-derived parameters — no raw video is ever stored.
+    """
+    id: str
+    therapist_id: str
+    name: str
+    description: Optional[str] = None
+    # The detected primary joint triplet (landmark names, not raw video)
+    joint_triplet_name: str                  # e.g. "Elbow Flexion/Extension"
+    joint_triplet_indices: List[int]         # [A_idx, vertex_idx, C_idx] from MediaPipe
+    joint_landmark_names: List[str]          # e.g. ["left_shoulder", "left_elbow", "left_wrist"]
+    is_angle_decreasing_on_flex: bool
+    # Derived kinematic parameters
+    target_rom: float                        # Auto-derived peak flexion angle (degrees)
+    rest_angle: float                        # Auto-derived resting angle (degrees)
+    hysteresis_buffer: float                 # Auto-derived (10% of range, min 5°)
+    angular_range: float                     # Total observed angular range from recording
+    reps_target: int                         # Therapist-specified target reps per set
+    estimated_reps_from_demo: int            # Auto-estimated reps detected in recording
+    derivation_confidence: float             # [0.0 – 1.0] how clearly the joint dominates
+    # Landmark summary for skeleton animation display (NOT raw video)
+    # Contains avg landmark positions across frames for a visual preview
+    landmark_summary: Optional[List[Dict[str, float]]] = None
+    notes: Optional[str] = None
+    created_at: str
+
+class ExerciseTemplateCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    # Auto-derived from template-deriver.ts (sent as numeric data, no raw video)
+    joint_triplet_name: str
+    joint_triplet_indices: List[int]
+    joint_landmark_names: List[str]
+    is_angle_decreasing_on_flex: bool
+    target_rom: float
+    rest_angle: float
+    hysteresis_buffer: float
+    angular_range: float
+    reps_target: int = 10
+    estimated_reps_from_demo: int = 0
+    derivation_confidence: float = 0.0
+    landmark_summary: Optional[List[Dict[str, float]]] = None
+    notes: Optional[str] = None

@@ -1,0 +1,333 @@
+"""
+Hospital & Marketplace Router — Priority 4 / 5 / 6
+
+Handles:
+  - Hospital onboarding of new patients (/hospital)
+  - Therapist marketplace profiles (/marketplace/therapists)
+  - Case request flow (patient → therapist quote → accept)
+
+IMPORTANT STUBS / TODO markers:
+  - File uploads: stored as URL strings only. TODO: integrate real S3/GCS blob storage for production.
+  - Payment: "Accept Quote" flips status to "accepted" with no real payment processing.
+    TODO: integrate a payment gateway (Razorpay/Stripe) before production.
+  - HOSPITAL_ADMIN seeding: demo hospital admin uses email hospital@rehabsense.demo.
+"""
+
+import uuid
+import os
+from datetime import datetime, timezone
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from database import get_db_collection
+from models.schemas import (
+    HospitalOnboardingRecord, HospitalOnboardingCreate,
+    TherapistProfile, CaseRequest, CaseRequestCreate, CaseRequestQuote
+)
+from routers.auth import get_current_user
+
+router = APIRouter(prefix="/hospital", tags=["Hospital & Marketplace"])
+
+# ══════════════════════════════════════════════════════════════════
+# HOSPITAL DASHBOARD
+# ══════════════════════════════════════════════════════════════════
+
+@router.get("/dashboard")
+async def hospital_dashboard(current_user: dict = Depends(get_current_user)):
+    """
+    Returns all onboarded patients with their current assignment status.
+    Accessible by HOSPITAL_ADMIN and SUPER_ADMIN roles.
+    """
+    records_col = get_db_collection("hospital_onboarding")
+    users_col = get_db_collection("users")
+    cases_col = get_db_collection("case_requests")
+
+    records_cursor = records_col.find({"hospital_id": current_user.get("hospital_id", "hosp-demo-1")})
+    records = await records_cursor.to_list(length=100)
+
+    enriched = []
+    for rec in records:
+        user = await users_col.find_one({"id": rec.get("patient_id")})
+        # Check if there's an active/pending case request
+        case = await cases_col.find_one(
+            {"patient_id": rec.get("patient_id")},
+            sort=[("created_at", -1)]
+        )
+        enriched.append({
+            **rec,
+            "patient_name": user.get("name", "Unknown") if user else rec.get("patient_name", "Unknown"),
+            "case_status": case["status"] if case else "unassigned",
+            "case_id": case["id"] if case else None
+        })
+
+    return {
+        "hospital_name": current_user.get("hospital_name", "Demo Hospital"),
+        "total_patients": len(records),
+        "patients": enriched
+    }
+
+
+@router.post("/onboard", response_model=HospitalOnboardingRecord)
+async def onboard_patient(
+    payload: HospitalOnboardingCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Register a new patient into the RehabSense platform.
+    Creates a PATIENT user account and a HospitalOnboardingRecord.
+    """
+    users_col = get_db_collection("users")
+    records_col = get_db_collection("hospital_onboarding")
+
+    # Check if patient already exists
+    existing = await users_col.find_one({"email": payload.patient_email})
+    if existing:
+        patient_id = existing["id"]
+    else:
+        import bcrypt
+        patient_id = f"user-patient-{uuid.uuid4().hex[:8]}"
+        # Hash a default password \u2014 patient should reset on first login (TODO for production)
+        default_password = "RehabSense@123"
+        hashed = bcrypt.hashpw(default_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        user_doc = {
+            "id": patient_id,
+            "email": payload.patient_email,
+            "name": payload.patient_name,
+            "role": "PATIENT",
+            "hashed_password": hashed,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await users_col.insert_one(user_doc)
+
+    record_id = f"hosp-rec-{uuid.uuid4().hex[:8]}"
+    record_doc = {
+        "id": record_id,
+        "patient_id": patient_id,
+        "hospital_id": payload.hospital_id,
+        "hospital_name": payload.hospital_name,
+        "operation_type": payload.operation_type,
+        "injury_description": payload.injury_description,
+        "surgery_date": payload.surgery_date,
+        # TODO: replace with actual uploaded file URLs from S3/GCS in production
+        "uploaded_report_urls": payload.uploaded_report_urls,
+        "status": "unassigned",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await records_col.insert_one(record_doc)
+
+    return record_doc
+
+
+@router.post("/onboard/upload-report")
+async def upload_report(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Upload a health report file (PDF, image, etc.).
+
+    TODO: In production, upload to S3/GCS and return a real signed URL.
+    For the hackathon demo: saves to a local ./uploads/ directory and returns a mock URL.
+    """
+    # TODO: replace with real cloud storage (S3/GCS) upload — this is demo-only local storage
+    upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    safe_filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+    file_path = os.path.join(upload_dir, safe_filename)
+
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    # Return a mock URL \u2014 in production this would be a real signed S3/GCS URL
+    mock_url = f"/uploads/{safe_filename}"
+    return {
+        "url": mock_url,
+        "filename": file.filename,
+        "size_bytes": len(content),
+        "stub": True,  # Clearly marked: this is a local-only URL, not a real hosted file
+        "note": "TODO: replace with real cloud storage URL before production deployment"
+    }
+
+
+# ══════════════════════════════════════════════════════════════════
+# THERAPIST MARKETPLACE
+# ══════════════════════════════════════════════════════════════════
+
+@router.get("/marketplace/therapists")
+async def list_therapist_profiles(
+    specialization: Optional[str] = None,
+    max_rate: Optional[float] = None
+):
+    """
+    Return all therapist profiles for the patient-facing marketplace.
+    Client-side filtering is also supported via query params (no search infra needed).
+    """
+    profiles_col = get_db_collection("therapist_profiles")
+    cursor = profiles_col.find({})
+    profiles = await cursor.to_list(length=100)
+
+    # Apply optional server-side filters (mirrors what client-side filter does)
+    if specialization:
+        profiles = [
+            p for p in profiles
+            if any(specialization.lower() in s.lower() for s in p.get("specializations", []))
+        ]
+    if max_rate is not None:
+        profiles = [
+            p for p in profiles
+            if p.get("per_program_rate") is None or p.get("per_program_rate", 0) <= max_rate
+        ]
+
+    return profiles
+
+
+# ══════════════════════════════════════════════════════════════════
+# CASE REQUESTS (Patient ← → Therapist quoting flow)
+# ══════════════════════════════════════════════════════════════════
+
+@router.post("/case-requests", response_model=CaseRequest)
+async def create_case_request(
+    payload: CaseRequestCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Patient selects a therapist and submits a case request."""
+    cases_col = get_db_collection("case_requests")
+    patients_col = get_db_collection("patients")
+
+    # Find patient record
+    patient = await patients_col.find_one({"user_id": current_user["id"]})
+    patient_id = patient["id"] if patient else current_user["id"]
+
+    case_id = f"case-{uuid.uuid4().hex[:8]}"
+    now = datetime.now(timezone.utc).isoformat()
+    case_doc = {
+        "id": case_id,
+        "patient_id": patient_id,
+        "therapist_id": payload.therapist_id,
+        "hospital_record_id": payload.hospital_record_id,
+        # TODO: payment gateway integration required before production
+        "status": "pending_quote",
+        "quoted_charge": None,
+        "therapist_notes": None,
+        "patient_notes": payload.patient_notes,
+        "created_at": now,
+        "updated_at": now
+    }
+    await cases_col.insert_one(case_doc)
+    return case_doc
+
+
+@router.get("/case-requests/mine")
+async def get_my_case_requests(current_user: dict = Depends(get_current_user)):
+    """Patient: list own case requests with therapist info."""
+    cases_col = get_db_collection("case_requests")
+    patients_col = get_db_collection("patients")
+
+    patient = await patients_col.find_one({"user_id": current_user["id"]})
+    patient_id = patient["id"] if patient else current_user["id"]
+
+    cursor = cases_col.find({"patient_id": patient_id}).sort("created_at", -1)
+    return await cursor.to_list(length=50)
+
+
+@router.get("/case-requests/therapist")
+async def get_therapist_case_requests(current_user: dict = Depends(get_current_user)):
+    """Therapist: list incoming case requests."""
+    cases_col = get_db_collection("case_requests")
+    records_col = get_db_collection("hospital_onboarding")
+
+    cursor = cases_col.find({"therapist_id": current_user["id"]}).sort("created_at", -1)
+    cases = await cursor.to_list(length=50)
+
+    # Enrich with hospital record details
+    enriched = []
+    for case in cases:
+        hosp_rec = None
+        if case.get("hospital_record_id"):
+            hosp_rec = await records_col.find_one({"id": case["hospital_record_id"]})
+        enriched.append({
+            **case,
+            "hospital_record": hosp_rec
+        })
+
+    return enriched
+
+
+@router.post("/case-requests/{case_id}/quote", response_model=CaseRequest)
+async def submit_quote(
+    case_id: str,
+    quote: CaseRequestQuote,
+    current_user: dict = Depends(get_current_user)
+):
+    """Therapist submits a quoted charge for a case request."""
+    cases_col = get_db_collection("case_requests")
+    case = await cases_col.find_one({"id": case_id})
+    if not case:
+        raise HTTPException(status_code=404, detail="Case request not found")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await cases_col.update_one(
+        {"id": case_id},
+        {"$set": {
+            "status": "quoted",
+            "quoted_charge": quote.quoted_charge,
+            "therapist_notes": quote.therapist_notes,
+            "updated_at": now
+        }}
+    )
+    return {**case, "status": "quoted", "quoted_charge": quote.quoted_charge,
+            "therapist_notes": quote.therapist_notes, "updated_at": now}
+
+
+@router.post("/case-requests/{case_id}/accept")
+async def accept_quote(
+    case_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Patient accepts a therapist quote.
+
+    STUB — no real payment processing happens here.
+    TODO: Before production, integrate a real payment gateway (e.g. Razorpay) to collect
+    quoted_charge before flipping status to 'accepted'. This is a UI demo stub only.
+    """
+    cases_col = get_db_collection("case_requests")
+    case = await cases_col.find_one({"id": case_id})
+    if not case:
+        raise HTTPException(status_code=404, detail="Case request not found")
+    if case.get("status") != "quoted":
+        raise HTTPException(status_code=400, detail="Can only accept a quoted request")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await cases_col.update_one(
+        {"id": case_id},
+        {"$set": {"status": "accepted", "updated_at": now}}
+    )
+
+    return {
+        "message": "Quote accepted (DEMO STUB — no payment processed). Therapist will be notified.",
+        "case_id": case_id,
+        "status": "accepted",
+        "stub": True,
+        "note": "TODO: integrate real payment gateway before production"
+    }
+
+
+@router.post("/case-requests/{case_id}/decline")
+async def decline_request(
+    case_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Therapist declines a case request."""
+    cases_col = get_db_collection("case_requests")
+    case = await cases_col.find_one({"id": case_id})
+    if not case:
+        raise HTTPException(status_code=404, detail="Case request not found")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await cases_col.update_one(
+        {"id": case_id},
+        {"$set": {"status": "declined", "updated_at": now}}
+    )
+    return {"message": "Case request declined", "case_id": case_id, "status": "declined"}

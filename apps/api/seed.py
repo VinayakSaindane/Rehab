@@ -276,7 +276,113 @@ async def seed_database():
     }
     await notifications_col.insert_one(notification)
 
-    print("[OK] Successfully seeded RehabSense database with demo accounts, all 3 exercises, prescriptions, 10 sessions, and notifications!")
+    # ─── Priority 4-6: Hospital Admin, Therapist Profiles, Case Requests ───
+
+    profiles_col = get_db_collection("therapist_profiles")
+    hosp_col = get_db_collection("hospital_onboarding")
+    cases_col = get_db_collection("case_requests")
+
+    for col in [profiles_col, hosp_col, cases_col]:
+        if hasattr(col, "documents"):
+            col.documents = []
+        elif hasattr(col, "delete_many"):
+            await col.delete_many({})
+
+    # Hospital admin user
+    hosp_admin_user = {
+        "id": "user-hospital-1",
+        "email": "hospital@rehabsense.demo",
+        "hashed_password": demo_pw_hash,
+        "name": "Apollo Orthopedics Admin",
+        "role": "HOSPITAL_ADMIN",
+        "hospital_id": "hosp-demo-1",
+        "hospital_name": "Apollo Orthopedics Hospital",
+        "created_at": (now - timedelta(days=30)).isoformat()
+    }
+    await users_col.insert_one(hosp_admin_user)
+
+    # Therapist marketplace profiles (browsable by patients)
+    therapist_marketplace_profiles = [
+        {
+            "id": "tp-1",
+            "user_id": "user-therapist-1",
+            "name": "Dr. Ananya Sharma",
+            "email": "therapist@rehabsense.demo",
+            "title": "Lead Musculoskeletal Physiotherapist",
+            "bio": "12 years specializing in post-operative upper and lower limb rehabilitation. Certified in manual therapy and McKenzie method.",
+            "specializations": ["Musculoskeletal", "Post-operative", "Upper Limb", "Sports Injury"],
+            "years_experience": 12,
+            "per_program_rate": 8500.0,  # INR per 4-week program
+            "availability": "Mon-Sat, 9 AM – 6 PM",
+            "clinic_name": "Sharma Rehab Clinic, Bengaluru",
+            "active_patients_count": 14
+        },
+        {
+            "id": "tp-2",
+            "user_id": "user-therapist-2",
+            "name": "Dr. Rohan Kapoor",
+            "email": "rohan.kapoor@rehabsense.demo",
+            "title": "Senior Physiotherapist",
+            "bio": "8 years of experience in neurological and orthopaedic rehabilitation. Special interest in geriatric mobility restoration.",
+            "specializations": ["Neurological", "Orthopaedic", "Geriatric", "Knee & Hip"],
+            "years_experience": 8,
+            "per_program_rate": 6000.0,
+            "availability": "Mon-Fri, 10 AM – 5 PM",
+            "clinic_name": "Kapoor Physio Centre, Mumbai",
+            "active_patients_count": 9
+        },
+        {
+            "id": "tp-3",
+            "user_id": "user-therapist-3",
+            "name": "Dr. Priya Nair",
+            "email": "priya.nair@rehabsense.demo",
+            "title": "Sports & Trauma Rehab Specialist",
+            "bio": "Former national-level athlete turned rehabilitation specialist. Expert in ACL recovery, rotator cuff injuries, and functional movement restoration.",
+            "specializations": ["Sports Injury", "ACL Recovery", "Shoulder & Rotator Cuff", "Post-operative"],
+            "years_experience": 6,
+            "per_program_rate": 7200.0,
+            "availability": "Tue-Sun, 8 AM – 4 PM",
+            "clinic_name": "ActiveRehab, Chennai",
+            "active_patients_count": 11
+        }
+    ]
+    for profile in therapist_marketplace_profiles:
+        await profiles_col.insert_one(profile)
+
+    # Hospital onboarding record for demo patient
+    hosp_record = {
+        "id": "hosp-rec-demo-1",
+        "patient_id": "patient-1",
+        "hospital_id": "hosp-demo-1",
+        "hospital_name": "Apollo Orthopedics Hospital",
+        "operation_type": "Elbow Ligament Reconstruction",
+        "injury_description": "Post-operative rehabilitation following left elbow UCL reconstruction. Patient recovering from sports-related ligament tear.",
+        "surgery_date": "2026-09-01",
+        # TODO: replace with real file storage URLs for production
+        "uploaded_report_urls": ["/uploads/demo-pre-op-report.pdf"],
+        "status": "active",
+        "created_at": (now - timedelta(days=15)).isoformat()
+    }
+    await hosp_col.insert_one(hosp_record)
+
+    # Demo case request (already accepted, matching the active prescription)
+    case_request = {
+        "id": "case-demo-1",
+        "patient_id": "patient-1",
+        "therapist_id": "user-therapist-1",
+        "hospital_record_id": "hosp-rec-demo-1",
+        # TODO: payment gateway integration required before production — quoted_charge is display-only
+        "status": "accepted",
+        "quoted_charge": 8500.0,
+        "therapist_notes": "Standard 4-week post-operative elbow rehab program. Will start with ROM exercises and progress to strengthening.",
+        "patient_notes": "Hoping to recover full ROM within 6 weeks.",
+        "created_at": (now - timedelta(days=14)).isoformat(),
+        "updated_at": (now - timedelta(days=13)).isoformat()
+    }
+    await cases_col.insert_one(case_request)
+
+    print("[OK] Successfully seeded RehabSense database with demo accounts, all 3 exercises, prescriptions, 10 sessions, notifications, hospital admin, therapist profiles, and marketplace case requests!")
 
 if __name__ == "__main__":
     asyncio.run(seed_database())
+

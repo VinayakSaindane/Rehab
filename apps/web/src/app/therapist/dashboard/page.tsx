@@ -14,7 +14,9 @@ import {
   Sliders, 
   ChevronRight,
   TrendingUp,
-  Clock
+  Clock,
+  Camera,
+  Inbox
 } from 'lucide-react';
 
 export default function TherapistDashboardPage() {
@@ -119,7 +121,23 @@ export default function TherapistDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href="/therapist/requests"
+              id="therapist-requests-link"
+              className="px-4 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-700 dark:text-sky-300 text-xs font-bold transition-all flex items-center gap-2 border border-sky-200 dark:border-sky-800"
+            >
+              <Inbox className="w-4 h-4" />
+              <span>Case Requests</span>
+            </Link>
+            <Link
+              href="/therapist/exercises/record"
+              id="record-exercise-link"
+              className="px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-all flex items-center gap-2 border border-emerald-200 dark:border-emerald-800"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Record Exercise Demo</span>
+            </Link>
             <Link
               href="/therapist/exercises"
               className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-2"

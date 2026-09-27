@@ -1,5 +1,6 @@
 import { Point2D, calculateJointAngle, MEDIAPIPE_LANDMARK_INDEX } from '../angle-calculator';
 import { ConfidenceGate, ConfidenceGateResult } from '../confidence-gate';
+import { CompensationDetector, CompensationResult } from '../compensation-detector';
 import { RepetitionStateMachine, RepTransitionResult } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { FeedbackEvent } from '@rehabsense/types';
@@ -9,12 +10,14 @@ export interface ExerciseFrameAnalysis {
   confidenceResult: ConfidenceGateResult;
   repResult: RepTransitionResult;
   feedbackEvent: FeedbackEvent;
+  compensationResult: CompensationResult;
   landmarks: Point2D[];
   activeJointIndices: number[];
 }
 
 export class ElbowFlexionAnalyzer {
   private confidenceGate: ConfidenceGate;
+  private compensationDetector: CompensationDetector;
   private stateMachine: RepetitionStateMachine;
   private feedbackEngine: FeedbackEngine;
   private targetReps: number;
@@ -26,6 +29,7 @@ export class ElbowFlexionAnalyzer {
   ) {
     this.targetReps = targetReps;
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
+    this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
       startAngle: 155,
       targetAngle: prescribedTargetRom,
@@ -69,7 +73,13 @@ export class ElbowFlexionAnalyzer {
       confidenceResult.overallConfidence
     );
 
-    // 4. Generate Explainable Feedback
+    // 4. Evaluate Compensatory Movement (only when confidence passes & actively repping)
+    const inRep = repResult.currentState === 'MOVING' || repResult.currentState === 'TARGET_ZONE';
+    const compensationResult = confidenceResult.isPassing
+      ? this.compensationDetector.evaluate(landmarks, inRep)
+      : { hasCompensation: false, compensation_flags: [], reasons: [] };
+
+    // 5. Generate Explainable Feedback
     const feedbackEvent = this.feedbackEngine.generateFeedback(
       confidenceResult,
       repResult,
@@ -80,6 +90,7 @@ export class ElbowFlexionAnalyzer {
       jointAngle,
       confidenceResult,
       repResult,
+      compensationResult,
       feedbackEvent,
       landmarks,
       activeJointIndices
@@ -96,6 +107,7 @@ export class ElbowFlexionAnalyzer {
 
   public reset(): void {
     this.confidenceGate.reset();
+    this.compensationDetector.reset();
     this.stateMachine.reset();
   }
 }

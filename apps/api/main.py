@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from database import db_manager, get_db_collection
 from seed import seed_database
-from routers import auth, patients, exercises, prescriptions, sessions, therapist, demo, notifications
+from routers import auth, patients, exercises, prescriptions, sessions, therapist, demo, notifications, hospital
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("rehabsense")
@@ -56,6 +56,7 @@ app.include_router(sessions.router, prefix=settings.API_PREFIX)
 app.include_router(therapist.router, prefix=settings.API_PREFIX)
 app.include_router(notifications.router, prefix=settings.API_PREFIX)
 app.include_router(demo.router, prefix=settings.API_PREFIX)
+app.include_router(hospital.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():

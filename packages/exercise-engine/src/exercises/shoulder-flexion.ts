@@ -1,11 +1,13 @@
 import { Point2D, calculateJointAngle, MEDIAPIPE_LANDMARK_INDEX } from '../angle-calculator';
 import { ConfidenceGate } from '../confidence-gate';
+import { CompensationDetector, CompensationResult } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
 
 export class ShoulderFlexionAnalyzer {
   private confidenceGate: ConfidenceGate;
+  private compensationDetector: CompensationDetector;
   private stateMachine: RepetitionStateMachine;
   private feedbackEngine: FeedbackEngine;
   private targetReps: number;
@@ -17,6 +19,7 @@ export class ShoulderFlexionAnalyzer {
   ) {
     this.targetReps = targetReps;
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
+    this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
       startAngle: 30,
       targetAngle: prescribedTargetRom,
@@ -57,6 +60,11 @@ export class ShoulderFlexionAnalyzer {
       confidenceResult.overallConfidence
     );
 
+    const inRep = repResult.currentState === 'MOVING' || repResult.currentState === 'TARGET_ZONE';
+    const compensationResult = confidenceResult.isPassing
+      ? this.compensationDetector.evaluate(landmarks, inRep)
+      : { hasCompensation: false, compensation_flags: [], reasons: [] };
+
     const feedbackEvent = this.feedbackEngine.generateFeedback(
       confidenceResult,
       repResult,
@@ -67,6 +75,7 @@ export class ShoulderFlexionAnalyzer {
       jointAngle,
       confidenceResult,
       repResult,
+      compensationResult,
       feedbackEvent,
       landmarks,
       activeJointIndices
@@ -83,6 +92,7 @@ export class ShoulderFlexionAnalyzer {
 
   public reset(): void {
     this.confidenceGate.reset();
+    this.compensationDetector.reset();
     this.stateMachine.reset();
   }
 }
