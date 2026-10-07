@@ -4,6 +4,7 @@ import { CompensationDetector } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
+import { getExerciseConfig } from '../exercise-configs';
 import { SupportedLanguage } from '@rehabsense/types';
 
 export class KneeExtensionAnalyzer {
@@ -23,16 +24,25 @@ export class KneeExtensionAnalyzer {
   ) {
     this.targetReps = targetReps;
     this.side = side;
-    this.confidenceGate = new ConfidenceGate(0.70, 0.75);
+    const profile = getExerciseConfig('knee-extension', prescribedTargetRom);
+
+    this.confidenceGate = new ConfidenceGate(profile.confidenceThreshold, 0.75, 2);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
-      startAngle: 95, // Seated ~90-95 degrees bent knee
-      targetAngle: prescribedTargetRom, // Full terminal extension ~165-175 degrees
-      returnAngle: 110,
-      hysteresisBuffer: 8,
-      isAngleDecreasingOnFlex: false, // Straightening knee increases angle
+      startAngle: profile.startAngle,
+      targetAngle: profile.defaultTargetAngle,
+      returnAngle: profile.returnAngle,
+      hysteresisBuffer: profile.hysteresisBuffer,
+      isAngleDecreasingOnFlex: profile.isAngleDecreasingOnFlex,
       prescribedTargetRom,
-      romToleranceDegrees: 8
+      romToleranceDegrees: profile.romToleranceDegrees,
+      minRomDegrees: profile.minRomDegrees,
+      minRepDurationMs: profile.minRepDurationMs,
+      maxRepDurationMs: profile.maxRepDurationMs,
+      minTargetDwellMs: profile.minTargetDwellMs,
+      cooldownMs: profile.cooldownMs,
+      readyFramesRequired: profile.readyFramesRequired,
+      smoothingAlpha: profile.smoothingAlpha
     });
     this.feedbackEngine = new FeedbackEngine(voiceEnabled, language);
   }
@@ -53,7 +63,7 @@ export class KneeExtensionAnalyzer {
     return this.side;
   }
 
-  public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
+  public processFrame(landmarks: Point2D[], timestampMs: number = Date.now()): ExerciseFrameAnalysis {
     const prefix = this.side === 'right' ? 'right' : 'left';
     const requiredLandmarkNames = [`${prefix}_hip`, `${prefix}_knee`, `${prefix}_ankle`];
     const activeJointIndices = [
@@ -64,18 +74,19 @@ export class KneeExtensionAnalyzer {
 
     const confidenceResult = this.confidenceGate.evaluate(landmarks, requiredLandmarkNames);
 
-    let jointAngle = 0;
+    let rawAngle = 0;
     if (landmarks && landmarks.length > 27) {
       const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
       const knee = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`]];
       const ankle = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]];
-      jointAngle = calculateJointAngle(hip, knee, ankle, true);
+      rawAngle = calculateJointAngle(hip, knee, ankle, true);
     }
 
     const repResult = this.stateMachine.update(
-      jointAngle,
+      rawAngle,
       confidenceResult.isPassing,
-      confidenceResult.overallConfidence
+      confidenceResult.overallConfidence,
+      timestampMs
     );
 
     const inRep = repResult.currentState === 'MOVING' || repResult.currentState === 'TARGET_ZONE';
@@ -92,13 +103,16 @@ export class KneeExtensionAnalyzer {
     );
 
     return {
-      jointAngle,
+      jointAngle: repResult.smoothedAngle,
+      rawAngle: repResult.rawAngle,
+      smoothedAngle: repResult.smoothedAngle,
       confidenceResult,
       repResult,
       compensationResult,
       feedbackEvent,
       landmarks,
-      activeJointIndices
+      activeJointIndices,
+      debug: repResult.debug
     };
   }
 

@@ -8,7 +8,6 @@ import {
   Activity, 
   Camera, 
   ShieldCheck, 
-  UserCheck, 
   Stethoscope, 
   CheckCircle2, 
   ArrowRight, 
@@ -18,455 +17,450 @@ import {
   Sparkles, 
   Eye, 
   Volume2, 
-  Cpu
+  LogIn,
+  Cpu,
+  Headphones,
+  FileCheck,
+  Check
 } from 'lucide-react';
 
 export default function LandingPage() {
   const router = useRouter();
-  const { switchRole } = useAuth();
+  const { demoLogin } = useAuth();
+
+  const handleLogin = () => {
+    router.push('/login');
+  };
 
   const handlePatientDemo = async () => {
-    await switchRole('PATIENT');
+    await demoLogin('PATIENT');
     router.push('/patient/dashboard');
   };
 
   const handleTherapistDemo = async () => {
-    await switchRole('THERAPIST');
+    await demoLogin('THERAPIST');
     router.push('/therapist/dashboard');
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen select-none">
       
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+      {/* 1. HERO SECTION (Spacious, Blue Theme, Transparent Frosted Glass) */}
+      <section className="relative overflow-hidden pt-10 pb-20 sm:pt-16 sm:pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          {/* Hero Header Content */}
+          <div className="text-center max-w-4xl mx-auto space-y-6">
             
-            {/* Hero Left Content */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-chip text-[#244b38] bg-emerald-600/10 text-xs font-bold border border-emerald-700/20 shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-[#244b38]" />
-                <span>Problem Statement 05 — Camera-Assisted Home Rehabilitation Coach</span>
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#1a2620] tracking-tight leading-[1.1]">
-                Your Recovery. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#244b38] via-[#356e52] to-[#5a8e73]">
-                  Your Camera.
-                </span> <br />
-                Your Care Team.
-              </h1>
-
-              <p className="text-lg sm:text-xl text-[#435147] max-w-2xl leading-relaxed font-normal">
-                Camera-assisted rehabilitation that empowers patients to practice therapist-prescribed exercises at home with real-time confidence-gated feedback — while keeping clinical teams in continuous control.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={handlePatientDemo}
-                  className="px-7 py-4 rounded-[22px] bg-gradient-to-r from-[#244b38] via-[#2f5e46] to-[#3f7b5c] hover:from-[#1e3f2f] hover:to-[#35674c] text-white font-black text-base shadow-xl shadow-emerald-950/20 hover:scale-[1.02] transition-all flex items-center gap-2 group cursor-pointer border border-white/25"
-                >
-                  <Play className="w-4 h-4 fill-current text-white group-hover:scale-110 transition-transform" />
-                  <span>Try Patient Demo</span>
-                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
-                </button>
-
-                <button
-                  onClick={handleTherapistDemo}
-                  className="px-7 py-4 rounded-[22px] glass-card text-[#222e26] font-bold text-base border border-[#e5dfd4] hover:border-stone-300 hover:bg-white/80 shadow-md transition-all flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
-                >
-                  <Stethoscope className="w-4 h-4 text-[#b86b45]" />
-                  <span>Therapist Dashboard</span>
-                </button>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-[#435147] font-medium">
-                <div className="flex items-center gap-2 glass-chip px-3.5 py-1.5 rounded-full border border-white/90 shadow-xs">
-                  <ShieldCheck className="w-4 h-4 text-[#2f5e46]" />
-                  <span>Confidence-Gated Feedback</span>
-                </div>
-                <div className="flex items-center gap-2 glass-chip px-3.5 py-1.5 rounded-full border border-white/90 shadow-xs">
-                  <Lock className="w-4 h-4 text-[#4a5f52]" />
-                  <span>Privacy by Design (Browser CV)</span>
-                </div>
-                <div className="flex items-center gap-2 glass-chip px-3.5 py-1.5 rounded-full border border-white/90 shadow-xs">
-                  <Sliders className="w-4 h-4 text-[#b86b45]" />
-                  <span>Therapist Configured Targets</span>
-                </div>
-              </div>
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-chip text-blue-900 bg-blue-500/10 text-xs font-bold border border-blue-400/30 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span>Problem Statement 05 · Camera-Assisted Rehabilitation Coach</span>
             </div>
 
-            {/* Hero Right: Live Product Interface Mockup Floating Glass Card */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto rounded-[32px] glass-card-strong p-4 sm:p-5 shadow-2xl border border-white/95">
-                
-                {/* Simulated Camera Feed View */}
-                <div className="relative rounded-[24px] overflow-hidden bg-gradient-to-b from-[#0c1812] via-[#12231a] to-[#182e23] aspect-[4/5] flex flex-col justify-between p-4 text-white border border-white/15">
-                  
-                  {/* Top HUD */}
-                  <div className="flex items-center justify-between z-10">
-                    <div className="bg-[#0e1d15]/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15">
-                      <span className="text-[11px] font-semibold text-[#bfe0cd]">Elbow Flexion & Extension</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[#244b38]/40 text-[#8ce3b2] border border-[#4a8665]/50 px-3 py-1 rounded-full text-xs font-mono font-bold backdrop-blur-md">
-                      <span className="w-2 h-2 rounded-full bg-[#52d18d] animate-pulse" />
-                      <span>94% CONFIDENCE</span>
-                    </div>
-                  </div>
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.08]">
+              Precision Recovery. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500">
+                Guided by Vision.
+              </span> <br />
+              Controlled by Clinicians.
+            </h1>
 
-                  {/* Pose Skeleton Graphic Simulation */}
-                  <div className="relative flex-1 flex items-center justify-center my-2">
-                    <svg className="w-full h-full max-h-56" viewBox="0 0 200 240" fill="none">
-                      {/* Body lines */}
-                      <line x1="100" y1="50" x2="80" y2="80" stroke="#6d947f" strokeWidth="2.5" />
-                      <line x1="100" y1="50" x2="120" y2="80" stroke="#6d947f" strokeWidth="2.5" />
-                      <line x1="80" y1="80" x2="120" y2="80" stroke="#6d947f" strokeWidth="2.5" />
-                      <line x1="80" y1="80" x2="85" y2="140" stroke="#6d947f" strokeWidth="2.5" />
-                      <line x1="120" y1="80" x2="115" y2="140" stroke="#6d947f" strokeWidth="2.5" />
-                      
-                      {/* Active Arm (Elbow Flexion) */}
-                      <line x1="80" y1="80" x2="65" y2="125" stroke="#49db96" strokeWidth="3.5" />
-                      <line x1="65" y1="125" x2="72" y2="85" stroke="#49db96" strokeWidth="3.5" />
-                      
-                      {/* Joint Dots */}
-                      <circle cx="100" cy="35" r="10" fill="#12251b" stroke="#87aa95" strokeWidth="2" />
-                      <circle cx="80" cy="80" r="5" fill="#49db96" />
-                      <circle cx="65" cy="125" r="7" fill="#49db96" stroke="#FFFFFF" strokeWidth="2" />
-                      <circle cx="72" cy="85" r="5" fill="#49db96" />
-                      <circle cx="120" cy="80" r="4" fill="#87aa95" />
-                      <circle cx="135" cy="120" r="4" fill="#87aa95" />
+            {/* Subtitle with breathing room */}
+            <p className="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+              Empower home physical therapy with real-time browser pose tracking, directional audio feedback, and seamless clinician oversight.
+            </p>
 
-                      {/* Live Angle Arc & Callout */}
-                      <path d="M 68 110 A 15 15 0 0 1 78 122" stroke="#49db96" strokeWidth="2" strokeDasharray="2 2" fill="none" />
-                      <rect x="18" y="112" width="40" height="20" rx="6" fill="#0a1610" stroke="#49db96" strokeWidth="1" />
-                      <text x="38" y="126" fill="#FFFFFF" fontSize="10" fontWeight="bold" textAnchor="middle">104°</text>
-                    </svg>
-                  </div>
+            {/* Primary Action Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
+              <button
+                onClick={handleLogin}
+                id="hero-login-btn"
+                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm sm:text-base shadow-xl shadow-blue-600/25 hover:scale-[1.02] transition-all flex items-center gap-2.5 group cursor-pointer border border-white/30"
+              >
+                <LogIn className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                <span>Launch Portal / Login</span>
+                <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+              </button>
 
-                  {/* Bottom Stats HUD */}
-                  <div className="space-y-2 z-10">
-                    <div className="bg-[#0c1812]/90 rounded-2xl p-3 border border-white/15 grid grid-cols-3 gap-2 text-center backdrop-blur-md">
-                      <div>
-                        <p className="text-[10px] text-white/70 font-semibold uppercase">REPS</p>
-                        <p className="text-lg font-black font-mono text-white">07<span className="text-xs text-white/50">/10</span></p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-white/70 font-semibold uppercase">CURRENT ROM</p>
-                        <p className="text-lg font-black font-mono text-[#8ce3b2]">104°</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-white/70 font-semibold uppercase">TARGET ROM</p>
-                        <p className="text-lg font-black font-mono text-[#49db96]">120°</p>
-                      </div>
-                    </div>
+              <button
+                onClick={handlePatientDemo}
+                id="hero-demo-patient-btn"
+                className="px-6 py-4 rounded-2xl glass-button text-slate-800 font-bold text-sm border border-white/50 hover:border-blue-400/60 shadow-md transition-all flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
+              >
+                <Play className="w-4 h-4 fill-current text-blue-600" />
+                <span>Demo Patient (Aarav)</span>
+              </button>
 
-                    <div className="bg-[#13281d]/85 border border-[#3f7b5c]/50 px-3 py-2 rounded-xl text-[11px] text-[#c7eed7] flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#49db96] animate-ping" />
-                      <span>Good cadence — move smoothly within prescribed range</span>
-                    </div>
-                  </div>
+              <button
+                onClick={handleTherapistDemo}
+                id="hero-demo-therapist-btn"
+                className="px-6 py-4 rounded-2xl glass-button text-slate-800 font-bold text-sm border border-white/50 hover:border-blue-400/60 shadow-md transition-all flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
+              >
+                <Stethoscope className="w-4 h-4 text-indigo-600" />
+                <span>Demo Therapist (Dr. Demo)</span>
+              </button>
+            </div>
 
-                </div>
+            {/* Trust Chips Strip */}
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-slate-700 font-medium">
+              <div className="flex items-center gap-2 glass-chip px-4 py-2 rounded-full border border-white/50 shadow-xs">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span>Confidence-Gated Biofeedback</span>
+              </div>
+              <div className="flex items-center gap-2 glass-chip px-4 py-2 rounded-full border border-white/50 shadow-xs">
+                <Lock className="w-4 h-4 text-indigo-600" />
+                <span>Privacy by Design (Browser CV)</span>
+              </div>
+              <div className="flex items-center gap-2 glass-chip px-4 py-2 rounded-full border border-white/50 shadow-xs">
+                <Sliders className="w-4 h-4 text-sky-600" />
+                <span>Therapist-Calibrated ROM Targets</span>
               </div>
             </div>
 
           </div>
+
+          {/* Hero Transparent Frosted Glass Showcase Grid (Replaces old right-side box animator) */}
+          <div className="mt-16 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              {/* Feature 1: ROM Tracking */}
+              <div className="glass-card-strong p-6 rounded-3xl border border-white/50 shadow-xl space-y-4 hover:border-blue-300 transition-all group">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600/15 border border-blue-400/30 flex items-center justify-center text-blue-600 shadow-xs">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 font-mono">Real-Time Bio-Mechanics</span>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">Live ROM Tracking</h3>
+                </div>
+                <div className="p-3 rounded-2xl glass-chip border border-white/40 space-y-1">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs text-slate-500 font-medium">Observed Arc</span>
+                    <span className="text-lg font-black font-mono text-blue-600">104°</span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-[11px] text-slate-600">
+                    <span>Prescribed Target</span>
+                    <span className="font-mono font-bold">120°</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Real-time angle computation at 30 fps with smooth cadence pacing.
+                </p>
+              </div>
+
+              {/* Feature 2: Confidence Gate */}
+              <div className="glass-card-strong p-6 rounded-3xl border border-white/50 shadow-xl space-y-4 hover:border-blue-300 transition-all group">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600/15 border border-indigo-400/30 flex items-center justify-center text-indigo-600 shadow-xs">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono">Edge Quality Control</span>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">Confidence Gate</h3>
+                </div>
+                <div className="p-3 rounded-2xl glass-chip border border-white/40 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500 font-medium">Keypoint Fidelity</span>
+                    <span className="text-xs font-mono font-extrabold text-blue-700 px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-400/40">94% PASS</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">No false repetitions when occluded.</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Pauses analysis immediately if limbs or joints leave the camera frame.
+                </p>
+              </div>
+
+              {/* Feature 3: Spatial Audio Coach */}
+              <div className="glass-card-strong p-6 rounded-3xl border border-white/50 shadow-xl space-y-4 hover:border-blue-300 transition-all group">
+                <div className="w-10 h-10 rounded-2xl bg-sky-600/15 border border-sky-400/30 flex items-center justify-center text-sky-600 shadow-xs">
+                  <Headphones className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 font-mono">Directional Audio</span>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">Spatial Audio Coach</h3>
+                </div>
+                <div className="p-3 rounded-2xl glass-chip border border-white/40 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-700 font-bold">
+                    <span>🇬🇧 EN</span>
+                    <span className="text-slate-300">·</span>
+                    <span>🇮🇳 हिन्दी</span>
+                    <span className="text-slate-300">·</span>
+                    <span>🚩 मराठी</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">Left vs right earphone posture haptics.</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Natural spoken instructions let patients practice without staring at screens.
+                </p>
+              </div>
+
+              {/* Feature 4: Clinician Census Sync */}
+              <div className="glass-card-strong p-6 rounded-3xl border border-white/50 shadow-xl space-y-4 hover:border-blue-300 transition-all group">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600/15 border border-blue-400/30 flex items-center justify-center text-blue-600 shadow-xs">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 font-mono">Clinical Oversight</span>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">Clinician Census</h3>
+                </div>
+                <div className="p-3 rounded-2xl glass-chip border border-white/40 space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 font-medium">Assigned Care</span>
+                    <span className="font-bold text-slate-800">Dr. Demo</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">Hospital MRI & telemetry linked.</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Physiotherapists review session metrics and adjust targets remotely.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* 2. HOW IT WORKS (6-STEP REHABILITATION WORKFLOW) */}
-      <section className="py-16">
+      {/* 2. HOW IT WORKS (Streamlined 4-Step Architecture) */}
+      <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#2f5e46]">
-              System Architecture & Data Flow
+          
+          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-700">
+              Closed-Loop Rehabilitation Protocol
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#1a2620] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
               How RehabSense Works
             </h2>
-            <p className="text-[#435147] mt-3 text-base font-normal">
-              A closed-loop rehabilitation flow combining local edge computer vision, confidence-gated feedback, and therapist supervision.
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Edge computer vision meets clinician control for verified, safe home physical therapy.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 step: '01',
                 title: 'Capture',
-                desc: 'Standard laptop or mobile camera captures user workspace at 30 fps.',
+                desc: 'Standard laptop or webcam captures exercise motion at 30 fps without specialized sensors.',
                 icon: Camera
               },
               {
                 step: '02',
-                title: 'Detect',
-                desc: 'MediaPipe Pose Landmarker predicts 33 body landmarks in browser.',
+                title: 'Detect & Analyze',
+                desc: 'MediaPipe estimates 33 body landmarks in browser, computing exact joint angles and ROM.',
                 icon: Activity
               },
               {
                 step: '03',
-                title: 'Analyze',
-                desc: 'Calculates joint angles and continuous Range of Motion (ROM).',
-                icon: Sliders
-              },
-              {
-                step: '04',
-                title: 'Validate',
-                desc: 'Confidence Gate verifies landmark visibility before form evaluation.',
+                title: 'Confidence Gating',
+                desc: 'Immediate pause if lighting, distance, or limb occlusions degrade measurement certainty.',
                 icon: ShieldCheck
               },
               {
-                step: '05',
-                title: 'Feedback',
-                desc: 'Rule engine delivers explainable visual and audio feedback cues.',
-                icon: Volume2
-              },
-              {
-                step: '06',
-                title: 'Review',
-                desc: 'Structured metrics sent to therapist to review and adjust targets.',
+                step: '04',
+                title: 'Therapist Oversight',
+                desc: 'Clinicians review longitudinal compliance trends, flag compensatory movement, and adjust protocols.',
                 icon: Stethoscope
               }
             ].map((item, idx) => (
-              <div key={idx} className="glass-card rounded-[28px] p-5 border border-white/85 hover:border-stone-300 transition-all flex flex-col justify-between hover:-translate-y-1 shadow-md">
+              <div key={idx} className="glass-card rounded-3xl p-6 border border-white/45 hover:border-blue-400/60 transition-all flex flex-col justify-between hover:-translate-y-1 shadow-lg space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-black text-[#2f5e46] font-mono">
+                    <span className="text-3xl font-black text-blue-600 font-mono">
                       {item.step}
                     </span>
-                    <item.icon className="w-5 h-5 text-stone-400" />
+                    <div className="w-10 h-10 rounded-2xl glass-chip flex items-center justify-center text-blue-600 border border-white/40">
+                      <item.icon className="w-5 h-5" />
+                    </div>
                   </div>
-                  <h3 className="text-base font-bold text-[#1a2620] mb-2">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-[#435147] leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed">
                     {item.desc}
                   </p>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* 3. CORE DIFFERENTIATOR: CONFIDENCE GATE */}
-      <section className="py-16">
+      {/* 3. CONFIDENCE-GATED ANALYSIS & SAFETY */}
+      <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-6 space-y-5">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#b86b45]">
-                Core Clinical Differentiator
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-700">
+                Core Clinical Safeguard
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-[#1a2620] tracking-tight">
-                Confidence-Gated Movement Analysis
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                Confidence-Gated Biofeedback
               </h2>
-              <p className="text-[#435147] text-base leading-relaxed font-normal">
-                Most consumer fitness apps blindly generate form feedback even when limbs are occluded, leading to false counts and potentially misleading data.
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal">
+                Standard fitness apps blindly count repetitions even when limbs are occluded or out of view. This generates inaccurate data and risks patient safety.
               </p>
-              <p className="text-[#435147] text-base leading-relaxed font-normal">
-                RehabSense introduces a strict <strong className="text-[#1a2620]">Confidence Gate</strong>. If camera distance, lighting, or joint visibility falls below clinical threshold, the system immediately pauses analysis.
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal">
+                RehabSense enforces a strict clinical <strong className="text-slate-900">Confidence Gate</strong>: if camera distance, angle, or landmark tracking drops below clinical tolerance, analysis pauses instantly.
               </p>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3 pt-2 text-xs sm:text-sm text-slate-700 font-medium">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#2f5e46] shrink-0 mt-0.5" />
-                  <p className="text-sm text-[#2b3930] font-medium">
-                    Prevents false rep counting when limbs are partially obstructed.
-                  </p>
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                  <span>Eliminates false rep counts caused by occlusion or improper camera perspective.</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#2f5e46] shrink-0 mt-0.5" />
-                  <p className="text-sm text-[#2b3930] font-medium">
-                    Clear guidance prompts: <em>&quot;Keep your elbow visible in frame&quot;</em> instead of inaccurate form warnings.
-                  </p>
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                  <span>Delivers clear guidance: <em>&quot;Please keep wrist visible in frame&quot;</em> instead of erroneous warnings.</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#2f5e46] shrink-0 mt-0.5" />
-                  <p className="text-sm text-[#2b3930] font-medium">
-                    Preserves data fidelity for the clinician&apos;s longitudinal review.
-                  </p>
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                  <span>Preserves medical fidelity for treating therapists and hospital audit logs.</span>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-6">
-              <div className="glass-card-strong rounded-[32px] p-6 border border-white/90 shadow-xl space-y-4">
-                
-                {/* Visualizing Gate High vs Gated */}
-                <div className="p-5 rounded-[22px] bg-[#ebf4ee] border border-[#b9d9c3] backdrop-blur-md">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase text-[#1a442e]">
-                      Tracking Optimal (94%)
-                    </span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#cee4d6] text-[#123623] border border-[#a6ceb5]">
-                      Active Analysis
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#30483a]">
-                    All required joints visible. Joint angle and repetition state machine operational.
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-[22px] bg-[#fbf1eb] border border-[#ebd0c2] backdrop-blur-md">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase text-[#7a3f22]">
-                      Tracking Paused (55%)
-                    </span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#f6ded1] text-[#7a3f22] border border-[#ebc2ae]">
-                      Confidence Gate Engaged
+            {/* Visual Glass Differentiator Cards */}
+            <div className="lg:col-span-6 space-y-4">
+              
+              {/* Card 1: Active Analysis */}
+              <div className="p-6 rounded-3xl glass-card-strong border border-blue-400/40 shadow-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
+                    <span className="text-xs font-bold uppercase text-blue-900">
+                      Tracking Optimal (94% Confidence)
                     </span>
                   </div>
-                  <p className="text-xs text-[#522c1b] font-medium">
-                    &quot;Movement analysis paused — Required joints obscured: Please adjust camera so left wrist remains visible.&quot;
-                  </p>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/15 text-blue-900 border border-blue-400/40 font-mono">
+                    ACTIVE EVALUATION
+                  </span>
                 </div>
-
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  All critical joints clearly visible. Kinematic state machine evaluates smooth flexion arc and cadence accurately.
+                </p>
               </div>
+
+              {/* Card 2: Gated Prompt */}
+              <div className="p-6 rounded-3xl glass-card-strong border border-amber-400/40 shadow-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="text-xs font-bold uppercase text-amber-900">
+                      Tracking Paused (55% Confidence)
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/15 text-amber-900 border border-amber-400/40 font-mono">
+                    GATE ENGAGED
+                  </span>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed italic">
+                  &quot;Analysis paused — Left wrist partially obscured. Please adjust laptop angle slightly backward.&quot;
+                </p>
+              </div>
+
             </div>
 
           </div>
         </div>
       </section>
 
-      {/* 4. PRIVACY BY DESIGN */}
-      <section className="py-16">
+      {/* 4. PRIVACY & SECURITY BY DESIGN */}
+      <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#2f5e46]">
-              Healthcare Trust & Data Ethics
+          
+          <div className="max-w-2xl mx-auto text-center mb-14 space-y-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-700">
+              Healthcare Ethics & Data Protection
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#1a2620] mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
               Privacy by Design
             </h2>
-            <p className="text-[#435147] mt-3 text-base font-normal">
-              Patient privacy is paramount. Camera imagery never leaves your physical device.
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+              Camera feeds never leave your browser. Zero cloud video streaming guarantees total patient confidentiality.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-[28px] glass-card border border-white/85 hover:border-stone-300 transition-all shadow-md">
-              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/90 flex items-center justify-center text-[#2f5e46] mb-4 shadow-xs bg-emerald-500/10">
+            <div className="p-6 rounded-3xl glass-card border border-white/45 shadow-lg space-y-3">
+              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/50 flex items-center justify-center text-blue-600 shadow-xs">
                 <Cpu className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-[#1a2620] mb-2">
-                100% On-Device Pose Estimation
+              <h3 className="text-base font-bold text-slate-900">
+                100% In-Browser MediaPipe
               </h3>
-              <p className="text-xs text-[#435147] leading-relaxed">
-                MediaPipe runs in the client browser. No raw video feed or biometric images are ever uploaded or transmitted over the network.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Computer vision runs directly on your device via WebAssembly. No raw video feed or biometric images are ever transmitted over the network.
               </p>
             </div>
 
-            <div className="p-6 rounded-[28px] glass-card border border-white/85 hover:border-stone-300 transition-all shadow-md">
-              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/90 flex items-center justify-center text-[#b86b45] mb-4 shadow-xs bg-amber-500/10">
+            <div className="p-6 rounded-3xl glass-card border border-white/45 shadow-lg space-y-3">
+              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/50 flex items-center justify-center text-indigo-600 shadow-xs">
                 <Lock className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-[#1a2620] mb-2">
-                Structured Numeric Metrics Only
+              <h3 className="text-base font-bold text-slate-900">
+                Numeric Telemetry Only
               </h3>
-              <p className="text-xs text-[#435147] leading-relaxed">
-                Only aggregate session data (reps, peak ROM angle, duration, tracking confidence, form flags) is persisted for clinician review.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Only aggregate biomechanical numbers (reps, peak range-of-motion angle, session duration, and form flags) are preserved for clinician review.
               </p>
             </div>
 
-            <div className="p-6 rounded-[28px] glass-card border border-white/85 hover:border-stone-300 transition-all shadow-md">
-              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/90 flex items-center justify-center text-[#3e7259] mb-4 shadow-xs bg-teal-500/10">
+            <div className="p-6 rounded-3xl glass-card border border-white/45 shadow-lg space-y-3">
+              <div className="w-12 h-12 rounded-2xl glass-chip border border-white/50 flex items-center justify-center text-sky-600 shadow-xs">
                 <Eye className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-[#1a2620] mb-2">
+              <h3 className="text-base font-bold text-slate-900">
                 Explicit Informed Consent
               </h3>
-              <p className="text-xs text-[#435147] leading-relaxed">
-                Clear onboarding camera permissions with an explicit consent modal. Patients retain complete autonomy over camera access.
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Patients retain complete autonomy. Camera access is strictly opt-in, with a camera-free manual logging mode always available.
               </p>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* 5. ACCESSIBILITY & CAMERA-FREE MODE */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#2f5e46]">
-                Universal Accessibility
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-[#1a2620]">
-                Built for Every Patient, Every Setup
-              </h2>
-              <p className="text-[#435147] text-base leading-relaxed font-normal">
-                Rehabilitation should never be restricted by hardware limitations or visual impairments. RehabSense includes a full accessibility suite and an inclusive <strong className="text-[#1a2620]">Camera-Free Mode</strong>.
-              </p>
+      {/* 5. CALL TO ACTION */}
+      <section className="py-20 relative">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          
+          <div className="glass-card-strong rounded-[32px] p-8 sm:p-12 border border-white/50 shadow-2xl space-y-6">
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+              Ready to Experience RehabSense?
+            </h2>
+            <p className="text-slate-600 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              Explore the full interactive system from patient, physiotherapist, or hospital administrator perspectives.
+            </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-5 rounded-[24px] glass-card border border-white/85">
-                  <h4 className="font-bold text-sm text-[#1a2620] mb-1">High Contrast & Large Font</h4>
-                  <p className="text-xs text-[#435147]">Optimized for low-vision patients and distant screen viewing.</p>
-                </div>
-                <div className="p-5 rounded-[24px] glass-card border border-white/85">
-                  <h4 className="font-bold text-sm text-[#1a2620] mb-1">Voice Feedback (Web Speech)</h4>
-                  <p className="text-xs text-[#435147]">Spoken rep counting and pacing cues so patients don&apos;t need to stare at screens.</p>
-                </div>
-                <div className="p-5 rounded-[24px] glass-card border border-white/85">
-                  <h4 className="font-bold text-sm text-[#1a2620] mb-1">Camera-Free Manual Logging</h4>
-                  <p className="text-xs text-[#435147]">Enables exercise instruction, manual logging, and therapist communication without camera.</p>
-                </div>
-                <div className="p-5 rounded-[24px] glass-card border border-white/85">
-                  <h4 className="font-bold text-sm text-[#1a2620] mb-1">Simulation Mode for Demos</h4>
-                  <p className="text-xs text-[#435147]">Deterministic kinematic movement generator for pitch-perfect hackathon demos.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 glass-card-strong rounded-[32px] p-8 text-[#1a2620] shadow-2xl flex flex-col justify-between border border-white/95 backdrop-blur-3xl">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2f5e46]">Interactive Demo</span>
-                <h3 className="text-2xl font-black mt-2 mb-3 text-[#1a2620]">Experience the Complete Journey</h3>
-                <p className="text-sm text-[#435147] leading-relaxed mb-6">
-                  Experience onboarding, camera calibration, live exercise, progress tracking, and therapist review with preloaded clinical data for Aarav Mehta.
-                </p>
-              </div>
-
-              <Link
-                href="/demo"
-                className="w-full py-4 px-6 bg-gradient-to-r from-[#244b38] via-[#2f5e46] to-[#3f7b5c] hover:from-[#1e3f2f] hover:to-[#35674c] text-white font-black rounded-[22px] text-center hover:scale-[1.02] transition-all shadow-xl shadow-emerald-950/20 flex items-center justify-center gap-2 border border-white/20"
+            <div className="flex flex-wrap justify-center gap-4 pt-2">
+              <button
+                onClick={handleLogin}
+                id="cta-login-btn"
+                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-xl shadow-blue-600/25 hover:scale-105 cursor-pointer border border-white/30 flex items-center gap-2"
               >
-                <Sparkles className="w-4 h-4 text-[#a5e4c0]" />
-                <span>Open Hackathon Demo Hub</span>
-              </Link>
+                <LogIn className="w-4 h-4" />
+                <span>Access Portal / Login</span>
+              </button>
+              <button
+                onClick={handlePatientDemo}
+                className="px-6 py-4 rounded-2xl glass-button text-slate-800 font-bold text-sm transition-all border border-white/50 hover:border-blue-400 shadow-md hover:scale-105 cursor-pointer"
+              >
+                Patient Demo (Aarav)
+              </button>
+              <button
+                onClick={handleTherapistDemo}
+                className="px-6 py-4 rounded-2xl glass-button text-slate-800 font-bold text-sm transition-all border border-white/50 hover:border-blue-400 shadow-md hover:scale-105 cursor-pointer"
+              >
+                Therapist Console (Dr. Demo)
+              </button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* 6. CALL TO ACTION */}
-      <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-black text-[#1a2620]">
-            Ready to Explore RehabSense?
-          </h2>
-          <p className="text-[#435147] max-w-xl mx-auto text-base">
-            Select a perspective below to experience the live prototype as a patient practicing at home or a therapist supervising recovery.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 pt-2">
-            <button
-              onClick={handlePatientDemo}
-              className="px-7 py-4 rounded-[22px] bg-gradient-to-r from-[#244b38] via-[#2f5e46] to-[#3f7b5c] hover:from-[#1e3f2f] hover:to-[#35674c] text-white font-black transition-all shadow-xl shadow-emerald-950/20 hover:scale-105 cursor-pointer border border-white/20"
-            >
-              Start as Patient (Aarav Mehta)
-            </button>
-            <button
-              onClick={handleTherapistDemo}
-              className="px-7 py-4 rounded-[22px] glass-card text-[#222e26] font-black transition-all border border-[#e5dfd4] hover:border-stone-300 hover:bg-white/80 shadow-md hover:scale-105 cursor-pointer"
-            >
-              Start as Therapist (Dr. Ananya Sharma)
-            </button>
-          </div>
         </div>
       </section>
 

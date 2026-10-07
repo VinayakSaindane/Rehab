@@ -1,18 +1,22 @@
 import { Point2D, calculateJointAngle, MEDIAPIPE_LANDMARK_INDEX } from '../angle-calculator';
 import { ConfidenceGate, ConfidenceGateResult } from '../confidence-gate';
 import { CompensationDetector, CompensationResult } from '../compensation-detector';
-import { RepetitionStateMachine, RepTransitionResult } from '../rep-state-machine';
+import { RepetitionStateMachine, RepTransitionResult, RepDebugInfo } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
+import { getExerciseConfig } from '../exercise-configs';
 import { FeedbackEvent, SupportedLanguage } from '@rehabsense/types';
 
 export interface ExerciseFrameAnalysis {
   jointAngle: number;
+  rawAngle: number;
+  smoothedAngle: number;
   confidenceResult: ConfidenceGateResult;
   repResult: RepTransitionResult;
   feedbackEvent: FeedbackEvent;
   compensationResult: CompensationResult;
   landmarks: Point2D[];
   activeJointIndices: number[];
+  debug: RepDebugInfo;
 }
 
 export class ElbowFlexionAnalyzer {
@@ -32,16 +36,25 @@ export class ElbowFlexionAnalyzer {
   ) {
     this.targetReps = targetReps;
     this.side = side;
-    this.confidenceGate = new ConfidenceGate(0.70, 0.75);
+    const profile = getExerciseConfig('elbow-flexion', prescribedTargetRom);
+
+    this.confidenceGate = new ConfidenceGate(profile.confidenceThreshold, 0.75, 2);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
-      startAngle: 155,
-      targetAngle: prescribedTargetRom,
-      returnAngle: 145,
-      hysteresisBuffer: 8,
-      isAngleDecreasingOnFlex: true,
+      startAngle: profile.startAngle,
+      targetAngle: profile.defaultTargetAngle,
+      returnAngle: profile.returnAngle,
+      hysteresisBuffer: profile.hysteresisBuffer,
+      isAngleDecreasingOnFlex: profile.isAngleDecreasingOnFlex,
       prescribedTargetRom,
-      romToleranceDegrees: 8
+      romToleranceDegrees: profile.romToleranceDegrees,
+      minRomDegrees: profile.minRomDegrees,
+      minRepDurationMs: profile.minRepDurationMs,
+      maxRepDurationMs: profile.maxRepDurationMs,
+      minTargetDwellMs: profile.minTargetDwellMs,
+      cooldownMs: profile.cooldownMs,
+      readyFramesRequired: profile.readyFramesRequired,
+      smoothingAlpha: profile.smoothingAlpha
     });
     this.feedbackEngine = new FeedbackEngine(voiceEnabled, language);
   }
@@ -62,7 +75,7 @@ export class ElbowFlexionAnalyzer {
     return this.side;
   }
 
-  public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
+  public processFrame(landmarks: Point2D[], timestampMs: number = Date.now()): ExerciseFrameAnalysis {
     const prefix = this.side === 'right' ? 'right' : 'left';
     const requiredLandmarkNames = [`${prefix}_shoulder`, `${prefix}_elbow`, `${prefix}_wrist`];
     const activeJointIndices = [
@@ -75,19 +88,20 @@ export class ElbowFlexionAnalyzer {
     const confidenceResult = this.confidenceGate.evaluate(landmarks, requiredLandmarkNames);
 
     // 2. Calculate Angle (Shoulder - Elbow - Wrist)
-    let jointAngle = 0;
+    let rawAngle = 0;
     if (landmarks && landmarks.length > 15) {
       const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
       const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
       const wrist = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_wrist`]];
-      jointAngle = calculateJointAngle(shoulder, elbow, wrist, true);
+      rawAngle = calculateJointAngle(shoulder, elbow, wrist, true);
     }
 
-    // 3. Update Repetition State Machine (passes confidence gating result)
+    // 3. Update Repetition State Machine (passes confidence gating result & timestamp)
     const repResult = this.stateMachine.update(
-      jointAngle,
+      rawAngle,
       confidenceResult.isPassing,
-      confidenceResult.overallConfidence
+      confidenceResult.overallConfidence,
+      timestampMs
     );
 
     // 4. Evaluate Compensatory Movement (only when confidence passes & actively repping)
@@ -106,13 +120,16 @@ export class ElbowFlexionAnalyzer {
     );
 
     return {
-      jointAngle,
+      jointAngle: repResult.smoothedAngle,
+      rawAngle: repResult.rawAngle,
+      smoothedAngle: repResult.smoothedAngle,
       confidenceResult,
       repResult,
       compensationResult,
       feedbackEvent,
       landmarks,
-      activeJointIndices
+      activeJointIndices,
+      debug: repResult.debug
     };
   }
 

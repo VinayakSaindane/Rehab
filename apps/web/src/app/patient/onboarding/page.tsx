@@ -75,11 +75,11 @@ export default function PatientOnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
       <div className="max-w-3xl mx-auto w-full space-y-8">
         
         {/* Step Progress Tracker */}
-        <div className="glass-card rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-md">
+        <div className="glass-card rounded-2xl p-4 border border-white/35 shadow-md">
           <div className="flex items-center justify-between">
             {steps.map((s, idx) => (
               <div key={s.id} className="flex items-center">
@@ -88,18 +88,18 @@ export default function PatientOnboardingPage() {
                     currentStep > s.id
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : currentStep === s.id
-                        ? 'bg-sky-600 text-white ring-4 ring-sky-500/20 shadow-md'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        ? 'bg-teal-700 text-white ring-4 ring-teal-500/20 shadow-md'
+                        : 'glass-chip text-slate-500 border border-white/40'
                   }`}>
                     {currentStep > s.id ? <CheckCircle2 className="w-4 h-4" /> : s.id}
                   </div>
-                  <span className="text-[10px] font-semibold text-slate-500 mt-1 hidden sm:block">
+                  <span className="text-[10px] font-semibold text-slate-600 mt-1 hidden sm:block">
                     {s.title}
                   </span>
                 </div>
                 {idx < steps.length - 1 && (
                   <div className={`h-0.5 w-6 sm:w-12 mx-1 sm:mx-2 ${
-                    currentStep > s.id ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'
+                    currentStep > s.id ? 'bg-emerald-500' : 'bg-white/30'
                   }`} />
                 )}
               </div>
@@ -108,7 +108,7 @@ export default function PatientOnboardingPage() {
         </div>
 
         {/* Step Content Card */}
-        <div className="glass-card-strong rounded-3xl p-8 border border-sky-500/20 shadow-2xl min-h-[420px] flex flex-col justify-between">
+        <div className="glass-card-strong rounded-3xl p-8 border border-white/35 shadow-2xl min-h-[420px] flex flex-col justify-between">
           
           {/* STEP 1: WELCOME */}
           {currentStep === 1 && (

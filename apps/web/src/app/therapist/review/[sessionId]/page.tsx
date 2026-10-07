@@ -10,6 +10,7 @@ import {
   TrendingUp, Activity, Zap, ShieldAlert, Info,
   ChevronDown, ChevronUp
 } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const FLAG_META: Record<string, { label: string; color: string; icon: any; bgColor: string }> = {
   trunk_lean:         { label: 'Trunk Lean',      color: 'text-orange-700 dark:text-orange-300',  bgColor: 'bg-orange-100 dark:bg-orange-950/50 border-orange-300 dark:border-orange-700', icon: Activity },
@@ -165,27 +166,28 @@ export default function TherapistSessionReviewPage() {
   const maxRomInSession = Math.max(...(session.joint_metrics?.map((r: any) => r.peak_rom) ?? [session.max_rom ?? 0]));
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={['THERAPIST']}>
+      <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
-          <Link href="/therapist/dashboard" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 glass-chip px-3 py-1.5 rounded-lg border border-white/80 transition-colors">
+          <Link href="/therapist/dashboard" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 glass-chip px-3 py-1.5 rounded-lg border border-white/40 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Clinical Census
           </Link>
-          <span className="text-xs font-mono text-slate-500 glass-chip px-2.5 py-1 rounded-lg border border-white/80">Session: {session.id}</span>
+          <span className="text-xs font-mono text-slate-700 glass-chip px-2.5 py-1 rounded-lg border border-white/40">Session: {session.id}</span>
         </div>
 
         {/* Header */}
-        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-xl backdrop-blur-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-3 border border-amber-200">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/35 shadow-xl backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-chip bg-amber-500/20 text-amber-950 text-xs font-semibold mb-3 border border-amber-400/40">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
             Clinical Session Review
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {session.exercise_name} — Aarav Mehta
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
             {new Date(session.started_at).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             &nbsp;•&nbsp; Duration: {Math.floor((session.duration_seconds ?? 315) / 60)}m {(session.duration_seconds ?? 315) % 60}s
           </p>
@@ -195,12 +197,12 @@ export default function TherapistSessionReviewPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label: 'Reps Done', value: `${session.completed_reps}/${session.target_reps}`, color: 'text-slate-900' },
-            { label: 'Valid Reps', value: session.valid_reps, color: 'text-emerald-700' },
-            { label: 'Avg ROM', value: `${session.average_rom}°`, color: 'text-sky-700' },
-            { label: 'Tracking', value: `${Math.round(session.tracking_confidence * 100)}%`, color: 'text-teal-700' },
+            { label: 'Valid Reps', value: session.valid_reps, color: 'text-emerald-800' },
+            { label: 'Avg ROM', value: `${session.average_rom}°`, color: 'text-sky-800' },
+            { label: 'Tracking', value: `${Math.round(session.tracking_confidence * 100)}%`, color: 'text-teal-800' },
           ].map(stat => (
-            <div key={stat.label} className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md text-center">
-              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{stat.label}</p>
+            <div key={stat.label} className="glass-card rounded-2xl p-4 sm:p-5 border border-white/35 shadow-md text-center">
+              <p className="text-[11px] text-slate-600 font-bold uppercase tracking-wider">{stat.label}</p>
               <p className={`text-2xl sm:text-3xl font-black font-mono mt-1 ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
@@ -208,11 +210,11 @@ export default function TherapistSessionReviewPage() {
 
         {/* AI Clinician Summary */}
         {summary?.clinician_summary && (
-          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-teal-950 rounded-3xl p-6 sm:p-7 text-white border border-white/20 shadow-xl backdrop-blur-xl">
+          <div className="glass-card-dark rounded-3xl p-6 sm:p-7 text-white border border-white/20 shadow-xl backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-3">
-              <Brain className="w-5 h-5 text-indigo-300" />
-              <h2 className="text-sm font-bold text-indigo-100">AI Clinician Summary</h2>
-              {summary.summary_cached && <span className="text-[10px] text-indigo-200 bg-white/10 px-2 py-0.5 rounded-full border border-white/20">cached</span>}
+              <Brain className="w-5 h-5 text-teal-300" />
+              <h2 className="text-sm font-bold text-teal-100">AI Clinician Summary</h2>
+              {summary.summary_cached && <span className="text-[10px] text-teal-200 glass-chip px-2 py-0.5 rounded-full border border-teal-400/30">cached</span>}
             </div>
             <p className="text-sm text-slate-200 leading-relaxed">{summary.clinician_summary}</p>
           </div>
@@ -220,13 +222,13 @@ export default function TherapistSessionReviewPage() {
 
         {/* Flag Analysis Panel */}
         {uniqueFlags.length > 0 && (
-          <div className="glass-card-strong rounded-3xl border border-white/80 shadow-xl overflow-hidden">
-            <div className="p-5 sm:p-6 border-b border-sky-100">
+          <div className="glass-card-strong rounded-3xl border border-white/35 shadow-xl overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/20">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-500" />
+                <ShieldAlert className="w-4 h-4 text-amber-600" />
                 Detected Issues — Clinical Guidance
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">Click each issue to see analysis and suggested coaching cues you can send to the patient.</p>
+              <p className="text-xs text-slate-600 mt-0.5">Click each issue to see analysis and suggested coaching cues you can send to the patient.</p>
             </div>
             <div className="divide-y divide-sky-100/70">
               {(summary?.flag_analysis ?? uniqueFlags.map((f: string) => ({ flag: f, label: FLAG_META[f]?.label ?? f, guidance: '' }))).map((analysis: any) => {
@@ -294,10 +296,10 @@ export default function TherapistSessionReviewPage() {
 
         {/* Rep-by-Rep Breakdown */}
         {session.joint_metrics?.length > 0 && (
-          <div className="glass-card rounded-3xl border border-white/80 shadow-xl overflow-hidden">
-            <div className="p-5 border-b border-sky-100">
+          <div className="glass-card rounded-3xl border border-white/35 shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-white/20">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-sky-600" />
+                <TrendingUp className="w-4 h-4 text-sky-700" />
                 Rep-by-Rep Breakdown
               </h2>
             </div>
@@ -306,43 +308,43 @@ export default function TherapistSessionReviewPage() {
                 <thead>
                   <tr className="glass-chip">
                     {['Rep', 'Peak ROM', 'Duration', 'Valid', 'Flags'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-slate-600 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-sky-100/70">
+                <tbody className="divide-y divide-white/20">
                   {session.joint_metrics.map((rep: any) => {
                     const repFlags: string[] = rep.flags ?? (rep.flag ? [rep.flag] : []);
                     const hasFlag = !rep.is_valid || repFlags.length > 0;
                     const romPct = maxRomInSession > 0 ? (rep.peak_rom / maxRomInSession) * 100 : 0;
                     return (
-                      <tr key={rep.rep_number} className={`${hasFlag ? 'bg-amber-50/40' : ''} hover:bg-white/50 transition-colors`}>
-                        <td className="px-4 py-3 font-bold text-slate-800">#{rep.rep_number}</td>
+                      <tr key={rep.rep_number} className={`${hasFlag ? 'bg-amber-500/10' : ''} hover:bg-white/20 transition-colors`}>
+                        <td className="px-4 py-3 font-bold text-slate-900">#{rep.rep_number}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-20 bg-sky-100 rounded-full h-2">
-                              <div className="h-2 rounded-full bg-sky-500 transition-all" style={{ width: `${romPct}%` }} />
+                            <div className="w-20 glass-chip rounded-full h-2 overflow-hidden border border-white/30">
+                              <div className="h-2 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all" style={{ width: `${romPct}%` }} />
                             </div>
-                            <span className="font-mono font-bold text-sky-800">{rep.peak_rom}°</span>
+                            <span className="font-mono font-bold text-sky-900">{rep.peak_rom}°</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-mono text-slate-500">{rep.duration_seconds.toFixed(1)}s</td>
+                        <td className="px-4 py-3 font-mono text-slate-600">{rep.duration_seconds.toFixed(1)}s</td>
                         <td className="px-4 py-3">
                           {rep.is_valid
-                            ? <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            : <AlertTriangle className="w-4 h-4 text-amber-500" />}
+                            ? <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                            : <AlertTriangle className="w-4 h-4 text-amber-600" />}
                         </td>
                         <td className="px-4 py-3">
                           {repFlags.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {repFlags.map((f: string) => (
-                                <span key={f} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                                <span key={f} className="text-[10px] font-semibold px-2 py-0.5 rounded-full glass-chip bg-amber-500/20 text-amber-950 border border-amber-400/40">
                                   {FLAG_META[f]?.label ?? f}
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <span className="text-[10px] text-slate-400">—</span>
+                            <span className="text-[10px] text-slate-500">—</span>
                           )}
                         </td>
                       </tr>
@@ -355,25 +357,25 @@ export default function TherapistSessionReviewPage() {
         )}
 
         {/* Feedback / Guidance Panel */}
-        <div className="glass-card rounded-3xl border border-white/80 shadow-xl overflow-hidden">
+        <div className="glass-card rounded-3xl border border-white/35 shadow-xl overflow-hidden">
           <button
             onClick={() => setShowFeedbackPanel(p => !p)}
-            className="w-full flex items-center justify-between p-5 hover:bg-white/60 transition-colors"
+            className="w-full flex items-center justify-between p-5 hover:bg-white/30 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl glass-chip text-sky-700 border border-sky-200">
+              <div className="p-2 rounded-xl glass-chip text-sky-800 border border-sky-400/30">
                 <MessageSquare className="w-4 h-4" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-slate-900">Guidance Message to Patient</p>
-                <p className="text-xs text-slate-500">Optional — sent as a notification directly to the patient app</p>
+                <p className="text-xs text-slate-600">Optional — sent as a notification directly to the patient app</p>
               </div>
             </div>
-            {showFeedbackPanel ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            {showFeedbackPanel ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
           </button>
 
           {showFeedbackPanel && (
-            <div className="border-t border-sky-100 p-5 space-y-4">
+            <div className="border-t border-white/20 p-5 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Guidance Message</label>
                 <textarea
@@ -381,21 +383,21 @@ export default function TherapistSessionReviewPage() {
                   onChange={e => setFeedbackMessage(e.target.value)}
                   rows={3}
                   placeholder="e.g. Great effort today! I noticed your shoulder was rising slightly during reps. Focus on keeping both shoulders level and relaxed throughout the movement…"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200/80 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/40 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none"
                 />
               </div>
 
               {/* Coaching Cues */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Coaching Cues <span className="font-normal text-slate-400">(shown as bullet points in patient app)</span>
+                  Coaching Cues <span className="font-normal text-slate-500">(shown as bullet points in patient app)</span>
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {coachingCues.map((cue, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 text-xs bg-sky-100 text-sky-800 border border-sky-200 rounded-full px-3 py-1 font-medium">
+                    <span key={i} className="inline-flex items-center gap-1.5 text-xs glass-chip bg-sky-500/20 text-sky-950 border border-sky-400/40 rounded-full px-3 py-1 font-medium">
                       {cue.length > 50 ? cue.slice(0, 50) + '…' : cue}
                       <button onClick={() => setCoachingCues(p => p.filter((_, j) => j !== i))}>
-                        <X className="w-3 h-3 hover:text-red-600" />
+                        <X className="w-3 h-3 hover:text-red-700" />
                       </button>
                     </span>
                   ))}
@@ -406,7 +408,7 @@ export default function TherapistSessionReviewPage() {
                     onChange={e => setNewCue(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && addCue(newCue)}
                     placeholder="Type a coaching cue and press Enter…"
-                    className="flex-1 px-3 py-2 rounded-xl border border-sky-200/80 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                    className="flex-1 px-3 py-2 rounded-xl border border-white/40 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
                   />
                   <button
                     onClick={() => addCue(newCue)}
@@ -427,7 +429,7 @@ export default function TherapistSessionReviewPage() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       feedbackPriority === p
                         ? p === 'URGENT' ? 'bg-red-600 text-white shadow-xs' : p === 'WARNING' ? 'bg-amber-500 text-white shadow-xs' : 'bg-sky-600 text-white shadow-xs'
-                        : 'glass-chip text-slate-600 hover:bg-white/80'
+                        : 'glass-chip text-slate-700 hover:bg-white/80'
                     }`}
                   >
                     {p}
@@ -439,24 +441,24 @@ export default function TherapistSessionReviewPage() {
         </div>
 
         {/* Review Decision Panel */}
-        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl space-y-6 backdrop-blur-xl">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/35 shadow-2xl space-y-6 backdrop-blur-xl">
           <div>
             <h3 className="text-lg font-bold text-slate-900 tracking-tight">Clinician Assessment & Target Calibration</h3>
-            <p className="text-xs text-slate-500 mt-1">Accept the flag as normal variance, or override the patient&apos;s prescribed ROM target.</p>
+            <p className="text-xs text-slate-600 mt-1">Accept the flag as normal variance, or override the patient&apos;s prescribed ROM target.</p>
           </div>
 
           {reviewSaved ? (
-            <div className="p-6 rounded-2xl glass-card border border-emerald-300 text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <h4 className="text-lg font-bold text-emerald-900">Review Saved!</h4>
-              <p className="text-xs text-emerald-800">
+            <div className="p-6 rounded-2xl glass-card border border-emerald-400/50 text-center space-y-3">
+              <CheckCircle2 className="w-12 h-12 text-emerald-700 mx-auto" />
+              <h4 className="text-lg font-bold text-emerald-950">Review Saved!</h4>
+              <p className="text-xs text-emerald-900">
                 {actionTaken === 'OVERRIDDEN'
                   ? `Target ROM updated to ${overrideTargetRom}° for Aarav Mehta.`
                   : 'Session flag reviewed and marked as accepted clinical variance.'}
                 {feedbackMessage && ' Guidance message sent to patient.'}
               </p>
               <div className="flex justify-center gap-3 pt-2">
-                <Link href="/therapist/dashboard" className="px-5 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-500 transition-colors shadow-sm">
+                <Link href="/therapist/dashboard" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold hover:from-blue-700 hover:to-indigo-700 transition-colors shadow-sm">
                   Return to Census
                 </Link>
               </div>
@@ -464,20 +466,20 @@ export default function TherapistSessionReviewPage() {
           ) : (
             <div className="space-y-5">
               {/* ROM Slider */}
-              <div className="glass-card rounded-2xl p-4 sm:p-5 border border-teal-200/60 space-y-2">
+              <div className="glass-card rounded-2xl p-4 sm:p-5 border border-blue-400/30 space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Calibrate New Target ROM</label>
-                  <span className="text-base font-black font-mono text-teal-700 glass-chip px-3 py-0.5 rounded-full border border-teal-200">{overrideTargetRom}°</span>
+                  <span className="text-base font-black font-mono text-blue-900 glass-chip px-3 py-0.5 rounded-full border border-blue-400/40">{overrideTargetRom}°</span>
                 </div>
                 <input
                   type="range" min={80} max={145}
                   value={overrideTargetRom}
                   onChange={e => setOverrideTargetRom(Number(e.target.value))}
-                  className="w-full h-2.5 bg-teal-100 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                  className="w-full h-2.5 bg-blue-200/50 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
-                <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                <div className="flex justify-between text-[11px] text-slate-600 font-medium">
                   <span>80° (Conservative)</span>
-                  <span className="text-teal-700 font-semibold">110° (Adjusted)</span>
+                  <span className="text-blue-800 font-semibold">110° (Adjusted)</span>
                   <span>120° (Original)</span>
                   <span>145°</span>
                 </div>
@@ -491,7 +493,7 @@ export default function TherapistSessionReviewPage() {
                   value={clinicalReason}
                   onChange={e => setClinicalReason(e.target.value)}
                   placeholder="e.g. Temporary reduced ROM target to accommodate post-operative stiffness"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200/80 glass-card text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-900"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/40 glass-card text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900"
                 />
               </div>
 
@@ -501,7 +503,7 @@ export default function TherapistSessionReviewPage() {
                   id="override-btn"
                   onClick={() => handleReviewWithFeedback('OVERRIDDEN')}
                   disabled={submitting}
-                  className="flex-1 py-3.5 px-5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl cursor-pointer border border-white/20"
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 hover:shadow-xl cursor-pointer border border-white/20"
                 >
                   <Save className="w-4 h-4" />
                   {submitting ? 'Saving…' : `Override to ${overrideTargetRom}° & Update Plan`}
@@ -511,10 +513,10 @@ export default function TherapistSessionReviewPage() {
                   id="accept-btn"
                   onClick={() => handleReviewWithFeedback('ACCEPTED')}
                   disabled={submitting}
-                  className="sm:w-auto py-3.5 px-6 rounded-xl glass-chip hover:bg-white/80 text-slate-800 font-semibold text-sm transition-all border border-white/80 shadow-xs cursor-pointer"
+                  className="sm:w-auto py-3.5 px-6 rounded-xl glass-button text-slate-800 font-semibold text-sm transition-all border border-white/40 shadow-xs cursor-pointer hover:bg-white/40"
                 >
                   Accept Flag (Keep Current Target)
-                  {feedbackMessage && <span className="ml-1 text-xs text-sky-700 font-bold">+ Send Guidance</span>}
+                  {feedbackMessage && <span className="ml-1 text-xs text-blue-800 font-bold">+ Send Guidance</span>}
                 </button>
               </div>
             </div>
@@ -522,6 +524,7 @@ export default function TherapistSessionReviewPage() {
         </div>
 
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

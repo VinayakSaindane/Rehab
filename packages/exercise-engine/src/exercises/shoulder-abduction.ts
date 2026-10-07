@@ -4,6 +4,7 @@ import { CompensationDetector } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
+import { getExerciseConfig } from '../exercise-configs';
 import { SupportedLanguage } from '@rehabsense/types';
 
 export class ShoulderAbductionAnalyzer {
@@ -23,16 +24,25 @@ export class ShoulderAbductionAnalyzer {
   ) {
     this.targetReps = targetReps;
     this.side = side;
-    this.confidenceGate = new ConfidenceGate(0.70, 0.75);
+    const profile = getExerciseConfig('shoulder-abduction', prescribedTargetRom);
+
+    this.confidenceGate = new ConfidenceGate(profile.confidenceThreshold, 0.75, 2);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
-      startAngle: 20, // Arm hanging at side ~20 degrees
-      targetAngle: prescribedTargetRom, // Abduction horizontal ~90 degrees
-      returnAngle: 35,
-      hysteresisBuffer: 8,
-      isAngleDecreasingOnFlex: false, // Lifting arm laterally increases angle
+      startAngle: profile.startAngle,
+      targetAngle: profile.defaultTargetAngle,
+      returnAngle: profile.returnAngle,
+      hysteresisBuffer: profile.hysteresisBuffer,
+      isAngleDecreasingOnFlex: profile.isAngleDecreasingOnFlex,
       prescribedTargetRom,
-      romToleranceDegrees: 8
+      romToleranceDegrees: profile.romToleranceDegrees,
+      minRomDegrees: profile.minRomDegrees,
+      minRepDurationMs: profile.minRepDurationMs,
+      maxRepDurationMs: profile.maxRepDurationMs,
+      minTargetDwellMs: profile.minTargetDwellMs,
+      cooldownMs: profile.cooldownMs,
+      readyFramesRequired: profile.readyFramesRequired,
+      smoothingAlpha: profile.smoothingAlpha
     });
     this.feedbackEngine = new FeedbackEngine(voiceEnabled, language);
   }
@@ -53,7 +63,7 @@ export class ShoulderAbductionAnalyzer {
     return this.side;
   }
 
-  public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
+  public processFrame(landmarks: Point2D[], timestampMs: number = Date.now()): ExerciseFrameAnalysis {
     const prefix = this.side === 'right' ? 'right' : 'left';
     const requiredLandmarkNames = [`${prefix}_hip`, `${prefix}_shoulder`, `${prefix}_elbow`];
     const activeJointIndices = [
@@ -64,18 +74,19 @@ export class ShoulderAbductionAnalyzer {
 
     const confidenceResult = this.confidenceGate.evaluate(landmarks, requiredLandmarkNames);
 
-    let jointAngle = 0;
+    let rawAngle = 0;
     if (landmarks && landmarks.length > 23) {
       const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
       const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
       const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
-      jointAngle = calculateJointAngle(hip, shoulder, elbow, true);
+      rawAngle = calculateJointAngle(hip, shoulder, elbow, true);
     }
 
     const repResult = this.stateMachine.update(
-      jointAngle,
+      rawAngle,
       confidenceResult.isPassing,
-      confidenceResult.overallConfidence
+      confidenceResult.overallConfidence,
+      timestampMs
     );
 
     const inRep = repResult.currentState === 'MOVING' || repResult.currentState === 'TARGET_ZONE';
@@ -92,13 +103,16 @@ export class ShoulderAbductionAnalyzer {
     );
 
     return {
-      jointAngle,
+      jointAngle: repResult.smoothedAngle,
+      rawAngle: repResult.rawAngle,
+      smoothedAngle: repResult.smoothedAngle,
       confidenceResult,
       repResult,
       compensationResult,
       feedbackEvent,
       landmarks,
-      activeJointIndices
+      activeJointIndices,
+      debug: repResult.debug
     };
   }
 

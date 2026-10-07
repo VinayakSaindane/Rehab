@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth, UserRole } from '@/lib/auth-context';
@@ -9,26 +9,35 @@ import {
   Activity, 
   User, 
   Stethoscope, 
+  Building2,
   Volume2, 
   VolumeX, 
   Eye, 
   Type, 
   Sparkles,
   Headphones,
-  Globe
+  LogIn,
+  LogOut,
+  FileText,
+  ChevronDown,
+  Globe,
+  Sliders,
+  Check,
+  MoreHorizontal,
+  Camera
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 export default function TopNavbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { role, switchRole } = useAuth();
+  const { user, role, isAuthenticated, switchRole, logout } = useAuth();
   const { 
     highContrast, 
     largeText, 
     voiceEnabled, 
     language,
-    earphoneMode,
+    earphoneMode, 
     toggleHighContrast, 
     toggleLargeText, 
     toggleVoice,
@@ -36,239 +45,470 @@ export default function TopNavbar() {
     toggleEarphoneMode
   } = useAccessibility();
 
+  // Dropdown states
+  const [audioMenuOpen, setAudioMenuOpen] = useState(false);
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+
+  const audioMenuRef = useRef<HTMLDivElement>(null);
+  const roleMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (audioMenuRef.current && !audioMenuRef.current.contains(event.target as Node)) {
+        setAudioMenuOpen(false);
+      }
+      if (roleMenuRef.current && !roleMenuRef.current.contains(event.target as Node)) {
+        setRoleMenuOpen(false);
+      }
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setRoleMenuOpen(false);
+    logout();
+    router.push('/login');
+  };
+
   const handleRoleToggle = async (newRole: UserRole) => {
+    setRoleMenuOpen(false);
     await switchRole(newRole);
     if (newRole === 'THERAPIST') {
       router.push('/therapist/dashboard');
+    } else if (newRole === 'HOSPITAL') {
+      router.push('/hospital/dashboard');
     } else {
       router.push('/patient/dashboard');
     }
   };
 
+  const languages = [
+    { id: 'en', label: 'English', flag: '🇬🇧', sub: 'Natural Clinical Pacing' },
+    { id: 'hi', label: 'हिन्दी', flag: '🇮🇳', sub: 'प्राकृतिक आवाज़' },
+    { id: 'mr', label: 'मराठी', flag: '🚩', sub: 'स्पष्ट ऑडिओ मार्गदर्शक' },
+  ];
+
   return (
-    <header className="sticky top-3 z-50 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-4">
-      <div className="glass-card-strong px-4 sm:px-6 py-2.5 rounded-[26px] border border-white/90 shadow-xl backdrop-blur-3xl flex flex-wrap items-center justify-between gap-3">
+    <header className="sticky top-3 z-50 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-4 select-none">
+      <div className="glass-navbar px-4 sm:px-6 py-2.5 rounded-[26px] border border-white/50 shadow-lg backdrop-blur-2xl flex items-center justify-between gap-3">
         
-        {/* Logo & Brand */}
+        {/* Left: Brand & Logo */}
         <div className="flex items-center space-x-3">
           <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#244b38] to-[#3a7256] flex items-center justify-center text-white shadow-md shadow-emerald-950/20 group-hover:scale-105 transition-all border border-white/60">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-600/20 group-hover:scale-105 transition-all border border-white/40">
+              <Activity className="w-4 h-4 text-white" />
             </div>
             <div>
-              <span className="font-black text-lg tracking-tight text-[#1a2620] flex items-center gap-1.5">
+              <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 flex items-center gap-1.5">
                 RehabSense
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full glass-chip text-[#244b38] border-emerald-600/20 bg-emerald-500/10">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full glass-chip text-blue-700 border-blue-300/40">
                   PS 05
                 </span>
               </span>
-              <p className="text-[11px] text-[#6d7b71] hidden sm:block">
-                Your Recovery. Your Camera. Your Care Team.
-              </p>
             </div>
           </Link>
         </div>
 
-        {/* Navigation Links based on Role */}
-        <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto pb-1 md:order-none md:w-auto md:pb-0">
+        {/* Center: Clean, Spaced Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1.5">
           <Link
             href="/"
             className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               pathname === '/' 
-                ? 'bg-white text-[#1a2620] border border-white shadow-xs font-bold' 
-                : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
             }`}
           >
             Overview
           </Link>
 
-          {role === 'PATIENT' ? (
+          {/* Authenticated Links with breathing space */}
+          {isAuthenticated && role === 'PATIENT' && (
             <>
               <Link
                 href="/patient/dashboard"
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.startsWith('/patient/dashboard') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                My Rehab Plan
+                Dashboard
               </Link>
               <Link
                 href="/patient/exercise/elbow-flexion"
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.includes('/exercise') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                Live Camera Exercise
+                Live Exercise
               </Link>
               <Link
                 href="/patient/progress"
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.startsWith('/patient/progress') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                Progress Trends
+                Progress
               </Link>
-              <Link
-                href="/patient/manual"
-                className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  pathname.startsWith('/patient/manual') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
-                }`}
-              >
-                Camera-Free Mode
-              </Link>
+
+              {/* Patient More Dropdown */}
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                  className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1 ${
+                    pathname.startsWith('/patient/documents') || pathname.startsWith('/patient/manual') || pathname.startsWith('/patient/onboarding')
+                      ? 'glass-chip text-blue-900 border-blue-300/50 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
+                  }`}
+                >
+                  <span>More</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                {moreMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-56 rounded-2xl glass-card-strong p-2 border border-white/60 shadow-2xl backdrop-blur-3xl z-50 space-y-1">
+                    <Link
+                      href="/patient/documents"
+                      onClick={() => setMoreMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                    >
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>Medical Documents</span>
+                    </Link>
+                    <Link
+                      href="/patient/manual"
+                      onClick={() => setMoreMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                    >
+                      <Sliders className="w-4 h-4 text-indigo-600" />
+                      <span>Camera-Free Mode</span>
+                    </Link>
+                    <Link
+                      href="/patient/onboarding"
+                      onClick={() => setMoreMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                    >
+                      <Camera className="w-4 h-4 text-sky-600" />
+                      <span>Camera Calibration</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </>
-          ) : (
+          )}
+
+          {isAuthenticated && role === 'THERAPIST' && (
             <>
               <Link
                 href="/therapist/dashboard"
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.startsWith('/therapist/dashboard') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                Clinical Census
+                Census
               </Link>
               <Link
                 href="/therapist/review/session-hist-6"
-                className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.includes('/review') 
-                    ? 'bg-white text-[#b86b45] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                <span>Session Review</span>
-                <span className="w-2 h-2 rounded-full bg-[#b86b45] animate-ping" />
+                Review
               </Link>
               <Link
                 href="/therapist/exercises"
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   pathname.startsWith('/therapist/exercises') 
-                    ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                    : 'text-[#435147] hover:text-[#1a2620] hover:bg-white/50'
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
                 }`}
               >
-                Exercise Config
+                Config
+              </Link>
+            </>
+          )}
+
+          {isAuthenticated && role === 'HOSPITAL' && (
+            <>
+              <Link
+                href="/hospital/dashboard"
+                className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  pathname.startsWith('/hospital/dashboard') 
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/hospital/onboard/new"
+                className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  pathname.startsWith('/hospital/onboard') 
+                    ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
+                }`}
+              >
+                Onboard Patient
               </Link>
             </>
           )}
 
           <Link
             href="/demo"
-            className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 ${
               pathname === '/demo' 
-                ? 'bg-white text-[#244b38] border border-white shadow-xs font-bold' 
-                : 'text-[#244b38] hover:text-[#173727] hover:bg-white/50'
+                ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
+                : 'text-blue-700 hover:text-blue-900 hover:bg-white/30'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#244b38]" />
-            Demo Hub
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>Demo Hub</span>
           </Link>
         </nav>
 
-        {/* Right Controls: Role Switcher & Accessibility */}
+        {/* Right: Consolidated Audio & Role Menus */}
         <div className="flex items-center gap-2">
           
-          {/* Multi-Language Voice Selector */}
-          <div className="hidden sm:flex items-center glass-chip rounded-xl p-0.5 space-x-0.5 border border-white/80 text-[11px] font-bold">
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-2 py-1 rounded-lg transition-all ${language === 'en' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
-              title="Audio Coach: English"
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLanguage('hi')}
-              className={`px-2 py-1 rounded-lg transition-all ${language === 'hi' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
-              title="Audio Coach: हिन्दी (Hindi)"
-            >
-              हिन्दी
-            </button>
-            <button
-              onClick={() => setLanguage('mr')}
-              className={`px-2 py-1 rounded-lg transition-all ${language === 'mr' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
-              title="Audio Coach: मराठी (Marathi)"
-            >
-              मराठी
-            </button>
-          </div>
+          {/* Notification Bell (Patient only) */}
+          {isAuthenticated && role === 'PATIENT' && <NotificationBell />}
 
-          {/* Accessibility Toggles & Spatial Audio */}
-          <div className="flex items-center glass-chip rounded-xl p-1 space-x-1 border border-white/80">
+          {/* 1. Consolidated Audio & Accessibility Pill Menu */}
+          <div className="relative" ref={audioMenuRef}>
             <button
-              onClick={toggleVoice}
-              title={voiceEnabled ? 'Mute voice feedback' : 'Enable voice feedback'}
-              className={`p-1.5 rounded-lg transition-colors ${voiceEnabled ? 'text-[#244b38] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
+              type="button"
+              onClick={() => setAudioMenuOpen(!audioMenuOpen)}
+              title="Audio Guidance & Accessibility Settings"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl glass-button text-xs font-bold text-slate-700 border border-white/50 hover:bg-white/40 transition-all shadow-xs"
             >
-              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={toggleEarphoneMode}
-              title={earphoneMode ? 'Directional Earphone Feedback: ON (Left/Right Buzz)' : 'Directional Earphone Feedback: OFF'}
-              className={`p-1.5 rounded-lg transition-colors relative ${earphoneMode ? 'text-[#244b38] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              <Headphones className="w-4 h-4" />
+              <Headphones className="w-4 h-4 text-blue-600" />
+              <span className="uppercase text-blue-900 font-extrabold">{language}</span>
               {earphoneMode && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
               )}
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
-            <button
-              onClick={toggleHighContrast}
-              title="Toggle High Contrast Mode"
-              className={`p-1.5 rounded-lg transition-colors ${highContrast ? 'text-[#b86b45] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
+            {audioMenuOpen && (
+              <div className="absolute right-0 mt-2 w-72 rounded-3xl glass-card-strong p-4 border border-white/60 shadow-2xl backdrop-blur-3xl z-50 space-y-4 text-xs">
+                
+                {/* Spoken Language Selector */}
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-white/30">
+                    <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Audio Coach Language</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-blue-700 font-bold uppercase">{language}</span>
+                  </div>
 
-            <button
-              onClick={toggleLargeText}
-              title="Toggle Large Typography"
-              className={`p-1.5 rounded-lg transition-colors ${largeText ? 'text-[#244b38] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              <Type className="w-4 h-4" />
-            </button>
+                  <div className="grid grid-cols-3 gap-1.5 pt-2">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.id}
+                        type="button"
+                        onClick={() => setLanguage(lang.id as any)}
+                        className={`p-2 rounded-xl text-center transition-all cursor-pointer border ${
+                          language === lang.id
+                            ? 'glass-pill-patient-active font-extrabold border-blue-400/60 shadow-xs'
+                            : 'glass-card text-slate-700 border-white/40 hover:bg-white/40'
+                        }`}
+                      >
+                        <span className="text-base block">{lang.flag}</span>
+                        <span className="text-[11px] font-bold block mt-0.5">{lang.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Audio Guidance Toggle */}
+                <div className="flex items-center justify-between pt-1 border-t border-white/30">
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                      {voiceEnabled ? <Volume2 className="w-3.5 h-3.5 text-blue-600" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+                      <span>Voice Audio Coach</span>
+                    </p>
+                    <p className="text-[10px] text-slate-500">Spoken rep pacing cues</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleVoice}
+                    className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border transition-all ${
+                      voiceEnabled ? 'glass-pill-patient-active' : 'glass-card text-slate-500'
+                    }`}
+                  >
+                    {voiceEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Spatial Earphone Haptic Feedback */}
+                <div className="flex items-center justify-between pt-1 border-t border-white/30">
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Headphones className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Directional Earphones</span>
+                    </p>
+                    <p className="text-[10px] text-slate-500">Left vs right earbud posture buzz</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleEarphoneMode}
+                    className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border transition-all ${
+                      earphoneMode ? 'glass-pill-patient-active' : 'glass-card text-slate-500'
+                    }`}
+                  >
+                    {earphoneMode ? 'ACTIVE' : 'OFF'}
+                  </button>
+                </div>
+
+                {/* Visual Accessibility Quick Toggles */}
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/30">
+                  <button
+                    type="button"
+                    onClick={toggleHighContrast}
+                    className={`p-2 rounded-xl text-center border font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all ${
+                      highContrast ? 'glass-pill-hospital-active' : 'glass-button text-slate-600'
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Contrast</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleLargeText}
+                    className={`p-2 rounded-xl text-center border font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all ${
+                      largeText ? 'glass-pill-patient-active' : 'glass-button text-slate-600'
+                    }`}
+                  >
+                    <Type className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Font Size</span>
+                  </button>
+                </div>
+
+              </div>
+            )}
           </div>
 
-          {/* Notification Bell */}
-          {role === 'PATIENT' && <NotificationBell />}
+          {/* 2. User Profile & Role Dropdown */}
+          {!isAuthenticated ? (
+            <Link
+              href="/login"
+              id="navbar-login-btn"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-600/25 hover:scale-[1.02] transition-all border border-white/30"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Login</span>
+            </Link>
+          ) : (
+            <div className="relative" ref={roleMenuRef}>
+              <button
+                type="button"
+                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl glass-button border border-white/50 hover:bg-white/40 transition-all shadow-xs"
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-600/20 text-blue-800 font-black flex items-center justify-center text-xs">
+                  {user?.name?.charAt(0) || 'U'}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <p className="font-bold text-slate-900 text-xs leading-none max-w-[100px] truncate">{user?.name}</p>
+                  <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wider mt-0.5">{role}</p>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-          {/* Quick 1-Click Role Switcher */}
-          <div className="flex items-center glass-chip rounded-xl p-1 border border-white/80">
-            <button
-              onClick={() => handleRoleToggle('PATIENT')}
-              className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                role === 'PATIENT'
-                  ? 'bg-[#244b38] text-white shadow-sm'
-                  : 'text-[#435147] hover:text-[#1a2620]'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Patient</span>
-            </button>
-            
-            <button
-              onClick={() => handleRoleToggle('THERAPIST')}
-              className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                role === 'THERAPIST'
-                  ? 'bg-[#b86b45] text-white shadow-sm'
-                  : 'text-[#435147] hover:text-[#1a2620]'
-              }`}
-            >
-              <Stethoscope className="w-3.5 h-3.5" />
-              <span>Therapist</span>
-            </button>
-          </div>
+              {roleMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-3xl glass-card-strong p-3 border border-white/60 shadow-2xl backdrop-blur-3xl z-50 space-y-3 text-xs">
+                  
+                  {/* User info banner */}
+                  <div className="p-2.5 rounded-2xl glass-chip border border-white/40">
+                    <p className="font-bold text-slate-900">{user?.name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
+                    <div className="mt-1.5 inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-600/15 text-blue-800 border border-blue-400/30">
+                      {role} Access Active
+                    </div>
+                  </div>
+
+                  {/* Role Switcher options */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider">
+                      Switch Active Perspective
+                    </p>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleRoleToggle('PATIENT')}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                        role === 'PATIENT' ? 'glass-pill-patient-active font-bold' : 'hover:bg-white/40 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-blue-600" />
+                        <span>Patient Portal</span>
+                      </div>
+                      {role === 'PATIENT' && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRoleToggle('THERAPIST')}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                        role === 'THERAPIST' ? 'glass-pill-therapist-active font-bold' : 'hover:bg-white/40 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="w-4 h-4 text-sky-600" />
+                        <span>Therapist Console</span>
+                      </div>
+                      {role === 'THERAPIST' && <Check className="w-3.5 h-3.5 text-sky-600" />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRoleToggle('HOSPITAL')}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                        role === 'HOSPITAL' ? 'glass-pill-hospital-active font-bold' : 'hover:bg-white/40 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-indigo-600" />
+                        <span>Hospital Admin</span>
+                      </div>
+                      {role === 'HOSPITAL' && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                    </button>
+                  </div>
+
+                  {/* Logout Button */}
+                  <div className="pt-2 border-t border-white/30">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl glass-button text-rose-700 hover:bg-rose-500/10 border-rose-300/40 font-bold transition-all"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-600" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 

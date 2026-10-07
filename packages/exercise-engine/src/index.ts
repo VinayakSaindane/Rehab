@@ -1,4 +1,7 @@
 export * from './angle-calculator';
+export * from './angle-smoother';
+export * from './motion-detector';
+export * from './exercise-configs';
 export * from './confidence-gate';
 export * from './compensation-detector';
 export * from './template-deriver';

@@ -39,6 +39,7 @@ import {
   Headphones,
   Globe
 } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function LiveExerciseScreen() {
   const params = useParams();
@@ -107,6 +108,10 @@ export default function LiveExerciseScreen() {
   const [faultSide, setFaultSide] = useState<'left' | 'right' | null>(null);
   // Aggregated compensation flags across this session (sent in payload)
   const sessionCompensationFlagsRef = React.useRef<Set<string>>(new Set());
+
+  // Developer / Clinician Kinematic Debug Telemetry State
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugTelemetry, setDebugTelemetry] = useState<any>(null);
 
   // Session Completed State
   const [isSessionCompleted, setIsSessionCompleted] = useState(false);
@@ -352,6 +357,9 @@ export default function LiveExerciseScreen() {
       setCompletedReps(analysis.repResult.completedReps);
       setValidReps(analysis.repResult.validReps);
       setStatusMessage(analysis.feedbackEvent.message);
+      if (analysis.debug) {
+        setDebugTelemetry(analysis.debug);
+      }
 
       // Update compensation HUD state
       const comp = analysis.compensationResult;
@@ -459,16 +467,17 @@ export default function LiveExerciseScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between select-none">
+    <ProtectedRoute allowedRoles={['PATIENT']}>
+      <div className="min-h-screen bg-slate-950/60 backdrop-blur-2xl text-white flex flex-col justify-between select-none">
       
-      {/* 1. TOP STATUS BAR */}
-      <header className="glass-card-dark dark-hud border-b border-white/10 px-4 py-3 z-30">
+      {/* 1. TOP STATUS BAR (Requirement 12: Level 1 Glass Ribbon) */}
+      <header className="glass-card-dark border-b border-white/15 px-4 py-3 z-30 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           
           <div className="flex items-center gap-3">
             <Link
               href="/patient/dashboard"
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 transition-colors border border-white/10"
+              className="p-2 rounded-xl glass-chip hover:bg-white/20 text-slate-200 transition-colors border border-white/20"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -534,6 +543,21 @@ export default function LiveExerciseScreen() {
             >
               <Play className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ready (3s)</span>
+            </button>
+
+            {/* Developer / Clinician Kinematic Diagnostic Telemetry Toggle */}
+            <button
+              type="button"
+              onClick={() => setDebugMode(!debugMode)}
+              className={`px-2.5 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all ${
+                debugMode
+                  ? 'bg-amber-500/25 border-amber-400 text-amber-300 font-bold shadow-sm shadow-amber-500/20'
+                  : 'bg-white/10 border-white/10 text-slate-300 hover:text-white'
+              }`}
+              title="Toggle Kinematic Telemetry & Biomechanical Diagnostics"
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Debug</span>
             </button>
 
             {/* Real vs Sim Mode Switcher */}
@@ -670,7 +694,7 @@ export default function LiveExerciseScreen() {
       <main className="flex-1 relative flex items-center justify-center p-2 sm:p-4 overflow-hidden dark-surface">
         
         {/* Fullscreen Video Viewport */}
-        <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-video rounded-3xl overflow-hidden bg-slate-950 border-2 border-sky-400/40 shadow-2xl flex items-center justify-center dark-surface">
+        <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-video rounded-3xl overflow-hidden bg-black/75 border border-white/25 shadow-2xl flex items-center justify-center backdrop-blur-2xl">
           
           {/* Real-Time Distance & Framing Guidance Badge */}
           {mode === 'REAL' && (
@@ -727,6 +751,97 @@ export default function LiveExerciseScreen() {
             reason={gatedReason}
             missingLandmarks={missingLandmarks}
           />
+
+          {/* Biomechanical Diagnostic HUD Overlay (Requirement 13) */}
+          {debugMode && (
+            <div className="absolute left-4 top-16 z-30 max-w-xs w-80 bg-slate-950/92 border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl text-xs font-mono text-slate-200 pointer-events-auto">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+                <div className="flex items-center gap-1.5 text-amber-400 font-bold tracking-wider uppercase text-[11px]">
+                  <Activity className="w-3.5 h-3.5 animate-pulse" />
+                  <span>Kinematic Engine</span>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                  debugTelemetry?.currentState === 'TARGET_ZONE' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                  debugTelemetry?.currentState === 'MOVING' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' :
+                  debugTelemetry?.currentState === 'RETURNING' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                  debugTelemetry?.currentState === 'COOLDOWN' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                  'bg-slate-800 text-slate-300 border border-slate-700'
+                }`}>
+                  {debugTelemetry?.currentState || 'READY'}
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Angle (Raw / Filtered):</span>
+                  <span className="font-bold text-white">
+                    {debugTelemetry?.rawAngle ?? Math.round(currentAngle)}° / <span className="text-sky-400 font-black">{debugTelemetry?.smoothedAngle ?? Math.round(currentAngle)}°</span>
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Angular Velocity:</span>
+                  <span className={`font-bold ${
+                    (debugTelemetry?.angularVelocity ?? 0) > 0 ? 'text-emerald-400' :
+                    (debugTelemetry?.angularVelocity ?? 0) < 0 ? 'text-cyan-400' : 'text-slate-400'
+                  }`}>
+                    {(debugTelemetry?.angularVelocity ?? 0) > 0 ? '+' : ''}{debugTelemetry?.angularVelocity ?? 0}°/s
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Movement Direction:</span>
+                  <span className={`font-bold ${
+                    debugTelemetry?.motionState === 'FLEXING' ? 'text-emerald-300' :
+                    debugTelemetry?.motionState === 'EXTENDING' ? 'text-purple-300' : 'text-slate-400'
+                  }`}>
+                    {debugTelemetry?.motionState || 'STATIONARY'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Excursion / Min ROM:</span>
+                  <span className="font-bold text-white">
+                    {debugTelemetry?.excursionThisRep ?? 0}° / <span className="text-purple-300">{debugTelemetry?.minRomRequired ?? 28}° min</span>
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Pose Confidence:</span>
+                  <span className={`font-bold ${trackingConfidence >= 0.75 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {Math.round(trackingConfidence * 100)}% {isGated ? '(PAUSED)' : '(ACTIVE)'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Duration / Reps:</span>
+                  <span className="font-bold text-white">
+                    {((debugTelemetry?.repDurationMs ?? 0) / 1000).toFixed(1)}s • Reps: <span className="text-emerald-400">{completedReps}</span>
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-slate-800/80 mt-2">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold mb-0.5">Validation Audit Log:</div>
+                  {debugTelemetry?.repAcceptedReason && (
+                    <div className="text-[11px] text-emerald-400 font-medium bg-emerald-950/40 border border-emerald-500/30 rounded px-2 py-1 mb-1">
+                      ✓ {debugTelemetry.repAcceptedReason}
+                    </div>
+                  )}
+                  {debugTelemetry?.repRejectionReason && (
+                    <div className="text-[11px] text-amber-300 font-medium bg-amber-950/40 border border-amber-500/30 rounded px-2 py-1">
+                      ⚠ {debugTelemetry.repRejectionReason}
+                    </div>
+                  )}
+                  {!debugTelemetry?.repAcceptedReason && !debugTelemetry?.repRejectionReason && (
+                    <div className="text-[10px] text-slate-500 italic">
+                      Tracking active • Awaiting validated movement cycle
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {/* Compensation Warning Banner (Appears when compensatory movement is detected) */}
           <CompensationWarningBanner
@@ -921,6 +1036,7 @@ export default function LiveExerciseScreen() {
         </div>
       )}
 
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

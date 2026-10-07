@@ -6,6 +6,7 @@ import {
   Inbox, ArrowLeft, CheckCircle2, Clock, XCircle,
   IndianRupee, FileText, ChevronDown, ChevronUp, Send
 } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function TherapistRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -89,7 +90,8 @@ export default function TherapistRequestsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={['THERAPIST']}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto space-y-6">
 
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
@@ -239,6 +241,7 @@ export default function TherapistRequestsPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -16,6 +16,7 @@ import {
   Check,
   VideoOff
 } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const EXERCISE_OPTIONS = [
   {
@@ -149,7 +150,8 @@ export default function CameraFreeWorkoutPage() {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={['PATIENT']}>
+      <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
         
         <Link
@@ -160,24 +162,24 @@ export default function CameraFreeWorkoutPage() {
           <span>Back to Dashboard</span>
         </Link>
 
-        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl backdrop-blur-xl space-y-6">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/35 shadow-2xl backdrop-blur-xl space-y-6">
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-sky-100 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/20 gap-3">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full glass-chip text-slate-700 text-xs font-semibold mb-2.5 border border-white/80">
-                <VideoOff className="w-3.5 h-3.5 text-slate-500" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full glass-chip text-slate-800 text-xs font-semibold mb-2.5 border border-white/40">
+                <VideoOff className="w-3.5 h-3.5 text-slate-600" />
                 <span>Camera-Free Accessible Mode</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {currentEx.name}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
                 Manual rep logging & guided instructions for low-mobility or camera-free environments.
               </p>
             </div>
 
             {/* Limb Side Switcher */}
-            <div className="flex items-center bg-sky-100/70 p-1 rounded-xl border border-sky-200 self-start sm:self-center text-xs">
+            <div className="flex items-center glass-chip p-1 rounded-xl border border-white/40 self-start sm:self-center text-xs">
               <button
                 type="button"
                 onClick={() => setSelectedSide('left')}
@@ -207,7 +209,7 @@ export default function CameraFreeWorkoutPage() {
             <select
               value={selectedExId}
               onChange={e => handleSelectExercise(e.target.value)}
-              className="w-full p-3 rounded-xl border border-sky-200 glass-card text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white/90"
+              className="w-full p-3 rounded-xl border border-white/40 glass-card text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               {EXERCISE_OPTIONS.map(opt => (
                 <option key={opt.id} value={opt.id}>
@@ -222,7 +224,7 @@ export default function CameraFreeWorkoutPage() {
             <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
               Exercise Instructions
             </h3>
-            <ol className="list-decimal list-inside space-y-2 text-xs text-slate-700 leading-relaxed glass-card p-5 rounded-2xl border border-sky-100/80">
+            <ol className="list-decimal list-inside space-y-2 text-xs text-slate-700 leading-relaxed glass-card p-5 rounded-2xl border border-white/40">
               {currentEx.instructions.map((inst, i) => (
                 <li key={i}>{inst}</li>
               ))}
@@ -235,14 +237,14 @@ export default function CameraFreeWorkoutPage() {
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Completed Repetitions
               </label>
-              <span className="text-xs text-slate-500 font-mono glass-chip px-2.5 py-0.5 rounded-full border border-white/80">Target: {currentEx.targetReps} reps</span>
+              <span className="text-xs text-slate-600 font-mono glass-chip px-2.5 py-0.5 rounded-full border border-white/40">Target: {currentEx.targetReps} reps</span>
             </div>
 
-            <div className="flex items-center justify-between glass-card p-4 sm:p-5 rounded-2xl border border-white/80 shadow-inner">
+            <div className="flex items-center justify-between glass-card p-4 sm:p-5 rounded-2xl border border-white/40 shadow-inner">
               <button
                 type="button"
                 onClick={() => setCompletedReps(prev => Math.max(0, prev - 1))}
-                className="w-12 h-12 rounded-xl glass-chip border border-white/80 flex items-center justify-center text-slate-800 hover:bg-white/80 transition-all shadow-xs cursor-pointer active:scale-95"
+                className="w-12 h-12 rounded-xl glass-button border border-white/40 flex items-center justify-center text-slate-800 transition-all shadow-xs cursor-pointer active:scale-95"
               >
                 <Minus className="w-5 h-5" />
               </button>
@@ -251,13 +253,13 @@ export default function CameraFreeWorkoutPage() {
                 <span className="text-4xl sm:text-5xl font-black font-mono text-slate-900 tracking-tight">
                   {completedReps}
                 </span>
-                <span className="text-sm font-semibold text-slate-500 ml-1.5">/ {currentEx.targetReps}</span>
+                <span className="text-sm font-semibold text-slate-600 ml-1.5">/ {currentEx.targetReps}</span>
               </div>
 
               <button
                 type="button"
                 onClick={() => setCompletedReps(prev => prev + 1)}
-                className="w-12 h-12 rounded-xl glass-chip border border-white/80 flex items-center justify-center text-slate-800 hover:bg-white/80 transition-all shadow-xs cursor-pointer active:scale-95"
+                className="w-12 h-12 rounded-xl glass-button border border-white/40 flex items-center justify-center text-slate-800 transition-all shadow-xs cursor-pointer active:scale-95"
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -270,7 +272,7 @@ export default function CameraFreeWorkoutPage() {
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Self-Reported Range of Motion
               </label>
-              <span className="text-xs font-bold font-mono text-sky-700 glass-chip px-2.5 py-0.5 rounded-full border border-sky-200">
+              <span className="text-xs font-bold font-mono text-sky-800 glass-chip px-2.5 py-0.5 rounded-full border border-sky-400/30">
                 {estimatedRom}° ROM
               </span>
             </div>
@@ -280,22 +282,22 @@ export default function CameraFreeWorkoutPage() {
               max={currentEx.maxRom}
               value={estimatedRom}
               onChange={e => setEstimatedRom(Number(e.target.value))}
-              className="w-full h-2.5 bg-sky-100 rounded-lg appearance-none cursor-pointer accent-sky-600"
+              className="w-full h-2.5 bg-sky-200/50 rounded-lg appearance-none cursor-pointer accent-sky-600"
             />
-            <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+            <div className="flex justify-between text-[11px] text-slate-600 font-medium">
               <span>{currentEx.minRom}° (Minimum)</span>
-              <span className="text-sky-700 font-semibold">{currentEx.targetRom}° (Prescribed Target)</span>
+              <span className="text-sky-800 font-semibold">{currentEx.targetRom}° (Prescribed Target)</span>
               <span>{currentEx.maxRom}° (Full)</span>
             </div>
           </div>
 
           {/* Post-Session Clinical Pain Rating (VAS Scale) */}
-          <div className="space-y-2.5 glass-card p-4 rounded-2xl border border-sky-100">
+          <div className="space-y-2.5 glass-card p-4 rounded-2xl border border-white/40">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Joint Pain Rating (VAS Scale)
               </label>
-              <span className="text-xs font-mono font-bold text-sky-700">
+              <span className="text-xs font-mono font-bold text-sky-800">
                 {painScore === 0 ? '0 / 10 (No Pain)' : `${painScore} / 10`}
               </span>
             </div>
@@ -313,7 +315,7 @@ export default function CameraFreeWorkoutPage() {
                   className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border ${
                     painScore === b.val
                       ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
-                      : 'bg-white/80 border-sky-200 text-slate-700 hover:bg-sky-50'
+                      : 'glass-button border-white/40 text-slate-800 hover:bg-white/60'
                   }`}
                 >
                   {b.label}
@@ -331,7 +333,7 @@ export default function CameraFreeWorkoutPage() {
               rows={2}
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              className="w-full p-3.5 rounded-xl border border-sky-200/80 glass-card text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 placeholder:text-slate-400"
+              className="w-full p-3.5 rounded-xl border border-white/40 glass-card text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 placeholder:text-slate-500"
               placeholder="Record any stiffness, fatigue, or feedback..."
             />
           </div>
@@ -340,7 +342,7 @@ export default function CameraFreeWorkoutPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting || submitted}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/30"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-blue-600/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/30"
           >
             {submitted ? (
               <>
@@ -354,13 +356,14 @@ export default function CameraFreeWorkoutPage() {
             )}
           </button>
 
-          <div className="p-3.5 glass-card border border-amber-200/80 rounded-2xl text-center text-xs text-amber-900">
+          <div className="p-3.5 glass-chip bg-amber-500/15 border border-amber-400/40 rounded-2xl text-center text-xs text-amber-950 font-medium">
             Stop immediately if you experience pain or discomfort and follow your clinician&apos;s guidance.
           </div>
 
         </div>
 
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

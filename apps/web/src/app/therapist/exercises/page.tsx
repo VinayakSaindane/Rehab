@@ -24,6 +24,7 @@ import {
   Eye
 } from 'lucide-react';
 import api from '@/lib/api';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface ExerciseItem {
   id: string;
@@ -514,7 +515,8 @@ export default function TherapistExercisesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={['THERAPIST']}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Back Link */}
@@ -1249,6 +1251,7 @@ export default function TherapistExercisesPage() {
         </div>
       )}
 
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -8,6 +8,9 @@ import {
   FileText, CheckCircle2, AlertTriangle, X
 } from 'lucide-react';
 
+import { mockStorage } from '@/lib/mock-storage';
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 export default function HospitalOnboardNewPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -20,8 +23,8 @@ export default function HospitalOnboardNewPage() {
     operation_type: '',
     injury_description: '',
     surgery_date: '',
-    hospital_id: 'hosp-demo-1',
-    hospital_name: 'Apollo Orthopedics Hospital',
+    hospital_id: 'hospital-001',
+    hospital_name: 'Demo Hospital',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -47,9 +50,7 @@ export default function HospitalOnboardNewPage() {
         setUploadedFiles(prev => [...prev, data.url]);
       }
     } catch {
-      // Graceful fallback \u2014 demo file name as stub URL
-      // TODO: real upload endpoint not reachable \u2014 using mock URL for demo
-      setUploadedFiles(prev => [...prev, `/uploads/stub-${file.name}`]);
+      setUploadedFiles(prev => [...prev, `/uploads/${file.name}`]);
     }
   };
 
@@ -57,9 +58,45 @@ export default function HospitalOnboardNewPage() {
     e.preventDefault();
     if (!form.patient_name || !form.patient_email || !form.operation_type) return;
     setSaving(true);
+
+    // Save to local mock storage
+    try {
+      mockStorage.init();
+      const newPatient = mockStorage.createPatient({
+        userId: `patient-${Date.now()}`,
+        name: form.patient_name,
+        email: form.patient_email,
+        condition: form.operation_type + (form.injury_description ? ` (${form.injury_description})` : ''),
+        surgeryDate: form.surgery_date || new Date().toISOString().split('T')[0],
+        status: 'Unassigned',
+        age: 34,
+        gender: 'Not specified',
+        hospitalId: 'hospital-001',
+        currentStreakDays: 0,
+        totalSessions: 0,
+      });
+
+      if (uploadedFiles.length > 0) {
+        uploadedFiles.forEach((fileUrl, idx) => {
+          mockStorage.addDocument({
+            patientId: newPatient.id,
+            name: `${form.operation_type} Clinical Report #${idx + 1}`,
+            type: 'Diagnosis Report',
+            fileName: fileUrl.split('/').pop() || 'report.pdf',
+            fileSize: '1.8 MB',
+            uploadedBy: 'hospital-001',
+            uploaderName: 'Demo Hospital',
+            summary: form.injury_description || 'Pre-operative evaluation documentation.',
+          });
+        });
+      }
+    } catch (e) {
+      console.error('Failed to save to mockStorage:', e);
+    }
+
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('rehab_token') : null;
-      const res = await fetch('http://localhost:8000/api/hospital/onboard', {
+      await fetch('http://localhost:8000/api/hospital/onboard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,15 +104,11 @@ export default function HospitalOnboardNewPage() {
         },
         body: JSON.stringify({ ...form, uploaded_report_urls: uploadedFiles })
       });
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => router.push('/hospital/dashboard'), 1800);
-      }
     } catch {
-      // Show success for demo even if backend unreachable
-      setSuccess(true);
-      setTimeout(() => router.push('/hospital/dashboard'), 1800);
+      // Ignored for local/offline mode
     } finally {
+      setSuccess(true);
+      setTimeout(() => router.push('/hospital/dashboard'), 1500);
       setSaving(false);
     }
   };

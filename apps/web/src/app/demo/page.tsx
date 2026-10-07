@@ -48,10 +48,10 @@ export default function DemoPortalPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Floating Light Glass Header Card */}
-        <div className="glass-card-strong rounded-[32px] p-8 sm:p-10 shadow-xl border border-white/90 relative overflow-hidden backdrop-blur-3xl">
+        <div className="glass-card-strong rounded-[32px] p-8 sm:p-10 shadow-xl border border-white/35 relative overflow-hidden backdrop-blur-3xl">
           <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-chip text-sky-800 border border-white/90 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-chip text-sky-900 border border-sky-400/30 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-sky-700" />
               <span>Judge & Evaluator Demo Portal</span>
             </div>
 
@@ -67,15 +67,15 @@ export default function DemoPortalPage() {
               <button
                 onClick={handleResetData}
                 disabled={resetting}
-                className="px-5 py-2.5 rounded-[18px] glass-chip hover:bg-white text-slate-800 text-xs font-bold border border-white/90 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                className="px-5 py-2.5 rounded-[18px] glass-button text-slate-800 text-xs font-bold border border-white/40 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin' : ''}`} />
                 <span>{resetting ? 'Resetting Data...' : 'Reset Demo to Clean Baseline'}</span>
               </button>
 
               {resetSuccess && (
-                <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5 animate-fadeIn">
-                  <Check className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs text-emerald-800 font-semibold flex items-center gap-1.5 animate-fadeIn">
+                  <Check className="w-4 h-4 text-emerald-700" />
                   <span>Demo state successfully restored!</span>
                 </span>
               )}
@@ -87,25 +87,25 @@ export default function DemoPortalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Patient Card */}
-          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/85 hover:border-white shadow-xl transition-all space-y-5 flex flex-col justify-between group">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/35 hover:border-white/60 shadow-xl transition-all space-y-5 flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-sky-600 border border-white/90">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-sky-700 border border-white/40">
                   <User className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-sky-800 font-mono border border-white/90">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-sky-900 font-mono border border-sky-400/30">
                   DEMO PATIENT
                 </span>
               </div>
 
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Aarav Mehta</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   32 y/o • Post-operative upper-limb rehabilitation
                 </p>
               </div>
 
-              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/80">
+              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/30">
                 <p><strong className="text-slate-900">Assigned Plan:</strong> Elbow Flexion & Extension</p>
                 <p><strong className="text-slate-900">Prescribed Target:</strong> 120° ROM • 10 reps • 2x/day</p>
                 <p><strong className="text-slate-900">Streak:</strong> 6 days • 10 historical sessions recorded</p>
@@ -124,34 +124,34 @@ export default function DemoPortalPage() {
 
               <button
                 onClick={() => handleSelectRole('PATIENT', '/patient/exercise/elbow-flexion')}
-                className="w-full py-3.5 rounded-[20px] glass-chip hover:bg-white text-sky-800 font-bold text-xs border border-white/90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full py-3.5 rounded-[20px] glass-button text-sky-900 font-bold text-xs border border-white/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                <Video className="w-3.5 h-3.5 text-sky-600" />
+                <Video className="w-3.5 h-3.5 text-sky-700" />
                 <span>Jump Directly to Live Camera Exercise</span>
               </button>
             </div>
           </div>
 
           {/* Therapist Card */}
-          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/85 hover:border-white shadow-xl transition-all space-y-5 flex flex-col justify-between group">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/50 hover:border-blue-300 shadow-xl transition-all space-y-5 flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-teal-600 border border-white/90">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-indigo-700 border border-white/40">
                   <Stethoscope className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-teal-800 font-mono border border-white/90">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-indigo-900 font-mono border border-indigo-400/30">
                   DEMO THERAPIST
                 </span>
               </div>
 
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Dr. Ananya Sharma</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Lead Musculoskeletal Physiotherapist • Apex Orthopaedic Center
                 </p>
               </div>
 
-              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/80">
+              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/30">
                 <p><strong className="text-slate-900">Active Clinical Census:</strong> 14 active patients</p>
                 <p><strong className="text-slate-900">Pending Flagged Sessions:</strong> 1 requiring clinical review</p>
                 <p><strong className="text-slate-900">Flagged Event:</strong> Aarav Mehta (Session #6: 108° vs 120°)</p>
@@ -162,7 +162,7 @@ export default function DemoPortalPage() {
             <div className="space-y-3 pt-2">
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/dashboard')}
-                className="w-full py-4 rounded-[20px] bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-black text-sm shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+                className="w-full py-4 rounded-[20px] bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
               >
                 <span>Launch Therapist Dashboard</span>
                 <ArrowRight className="w-4 h-4 text-white" />
@@ -170,7 +170,7 @@ export default function DemoPortalPage() {
 
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/review/session-hist-6')}
-                className="w-full py-3.5 rounded-[20px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 font-bold text-xs border border-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs backdrop-blur"
+                className="w-full py-3.5 rounded-[20px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 font-bold text-xs border border-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs backdrop-blur"
               >
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                 <span>Jump Directly to Flagged Session Review</span>
@@ -184,10 +184,10 @@ export default function DemoPortalPage() {
         <AudioCoachWidget />
 
         {/* Step-by-Step Judge Walkthrough Script */}
-        <div className="glass-card-strong rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-xl space-y-6 backdrop-blur-3xl">
+        <div className="glass-card-strong rounded-[32px] p-6 sm:p-8 border border-white/50 shadow-xl space-y-6 backdrop-blur-3xl">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-purple-700">
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-800">
                 Judging Guide
               </span>
               <h2 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
@@ -241,9 +241,9 @@ export default function DemoPortalPage() {
                 href: "/therapist/dashboard"
               }
             ].map((item) => (
-              <div key={item.step} className="p-4 sm:p-5 rounded-[22px] glass-card border border-white/85 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white transition-all">
+              <div key={item.step} className="p-4 sm:p-5 rounded-[22px] glass-card border border-white/50 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-300 transition-all">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 font-black text-sm flex items-center justify-center shrink-0 border border-purple-200">
+                  <div className="w-8 h-8 rounded-xl glass-chip bg-blue-500/20 text-blue-950 font-black text-sm flex items-center justify-center shrink-0 border border-blue-400/40">
                     {item.step}
                   </div>
                   <div>
@@ -258,7 +258,7 @@ export default function DemoPortalPage() {
 
                 <Link
                   href={item.href}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-purple-800 glass-chip hover:bg-white/90 border border-white/90 transition-colors shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-blue-900 glass-chip hover:bg-white/90 border border-white/40 transition-colors shrink-0"
                 >
                   <span>{item.linkText}</span>
                   <ExternalLink className="w-3.5 h-3.5" />

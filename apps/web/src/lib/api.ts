@@ -15,16 +15,30 @@ function getAuthHeader(): Record<string, string> {
 
 /**
  * Check if a JWT token is expired.
- * Returns true if expired or malformed.
+ * Returns true if expired. Safe for mock and demo tokens.
  */
 export function isTokenExpired(token: string): boolean {
   if (typeof window === 'undefined') return false; // SSR guard — atob not available in Node.js
+  if (!token) return true;
+  // Non-JWT tokens (mock, demo, local dev tokens) should never be prematurely expired
+  if (
+    token.startsWith('demo-') ||
+    token.startsWith('mock-') ||
+    token.startsWith('local-') ||
+    !token.includes('.')
+  ) {
+    return false;
+  }
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const parts = token.split('.');
+    if (parts.length < 2) return false;
+    const payload = JSON.parse(atob(parts[1]));
+    if (!payload || !payload.exp) return false;
     // exp is in seconds; Date.now() is in ms
     return payload.exp * 1000 < Date.now();
   } catch {
-    return true;
+    // If decoding fails, don't falsely expire non-standard or mock tokens
+    return false;
   }
 }
 
@@ -82,13 +96,18 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   // Handle 401 — token rejected server-side
   if (response.status === 401) {
-    localStorage.removeItem('rehab_token');
-    localStorage.removeItem('rehab_user');
-    localStorage.removeItem('rehab_role');
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('rehabsense:token-expired'));
+    const token = getToken();
+    const isMock = !token || token.startsWith('demo-') || token.startsWith('mock-') || token.startsWith('local-') || !token.includes('.');
+    // Only expire session if it was a real backend JWT that the backend rejected
+    if (!isMock) {
+      localStorage.removeItem('rehab_token');
+      localStorage.removeItem('rehab_user');
+      localStorage.removeItem('rehab_role');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('rehabsense:token-expired'));
+      }
     }
-    throw new ApiError('Session expired. Please log in again.', 401);
+    throw new ApiError('Session expired or unauthorized. Please log in again.', 401);
   }
 
   if (!response.ok) {

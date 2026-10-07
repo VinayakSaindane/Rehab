@@ -6,20 +6,25 @@ export interface ConfidenceGateResult {
   overallConfidence: number; // 0.0 to 1.0
   reason: string | null;
   missingLandmarks: string[];
+  consecutivePassingFrames: number;
 }
 
 export class ConfidenceGate {
   private minLandmarkVisibility: number;
   private minOverallConfidence: number;
   private smoothedConfidence: number = 0.9;
-  private alpha: number = 0.2; // Exponential moving average smoothing factor
+  private alpha: number = 0.25; // Exponential moving average smoothing factor
+  private consecutivePassingFrames: number = 0;
+  private requiredConsecutiveFrames: number = 2;
 
   constructor(
     minLandmarkVisibility = 0.70,
-    minOverallConfidence = 0.75
+    minOverallConfidence = 0.75,
+    requiredConsecutiveFrames = 2
   ) {
     this.minLandmarkVisibility = minLandmarkVisibility;
     this.minOverallConfidence = minOverallConfidence;
+    this.requiredConsecutiveFrames = requiredConsecutiveFrames;
   }
 
   public evaluate(
@@ -27,12 +32,14 @@ export class ConfidenceGate {
     requiredLandmarkNames: string[]
   ): ConfidenceGateResult {
     if (!landmarks || landmarks.length === 0) {
+      this.consecutivePassingFrames = 0;
       return {
         isGated: true,
         isPassing: false,
         overallConfidence: 0,
         reason: 'No body landmarks detected in camera frame.',
-        missingLandmarks: requiredLandmarkNames
+        missingLandmarks: requiredLandmarkNames,
+        consecutivePassingFrames: 0
       };
     }
 
@@ -64,15 +71,26 @@ export class ConfidenceGate {
     // Exponential smoothing
     this.smoothedConfidence = (this.alpha * rawConfidence) + ((1 - this.alpha) * this.smoothedConfidence);
 
-    const isPassing = missingLandmarks.length === 0 && this.smoothedConfidence >= this.minOverallConfidence;
+    const framePasses = missingLandmarks.length === 0 && this.smoothedConfidence >= this.minOverallConfidence;
+
+    if (framePasses) {
+      this.consecutivePassingFrames++;
+    } else {
+      this.consecutivePassingFrames = 0;
+    }
+
+    // Require stable tracking across consecutive frames to prevent single-frame flickers
+    const isPassing = framePasses && this.consecutivePassingFrames >= this.requiredConsecutiveFrames;
 
     let reason: string | null = null;
     if (!isPassing) {
       if (missingLandmarks.length > 0) {
         const readableNames = missingLandmarks.map(n => n.replace(/_/g, ' ')).join(', ');
         reason = `Required joints obscured: Please adjust camera so ${readableNames} remain visible.`;
-      } else {
+      } else if (!framePasses) {
         reason = 'Tracking confidence low: Ensure adequate room lighting and avoid backlighting.';
+      } else {
+        reason = 'Stabilizing tracking...';
       }
     }
 
@@ -81,11 +99,13 @@ export class ConfidenceGate {
       isPassing,
       overallConfidence: Math.round(this.smoothedConfidence * 100) / 100,
       reason,
-      missingLandmarks
+      missingLandmarks,
+      consecutivePassingFrames: this.consecutivePassingFrames
     };
   }
 
   public reset(): void {
     this.smoothedConfidence = 0.9;
+    this.consecutivePassingFrames = 0;
   }
 }

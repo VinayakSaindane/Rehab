@@ -113,4 +113,9 @@ assert.strictEqual(resultOccluded.detectedJoint.targetJoint, 'Elbow', 'Must dete
 assert.notStrictEqual(resultOccluded.detectedJoint.targetJoint, 'Hip', 'Must NEVER misclassify as Hip');
 console.log('✓ Successfully disqualified occluded lower-body noise and selected Elbow.');
 
-console.log('\n🎉 ALL EXERCISE ENGINE & AI DETECTION TESTS PASSED PERFECTLY!\n');
+// 5. Comprehensive Biomechanical Validation Suite (Scenarios A through L)
+console.log('\n[5/5] Running Temporal Movement-Validation Suite (Scenarios A-L)...');
+require('./test-validation');
+
+console.log('\n🎉 ALL EXERCISE ENGINE, KINEMATIC & AI VALIDATION TESTS PASSED PERFECTLY!\n');
+
