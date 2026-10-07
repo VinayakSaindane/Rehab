@@ -115,6 +115,8 @@ export interface Session {
   patientNotes?: string;
   reviewStatus: 'PENDING_REVIEW' | 'REVIEWED' | 'OVERRIDDEN';
   isManualLog?: boolean;
+  painScore?: number;
+  sideTrained?: string;
 }
 
 export interface TherapistReview {

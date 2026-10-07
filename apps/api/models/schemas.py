@@ -220,6 +220,15 @@ class SessionCreate(BaseModel):
     joint_metrics: List[SessionRepMetricSchema] = []
     patient_notes: Optional[str] = None
     is_manual_log: Optional[bool] = False
+    pain_score: Optional[int] = None # Patient-reported VAS pain scale 0 to 10
+    side_trained: Optional[str] = "left" # "left" | "right" | "bilateral"
+
+    @field_validator('pain_score')
+    @classmethod
+    def validate_pain_score(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and (v < 0 or v > 10):
+            raise ValueError('pain_score must be between 0 and 10')
+        return v
 
     @field_validator('average_rom', 'max_rom')
     @classmethod

@@ -42,13 +42,13 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-slate-50 via-sky-50/30 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Hero Left Content */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 text-xs font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-chip text-sky-800 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-sky-600" />
                 <span>Problem Statement 05 — Camera-Assisted Home Rehabilitation Coach</span>
               </div>
@@ -61,7 +61,7 @@ export default function LandingPage() {
                 Your Care Team.
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              <p className="text-lg sm:text-xl text-slate-600 max-w-2xl leading-relaxed font-medium">
                 Camera-assisted rehabilitation that empowers patients to practice therapist-prescribed exercises at home with real-time confidence-gated feedback — while keeping clinical teams in continuous control.
               </p>
 
@@ -78,7 +78,7 @@ export default function LandingPage() {
 
                 <button
                   onClick={handleTherapistDemo}
-                  className="px-6 py-3.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-base border border-slate-200 dark:border-slate-700 shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3.5 rounded-xl glass-card text-slate-900 font-bold text-base border border-white/70 shadow-sm transition-all flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
                 >
                   <Stethoscope className="w-4 h-4 text-teal-600" />
                   <span>Therapist Dashboard Demo</span>
@@ -104,9 +104,9 @@ export default function LandingPage() {
 
             {/* Hero Right: Live Product Interface Mockup */}
             <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto rounded-3xl bg-slate-950 p-3 shadow-2xl border border-slate-800">
+              <div className="relative mx-auto rounded-3xl glass-card-strong p-3 shadow-2xl border border-white/80">
                 {/* Simulated Camera Feed View */}
-                <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 aspect-[4/5] flex flex-col justify-between p-4 text-white">
+                <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-sky-950 via-slate-950 to-cyan-950 aspect-[4/5] flex flex-col justify-between p-4 text-white">
                   
                   {/* Top HUD */}
                   <div className="flex items-center justify-between z-10">
@@ -180,16 +180,16 @@ export default function LandingPage() {
       </section>
 
       {/* 2. HOW IT WORKS (6-STEP REHABILITATION WORKFLOW) */}
-      <section className="py-20 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+      <section className="py-20 border-y border-white/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-sky-600 dark:text-sky-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-sky-600">
               System Architecture & Data Flow
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2">
               How RehabSense Works
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-3 text-base">
+            <p className="text-slate-600 mt-3 text-base font-medium">
               A closed-loop rehabilitation flow combining local edge computer vision, confidence-gated feedback, and therapist supervision.
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function LandingPage() {
                 icon: Stethoscope
               }
             ].map((item, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-200 dark:border-slate-700/60 hover:border-sky-500 transition-colors flex flex-col justify-between">
+              <div key={idx} className="glass-card rounded-2xl p-5 border border-white/70 hover:border-sky-300 transition-all flex flex-col justify-between hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl font-black text-sky-600 dark:text-sky-400 font-mono">
@@ -255,21 +255,21 @@ export default function LandingPage() {
       </section>
 
       {/* 3. CORE DIFFERENTIATOR: CONFIDENCE GATE */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-950">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-6 space-y-5">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
                 Core Clinical Differentiator
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                 Confidence-Gated Movement Analysis
               </h2>
-              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
+              <p className="text-slate-600 text-base leading-relaxed font-medium">
                 Most consumer fitness apps blindly generate form feedback even when limbs are occluded, leading to false counts and potentially misleading data.
               </p>
-              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
+              <p className="text-slate-600 text-base leading-relaxed font-medium">
                 RehabSense introduces a strict <strong>Confidence Gate</strong>. If camera distance, lighting, or joint visibility falls below clinical threshold, the system immediately pauses analysis.
               </p>
 
@@ -296,7 +296,7 @@ export default function LandingPage() {
             </div>
 
             <div className="lg:col-span-6">
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+              <div className="glass-card-strong rounded-3xl p-6 border border-white/80 shadow-xl space-y-4">
                 
                 {/* Visualizing Gate High vs Gated */}
                 <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
@@ -335,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* 4. PRIVACY BY DESIGN */}
-      <section className="py-20 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+      <section className="py-20 border-t border-white/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <span className="text-xs font-bold uppercase tracking-widest text-sky-600">
@@ -344,13 +344,13 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
               Privacy by Design
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-3 text-base">
+            <p className="text-slate-600 mt-3 text-base font-medium">
               Patient privacy is paramount. Camera imagery never leaves your physical device.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="p-6 rounded-2xl glass-card border border-white/70">
               <div className="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-950 flex items-center justify-center text-sky-600 mb-4">
                 <Cpu className="w-6 h-6" />
               </div>
@@ -362,7 +362,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="p-6 rounded-2xl glass-card border border-white/70">
               <div className="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950 flex items-center justify-center text-teal-600 mb-4">
                 <Lock className="w-6 h-6" />
               </div>
@@ -374,7 +374,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="p-6 rounded-2xl glass-card border border-white/70">
               <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 mb-4">
                 <Eye className="w-6 h-6" />
               </div>
@@ -390,7 +390,7 @@ export default function LandingPage() {
       </section>
 
       {/* 5. ACCESSIBILITY & CAMERA-FREE MODE */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+      <section className="py-20 border-t border-white/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 space-y-4">
@@ -400,31 +400,31 @@ export default function LandingPage() {
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
                 Built for Every Patient, Every Setup
               </h2>
-              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
+              <p className="text-slate-600 text-base leading-relaxed font-medium">
                 Rehabilitation should never be restricted by hardware limitations or visual impairments. RehabSense includes a full accessibility suite and an inclusive <strong>Camera-Free Mode</strong>.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="p-4 rounded-xl glass-card border border-white/70">
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-1">High Contrast & Large Font</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Optimized for low-vision patients and distant screen viewing.</p>
                 </div>
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="p-4 rounded-xl glass-card border border-white/70">
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-1">Voice Feedback (Web Speech)</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Spoken rep counting and pacing cues so patients don&apos;t need to stare at screens.</p>
                 </div>
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="p-4 rounded-xl glass-card border border-white/70">
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-1">Camera-Free Manual Logging</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Enables exercise instruction, manual logging, and therapist communication without camera.</p>
                 </div>
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div className="p-4 rounded-xl glass-card border border-white/70">
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-1">Simulation Mode for Demos</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Deterministic kinematic movement generator for pitch-perfect hackathon demos.</p>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-gradient-to-br from-sky-600 to-teal-700 rounded-3xl p-8 text-white shadow-xl flex flex-col justify-between">
+            <div className="lg:col-span-5 bg-gradient-to-br from-sky-600/90 to-teal-600/90 rounded-3xl p-8 text-white shadow-xl flex flex-col justify-between border border-white/40 backdrop-blur-xl">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-sky-200">Interactive Demo</span>
                 <h3 className="text-2xl font-bold mt-1 mb-3">Experience the Complete Journey</h3>
@@ -446,7 +446,7 @@ export default function LandingPage() {
       </section>
 
       {/* 6. CALL TO ACTION */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+      <section className="py-16 border-t border-white/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <h2 className="text-3xl font-black text-slate-900 dark:text-white">
             Ready to Explore RehabSense?

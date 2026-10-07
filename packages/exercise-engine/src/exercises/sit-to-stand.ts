@@ -11,13 +11,16 @@ export class SitToStandAnalyzer {
   private stateMachine: RepetitionStateMachine;
   private feedbackEngine: FeedbackEngine;
   private targetReps: number;
+  private side: 'left' | 'right';
 
   constructor(
     prescribedTargetRom = 165,
     targetReps = 10,
-    voiceEnabled = true
+    voiceEnabled = true,
+    side: 'left' | 'right' = 'left'
   ) {
     this.targetReps = targetReps;
+    this.side = side;
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
@@ -36,22 +39,31 @@ export class SitToStandAnalyzer {
     this.feedbackEngine.setVoiceEnabled(enabled);
   }
 
+  public setSide(side: 'left' | 'right'): void {
+    this.side = side;
+  }
+
+  public getSide(): 'left' | 'right' {
+    return this.side;
+  }
+
   public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
-    const requiredLandmarkNames = ['left_hip', 'left_knee', 'left_ankle'];
+    const prefix = this.side === 'right' ? 'right' : 'left';
+    const requiredLandmarkNames = [`${prefix}_hip`, `${prefix}_knee`, `${prefix}_ankle`];
     const activeJointIndices = [
-      MEDIAPIPE_LANDMARK_INDEX['left_hip'],
-      MEDIAPIPE_LANDMARK_INDEX['left_knee'],
-      MEDIAPIPE_LANDMARK_INDEX['left_ankle']
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`],
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`],
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]
     ];
 
     const confidenceResult = this.confidenceGate.evaluate(landmarks, requiredLandmarkNames);
 
     let jointAngle = 0;
     if (landmarks && landmarks.length > 27) {
-      const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_hip']];
-      const knee = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_knee']];
-      const ankle = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_ankle']];
-      jointAngle = calculateJointAngle(hip, knee, ankle);
+      const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
+      const knee = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`]];
+      const ankle = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]];
+      jointAngle = calculateJointAngle(hip, knee, ankle, true);
     }
 
     const repResult = this.stateMachine.update(

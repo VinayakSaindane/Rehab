@@ -69,30 +69,30 @@ export default function TherapistDashboardPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
-            <div className="h-3 w-36 bg-slate-200 dark:bg-slate-700 rounded-full mb-3" />
-            <div className="h-7 w-56 bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
-            <div className="h-3 w-44 bg-slate-200 dark:bg-slate-700 rounded-full" />
+          <div className="glass-card-strong p-6 rounded-3xl border border-white/80">
+            <div className="h-3 w-36 bg-teal-200/50 rounded-full mb-3" />
+            <div className="h-7 w-56 bg-teal-200/60 rounded-full mb-2" />
+            <div className="h-3 w-44 bg-teal-200/40 rounded-full" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1,2,3].map(i => (
-              <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                <div className="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div key={i} className="glass-card rounded-3xl p-6 border border-white/70 space-y-4">
+                <div className="h-3 w-24 bg-teal-200/50 rounded-full" />
+                <div className="h-8 w-16 bg-teal-200/60 rounded-full" />
+                <div className="h-3 w-32 bg-teal-200/40 rounded-full" />
               </div>
             ))}
           </div>
           {[1,2].map(i => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+            <div key={i} className="glass-card rounded-3xl p-6 border border-white/70 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-5 w-40 bg-teal-200/50 rounded-full" />
+                <div className="h-6 w-24 bg-teal-200/60 rounded-full" />
               </div>
-              <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
-              <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-3 w-full bg-teal-200/40 rounded-full" />
+              <div className="h-3 w-3/4 bg-teal-200/40 rounded-full" />
             </div>
           ))}
         </div>
@@ -103,20 +103,20 @@ export default function TherapistDashboardPage() {
   const { overview, patients } = data;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Clinician Header */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/80 shadow-xl backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 text-xs font-semibold mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-chip text-teal-800 text-xs font-semibold mb-2.5 border border-white/80">
               <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
               <span>Apex Physical Therapy & Orthopaedic Center</span>
             </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
               Dr. Ananya Sharma
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Lead Musculoskeletal Physiotherapist • Remote Monitoring & Telerehab Census
             </p>
           </div>
@@ -125,24 +125,24 @@ export default function TherapistDashboardPage() {
             <Link
               href="/therapist/requests"
               id="therapist-requests-link"
-              className="px-4 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-700 dark:text-sky-300 text-xs font-bold transition-all flex items-center gap-2 border border-sky-200 dark:border-sky-800"
+              className="px-4 py-2.5 rounded-xl glass-chip hover:bg-white/80 text-sky-800 text-xs font-bold transition-all flex items-center gap-2 border border-sky-200/80 shadow-xs"
             >
-              <Inbox className="w-4 h-4" />
+              <Inbox className="w-4 h-4 text-sky-600" />
               <span>Case Requests</span>
             </Link>
             <Link
               href="/therapist/exercises/record"
               id="record-exercise-link"
-              className="px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-all flex items-center gap-2 border border-emerald-200 dark:border-emerald-800"
+              className="px-4 py-2.5 rounded-xl glass-chip hover:bg-white/80 text-emerald-800 text-xs font-bold transition-all flex items-center gap-2 border border-emerald-200/80 shadow-xs"
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="w-4 h-4 text-emerald-600" />
               <span>Record Exercise Demo</span>
             </Link>
             <Link
               href="/therapist/exercises"
-              className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl glass-chip hover:bg-white/80 text-slate-800 text-xs font-bold transition-all flex items-center gap-2 border border-white/80 shadow-xs"
             >
-              <Sliders className="w-4 h-4" />
+              <Sliders className="w-4 h-4 text-teal-600" />
               <span>Exercise Library Config</span>
             </Link>
           </div>
@@ -150,63 +150,64 @@ export default function TherapistDashboardPage() {
 
         {/* 4 Clinical Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
             <div className="flex items-center justify-between text-slate-400 mb-1">
-              <span className="text-[11px] font-bold uppercase">Active Patients</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Patients</span>
               <Users className="w-4 h-4 text-sky-600" />
             </div>
-            <p className="text-2xl font-black font-mono text-slate-900 dark:text-white">
+            <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 mt-1">
               {overview?.total_patients || 14}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Supervised at home</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
             <div className="flex items-center justify-between text-slate-400 mb-1">
-              <span className="text-[11px] font-bold uppercase">Active Plans</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Plans</span>
               <FileText className="w-4 h-4 text-teal-600" />
             </div>
-            <p className="text-2xl font-black font-mono text-teal-600 dark:text-teal-400">
+            <p className="text-2xl sm:text-3xl font-black font-mono text-teal-700 mt-1">
               {overview?.active_plans || 1}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Target prescribed</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
             <div className="flex items-center justify-between text-slate-400 mb-1">
-              <span className="text-[11px] font-bold uppercase">Sessions Today</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Sessions Today</span>
               <Calendar className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
+            <p className="text-2xl sm:text-3xl font-black font-mono text-emerald-700 mt-1">
               {overview?.sessions_today || 3}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Structured telemetry</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border-2 border-amber-500/50 shadow-sm">
-            <div className="flex items-center justify-between text-amber-600 mb-1">
-              <span className="text-[11px] font-bold uppercase">Pending Review</span>
+          <div className="glass-card-strong rounded-2xl p-4 sm:p-5 border-2 border-amber-400/80 shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-400/10 rounded-full blur-xl pointer-events-none" />
+            <div className="flex items-center justify-between text-amber-700 mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider">Pending Review</span>
               <AlertTriangle className="w-4 h-4 text-amber-500 animate-bounce" />
             </div>
-            <p className="text-2xl font-black font-mono text-amber-600">
+            <p className="text-2xl sm:text-3xl font-black font-mono text-amber-700 mt-1">
               {overview?.sessions_requiring_review || 1}
             </p>
-            <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1 font-medium">1 flagged session</p>
+            <p className="text-[11px] text-amber-800 mt-1 font-semibold">1 flagged session</p>
           </div>
         </div>
 
         {/* Patient Census List */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/80 shadow-xl space-y-5">
+          <div className="flex items-center justify-between pb-4 border-b border-sky-100">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                 Patient Rehabilitation Census
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Live telemetry from home-based camera rehabilitation sessions.
               </p>
             </div>
-            <span className="text-xs font-semibold text-slate-500">
+            <span className="text-xs font-semibold text-slate-500 glass-chip px-3 py-1 rounded-full border border-white/80">
               {patients?.length || 1} Active Patient
             </span>
           </div>
@@ -217,34 +218,34 @@ export default function TherapistDashboardPage() {
                 key={patient.id}
                 className={`p-6 rounded-2xl border transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${
                   patient.has_review_flag
-                    ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800'
-                    : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700'
+                    ? 'glass-card-strong border-amber-300 shadow-md'
+                    : 'glass-card border-white/80 shadow-xs'
                 }`}
               >
                 {/* Patient Details */}
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-lg font-bold text-slate-900">
                       {patient.name}
                     </h3>
                     <span className="text-xs text-slate-500">({patient.age} y/o)</span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full glass-chip text-slate-700 border border-white/80">
                       {patient.condition_label}
                     </span>
                     {patient.has_review_flag && (
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-amber-600" />
                         <span>Flagged Event (Session #6)</span>
                       </span>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                    <p><strong>Plan:</strong> {patient.assigned_plan}</p>
-                    <p><strong>Target:</strong> {patient.target_rom}° ROM ({patient.target_reps} reps)</p>
-                    <p><strong>Adherence:</strong> {patient.adherence}</p>
-                    <p><strong>Latest Session:</strong> {patient.latest_session?.date || 'Today, 6:42 PM'}</p>
-                    <p><strong>Observed ROM:</strong> <span className="font-mono font-bold text-slate-900 dark:text-white">{patient.latest_session?.average_rom || 104}°</span></p>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                    <p className="glass-chip px-2.5 py-1 rounded-lg border border-white/70"><strong>Plan:</strong> {patient.assigned_plan}</p>
+                    <p className="glass-chip px-2.5 py-1 rounded-lg border border-white/70"><strong>Target:</strong> {patient.target_rom}° ROM ({patient.target_reps} reps)</p>
+                    <p className="glass-chip px-2.5 py-1 rounded-lg border border-white/70"><strong>Adherence:</strong> {patient.adherence}</p>
+                    <p className="glass-chip px-2.5 py-1 rounded-lg border border-white/70"><strong>Latest Session:</strong> {patient.latest_session?.date || 'Today, 6:42 PM'}</p>
+                    <p className="glass-chip px-2.5 py-1 rounded-lg border border-white/70"><strong>Observed ROM:</strong> <span className="font-mono font-bold text-sky-700">{patient.latest_session?.average_rom || 104}°</span></p>
                   </div>
                 </div>
 
@@ -253,7 +254,7 @@ export default function TherapistDashboardPage() {
                   {patient.has_review_flag && (
                     <Link
                       href={`/therapist/review/${patient.flagged_session_id || 'session-hist-6'}`}
-                      className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer border border-white/20"
                     >
                       <AlertTriangle className="w-3.5 h-3.5" />
                       <span>Review Flagged Reps</span>
@@ -262,7 +263,7 @@ export default function TherapistDashboardPage() {
 
                   <Link
                     href={`/therapist/patients/${patient.id}`}
-                    className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-white/20"
                   >
                     <span>View Patient Profile</span>
                     <ChevronRight className="w-4 h-4" />

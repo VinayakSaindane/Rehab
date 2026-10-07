@@ -33,7 +33,7 @@ export default function RepProgressCard({
   const confidencePct = Math.round(trackingConfidence * 100);
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl p-4 text-white shadow-xl flex flex-col justify-between">
+    <div className="glass-card-dark dark-hud rounded-2xl p-4 text-white shadow-2xl border border-white/10 backdrop-blur-xl flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
           <div>

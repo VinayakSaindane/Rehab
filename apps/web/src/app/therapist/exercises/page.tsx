@@ -530,10 +530,10 @@ export default function TherapistExercisesPage() {
         </div>
 
         {/* Header with Add Exercise CTA */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-teal-500/20 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 text-xs font-semibold">
-              <Sliders className="w-3.5 h-3.5 text-teal-600" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-300 text-xs font-semibold border border-teal-500/20">
+              <Sliders className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               <span>Clinician Rehabilitation Library</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -555,16 +555,16 @@ export default function TherapistExercisesPage() {
             </button>
             <Link
               href="/therapist/exercises/record"
-              className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center gap-2"
+              className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center gap-2 border border-slate-200 dark:border-slate-700"
             >
-              <Activity className="w-4 h-4 text-teal-600" />
+              <Activity className="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Camera Auto-Derive</span>
             </Link>
           </div>
         </div>
 
         {/* Filter Controls Row */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-md space-y-3">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             {/* Search */}
             <div className="relative w-full sm:w-80">
@@ -574,12 +574,12 @@ export default function TherapistExercisesPage() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search by exercise name, joint, region…"
-                className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/60 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50 backdrop-blur-xs"
               />
             </div>
 
             {/* Type Filter Tabs */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 self-stretch sm:self-auto">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 self-stretch sm:self-auto border border-slate-200/60 dark:border-slate-700/60">
               {(['ALL', 'PLATFORM', 'CUSTOM'] as const).map(type => (
                 <button
                   key={type}
@@ -605,8 +605,8 @@ export default function TherapistExercisesPage() {
                 onClick={() => setFilterRegion(reg)}
                 className={`text-xs px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all ${
                   filterRegion === reg
-                    ? 'bg-teal-600 text-white font-bold'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    ? 'bg-teal-600 text-white font-bold shadow-xs'
+                    : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 border border-slate-200/40 dark:border-slate-700/40'
                 }`}
               >
                 {reg}
@@ -648,21 +648,21 @@ export default function TherapistExercisesPage() {
                     onClick={() => handleSelectExercise(ex)}
                     className={`p-4 rounded-2xl border transition-all cursor-pointer relative group ${
                       isSelected
-                        ? 'bg-teal-50/70 dark:bg-teal-950/40 border-teal-500 shadow-sm ring-2 ring-teal-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 hover:shadow-xs'
+                        ? 'glass-card border-teal-500 shadow-md ring-2 ring-teal-500/30'
+                        : 'glass-card hover:border-teal-500/40 hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50">
                           {ex.body_region}
                         </span>
                         {ex.is_custom ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
                             Custom Exercise
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20">
                             Pre-Stored
                           </span>
                         )}
@@ -691,7 +691,7 @@ export default function TherapistExercisesPage() {
                       {ex.description}
                     </p>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/60">
                       <span>Joint: <strong className="text-slate-700 dark:text-slate-300">{ex.target_joint}</strong></span>
                       <span>View: <strong className="text-slate-700 dark:text-slate-300">{ex.camera_view.split(' ')[0]}</strong></span>
                       <span>Target: <strong className="text-slate-700 dark:text-slate-300">{ex.targetReps || 10} reps</strong></span>
@@ -703,7 +703,7 @@ export default function TherapistExercisesPage() {
           </div>
 
           {/* Right Column: Active Exercise Configuration & Clinical Details (7 cols) */}
-          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+          <div className="glass-card-strong lg:col-span-7 rounded-3xl p-6 sm:p-8 border border-teal-500/20 shadow-xl space-y-6">
             
             {/* Active Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
@@ -911,10 +911,10 @@ export default function TherapistExercisesPage() {
       {/* ADD CUSTOM EXERCISE MODAL WIZARD                                */}
       {/* ============================================================== */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="glass-card-strong rounded-3xl max-w-2xl w-full border border-teal-500/30 shadow-2xl overflow-hidden my-8">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-teal-50/50 dark:bg-teal-950/20">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-teal-500/10">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-teal-600 text-white">
                   <Plus className="w-5 h-5" />

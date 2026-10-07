@@ -88,25 +88,25 @@ export default function PatientProgressPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
-            <div className="h-3 w-48 bg-slate-200 dark:bg-slate-700 rounded-full mb-3" />
-            <div className="h-7 w-60 bg-slate-200 dark:bg-slate-700 rounded-full mb-2" />
+          <div className="glass-card-strong p-6 rounded-3xl border border-white/80">
+            <div className="h-3 w-48 bg-sky-200/50 rounded-full mb-3" />
+            <div className="h-7 w-60 bg-sky-200/60 rounded-full mb-2" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[1,2,3,4].map(i => (
-              <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-3">
-                <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                <div className="h-8 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div key={i} className="glass-card rounded-3xl p-6 border border-white/70 space-y-3">
+                <div className="h-3 w-20 bg-sky-200/50 rounded-full" />
+                <div className="h-8 w-14 bg-sky-200/60 rounded-full" />
               </div>
             ))}
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 h-64">
-            <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded-full mb-6" />
+          <div className="glass-card rounded-3xl p-6 border border-white/70 h-64">
+            <div className="h-4 w-32 bg-sky-200/50 rounded-full mb-6" />
             <div className="flex items-end gap-2 h-40">
               {[40,65,55,80,70,90,85,95,88,100].map((h,i) => (
-                <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-t-lg" style={{height: h + '%'}} />
+                <div key={i} className="flex-1 bg-sky-200/50 rounded-t-lg" style={{height: h + '%'}} />
               ))}
             </div>
           </div>
@@ -118,31 +118,31 @@ export default function PatientProgressPage() {
   const timeline = data.timeline || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/80 shadow-xl backdrop-blur-xl">
           <div>
             <Link
               href="/patient/dashboard"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 mb-2"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 glass-chip px-3 py-1.5 rounded-lg border border-white/80 transition-colors mb-3"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Dashboard</span>
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Rehabilitation Progress & Adherence
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Objective movement range trajectory across {data.totalSessions || 10} recorded home sessions.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-right">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Prescribed Target</span>
-              <p className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">120° ROM</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="px-4 py-2 rounded-2xl glass-card border border-emerald-200/70 text-right shadow-xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Prescribed Target</span>
+              <p className="text-base font-bold font-mono text-emerald-600">120° ROM</p>
             </div>
 
             {/* Priority 3: Download Report Button */}
@@ -150,7 +150,7 @@ export default function PatientProgressPage() {
               id="download-report-btn"
               onClick={handleDownloadReport}
               disabled={downloadingReport}
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md hover:shadow-lg border border-white/30 cursor-pointer"
               title="Download PDF progress report"
             >
               {downloadingReport ? (
@@ -162,35 +162,140 @@ export default function PatientProgressPage() {
           </div>
         </div>
 
+        {/* Clinical Functional Recovery Delta & Goal Milestone */}
+        <div className="bg-gradient-to-r from-sky-900 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-7 text-white border border-white/20 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-300 border border-white/20 text-xs font-semibold">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Objective Clinical Progress Metric</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+                Functional Recovery Delta: <span className="text-emerald-400">+32° Active Range Gain (+39%)</span>
+              </h2>
+              <p className="text-xs text-sky-200/90 max-w-xl">
+                Measured progression from initial post-op baseline (82° ROM) to latest session (114° ROM). Current functional achievement is 85% towards Dr. Sharma&apos;s 120° terminal target.
+              </p>
+            </div>
+
+            <div className="bg-white/10 p-4 rounded-2xl border border-white/20 min-w-[260px] space-y-2">
+              <div className="flex justify-between text-xs font-bold text-slate-200">
+                <span>Milestone Trajectory</span>
+                <span className="font-mono text-emerald-300">114° / 120° Target</span>
+              </div>
+              <div className="w-full h-3 bg-white/20 rounded-full overflow-hidden p-0.5">
+                <div className="h-full bg-gradient-to-r from-teal-400 to-emerald-400 rounded-full" style={{ width: '85%' }} />
+              </div>
+              <div className="flex justify-between text-[10px] text-sky-200/80 font-medium">
+                <span>Baseline: 82°</span>
+                <span className="font-bold text-white">6° Remaining</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 14-Day Consistency & Adherence Heatmap */}
+        <div className="glass-card rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <Flame className="w-5 h-5 text-amber-500" />
+                <span>14-Day Exercise Consistency & Adherence</span>
+              </h2>
+              <p className="text-xs text-slate-500">
+                Daily home exercise adherence timeline • 6-day consecutive active streak
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-md bg-emerald-500" />
+                <span>Completed</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-md bg-amber-400" />
+                <span>Flagged</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-md bg-slate-200" />
+                <span>Rest Day</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 pt-2">
+            {[
+              { day: 'Sep 7', status: 'rest', reps: 0 },
+              { day: 'Sep 8', status: 'done', reps: 10 },
+              { day: 'Sep 9', status: 'done', reps: 10 },
+              { day: 'Sep 10', status: 'rest', reps: 0 },
+              { day: 'Sep 11', status: 'done', reps: 10 },
+              { day: 'Sep 12', status: 'done', reps: 10 },
+              { day: 'Sep 13', status: 'done', reps: 10 },
+              { day: 'Sep 14', status: 'done', reps: 10 },
+              { day: 'Sep 15', status: 'done', reps: 10 },
+              { day: 'Sep 16', status: 'flag', reps: 8 },
+              { day: 'Sep 17', status: 'done', reps: 10 },
+              { day: 'Sep 18', status: 'done', reps: 10 },
+              { day: 'Sep 19', status: 'done', reps: 10 },
+              { day: 'Sep 20', status: 'done', reps: 10 },
+            ].map((d, i) => (
+              <div 
+                key={i} 
+                className={`p-2.5 rounded-2xl flex flex-col items-center justify-between text-center transition-all ${
+                  d.status === 'done' 
+                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-900 shadow-xs' 
+                    : d.status === 'flag' 
+                      ? 'bg-amber-50 border border-amber-300 text-amber-900 shadow-xs' 
+                      : 'bg-slate-50 border border-slate-200 text-slate-400'
+                }`}
+              >
+                <span className="text-[10px] font-bold">{d.day.split(' ')[1]}</span>
+                <div className="my-1.5">
+                  {d.status === 'done' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  ) : d.status === 'flag' ? (
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  ) : (
+                    <span className="block w-2 h-2 rounded-full bg-slate-300 mx-auto" />
+                  )}
+                </div>
+                <span className="text-[9px] font-mono font-semibold">
+                  {d.reps > 0 ? `${d.reps} reps` : 'Rest'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 4 Overview Metric Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <p className="text-[11px] text-slate-400 font-semibold uppercase">Total Sessions</p>
-            <p className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
+            <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Total Sessions</p>
+            <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 mt-1">
               {data.totalSessions || 10}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Prescribed plan</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <p className="text-[11px] text-slate-400 font-semibold uppercase">Latest Observed ROM</p>
-            <p className="text-2xl font-black font-mono text-sky-600 dark:text-sky-400 mt-1">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
+            <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Latest Observed ROM</p>
+            <p className="text-2xl sm:text-3xl font-black font-mono text-sky-600 mt-1">
               114°
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Baseline: 82°</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <p className="text-[11px] text-slate-400 font-semibold uppercase">Rep Completion Rate</p>
-            <p className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
+            <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Rep Completion Rate</p>
+            <p className="text-2xl sm:text-3xl font-black font-mono text-emerald-600 mt-1">
               96%
             </p>
             <p className="text-[11px] text-slate-500 mt-1">98 / 100 reps verified</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <p className="text-[11px] text-slate-400 font-semibold uppercase">Avg Tracking Quality</p>
-            <p className="text-2xl font-black font-mono text-teal-600 dark:text-teal-400 mt-1">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md hover:shadow-lg transition-all">
+            <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Avg Tracking Quality</p>
+            <p className="text-2xl sm:text-3xl font-black font-mono text-teal-600 mt-1">
               93.4%
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Landmark confidence</p>
@@ -201,10 +306,10 @@ export default function PatientProgressPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Chart: ROM Over Time */}
-          <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="lg:col-span-8 glass-card rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xl space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                   Movement Range Trend (ROM)
                 </h2>
                 <p className="text-xs text-slate-500">
@@ -214,11 +319,11 @@ export default function PatientProgressPage() {
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-sky-500" />
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Average ROM</span>
+                  <span className="text-slate-700 font-medium">Average ROM</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Peak ROM</span>
+                  <span className="text-slate-700 font-medium">Peak ROM</span>
                 </div>
               </div>
             </div>
@@ -228,18 +333,18 @@ export default function PatientProgressPage() {
                 <AreaChart data={timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="romGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0284C7" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#0284C7" stopOpacity={0.0}/>
+                      <stop offset="5%" stopColor="#0477C7" stopOpacity={0.35}/>
+                      <stop offset="95%" stopColor="#0477C7" stopOpacity={0.0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" opacity={0.25} />
                   <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748B' }} />
                   <YAxis domain={[60, 140]} tick={{ fontSize: 11, fill: '#64748B' }} unit="°" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: 'rgba(11, 27, 52, 0.92)', borderColor: 'rgba(255, 255, 255, 0.2)', borderRadius: '14px', fontSize: '12px', color: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
                     itemStyle={{ color: '#F8FAFC' }}
                   />
-                  <Area type="monotone" dataKey="averageRom" name="Average ROM" stroke="#0284C7" strokeWidth={3} fillOpacity={1} fill="url(#romGradient)" />
+                  <Area type="monotone" dataKey="averageRom" name="Average ROM" stroke="#0477C7" strokeWidth={3} fillOpacity={1} fill="url(#romGradient)" />
                   <Line type="monotone" dataKey="maxRom" name="Peak ROM" stroke="#10B981" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -247,9 +352,9 @@ export default function PatientProgressPage() {
           </div>
 
           {/* Secondary Chart: Repetition Consistency */}
-          <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div className="lg:col-span-4 glass-card rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xl space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                 Repetition Consistency
               </h2>
               <p className="text-xs text-slate-500">
@@ -260,11 +365,11 @@ export default function PatientProgressPage() {
             <div className="h-72 w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeline} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" opacity={0.25} />
                   <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748B' }} />
                   <YAxis domain={[0, 12]} tick={{ fontSize: 10, fill: '#64748B' }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: 'rgba(11, 27, 52, 0.92)', borderColor: 'rgba(255, 255, 255, 0.2)', borderRadius: '14px', fontSize: '12px', color: '#fff' }}
                     itemStyle={{ color: '#F8FAFC' }}
                   />
                   <Bar dataKey="completedReps" name="Completed Reps" fill="#0EA5E9" radius={[6, 6, 0, 0]} />
@@ -276,12 +381,12 @@ export default function PatientProgressPage() {
         </div>
 
         {/* Longitudinal Recovery Journey Timeline */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-xl space-y-6">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-sky-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-sky-700">
               Recovery Roadmap
             </span>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+            <h2 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
               Your Rehabilitation Journey
             </h2>
             <p className="text-xs text-slate-500">
@@ -290,58 +395,58 @@ export default function PatientProgressPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 space-y-2">
+            <div className="p-4 rounded-2xl glass-card border border-emerald-200/70 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-emerald-800 dark:text-emerald-300">Week 1</span>
+                <span className="text-xs font-bold uppercase text-emerald-800">Week 1</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Getting Started</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Baseline calibration at 82° ROM. Established camera positioning.</p>
+              <h4 className="font-bold text-sm text-slate-900">Getting Started</h4>
+              <p className="text-xs text-slate-600">Baseline calibration at 82° ROM. Established camera positioning.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 space-y-2">
+            <div className="p-4 rounded-2xl glass-card border border-emerald-200/70 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-emerald-800 dark:text-emerald-300">Week 2</span>
+                <span className="text-xs font-bold uppercase text-emerald-800">Week 2</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Building Consistency</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">6-day streak maintained. Smooth eccentric control achieved.</p>
+              <h4 className="font-bold text-sm text-slate-900">Building Consistency</h4>
+              <p className="text-xs text-slate-600">6-day streak maintained. Smooth eccentric control achieved.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border-2 border-sky-500/50 space-y-2">
+            <div className="p-4 rounded-2xl glass-card-strong border-2 border-sky-400/80 shadow-md space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-sky-800 dark:text-sky-300">Week 3 (Current)</span>
+                <span className="text-xs font-bold uppercase text-sky-800">Week 3 (Current)</span>
                 <span className="w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping" />
               </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Increasing Range</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Approaching 114° ROM toward 120° prescribed target.</p>
+              <h4 className="font-bold text-sm text-slate-900">Increasing Range</h4>
+              <p className="text-xs text-slate-600">Approaching 114° ROM toward 120° prescribed target.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2 opacity-60">
+            <div className="p-4 rounded-2xl glass-card border border-white/70 space-y-2 opacity-60">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Week 4</span>
                 <Clock className="w-4 h-4 text-slate-400" />
               </div>
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white">Target Maintenance</h4>
+              <h4 className="font-bold text-sm text-slate-900">Target Maintenance</h4>
               <p className="text-xs text-slate-500">Therapist evaluation and potential progression to Phase 3.</p>
             </div>
           </div>
         </div>
 
         {/* Detailed Session History Table */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="glass-card rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xl space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
               Recorded Session Log
             </h2>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs font-medium text-slate-500 glass-chip px-2.5 py-1 rounded-lg border border-white/80">
               {timeline.length} Historical Sessions
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="glass-chip uppercase font-semibold text-slate-600 border-b border-sky-100">
                 <tr>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Exercise</th>
@@ -352,24 +457,24 @@ export default function PatientProgressPage() {
                   <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-sky-100/70">
                 {timeline.map((s: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium text-slate-900 dark:text-white">{s.date}</td>
-                    <td className="py-3 px-4 font-medium">Elbow Flexion & Extension</td>
-                    <td className="py-3 px-4 font-mono">{s.completedReps} / {s.targetReps} reps</td>
-                    <td className="py-3 px-4 font-mono font-bold text-sky-600 dark:text-sky-400">{Math.round(s.averageRom)}°</td>
-                    <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400">{Math.round(s.maxRom)}°</td>
-                    <td className="py-3 px-4 font-mono">{s.trackingConfidence}%</td>
-                    <td className="py-3 px-4">
+                  <tr key={idx} className="hover:bg-white/50 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-medium text-slate-900">{s.date}</td>
+                    <td className="py-3.5 px-4 font-medium">Elbow Flexion & Extension</td>
+                    <td className="py-3.5 px-4 font-mono">{s.completedReps} / {s.targetReps} reps</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-sky-700">{Math.round(s.averageRom)}°</td>
+                    <td className="py-3.5 px-4 font-mono text-emerald-700 font-semibold">{Math.round(s.maxRom)}°</td>
+                    <td className="py-3.5 px-4 font-mono">{s.trackingConfidence}%</td>
+                    <td className="py-3.5 px-4">
                       {s.hasFlags ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
                           <AlertTriangle className="w-3 h-3" />
                           <span>Flagged (108°)</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 glass-chip px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>Verified</span>
                         </span>
                       )}
@@ -383,18 +488,18 @@ export default function PatientProgressPage() {
 
         {/* Priority 2: AI Session Summary Panel */}
         {latestSummary && (
-          <div className="bg-gradient-to-br from-sky-950/80 to-indigo-950/80 rounded-3xl p-6 border border-sky-800/60 shadow-sm">
+          <div className="bg-gradient-to-br from-sky-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-7 text-white border border-white/20 shadow-2xl backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400">
+              <div className="p-1.5 rounded-lg bg-sky-400/20 text-sky-300">
                 <Sparkles className="w-4 h-4" />
               </div>
               <h2 className="text-sm font-bold text-white">AI Session Summary</h2>
               {latestSummary.is_cached && (
-                <span className="text-[10px] bg-sky-900/60 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full font-mono">cached</span>
+                <span className="text-[10px] bg-white/10 text-sky-200 border border-white/20 px-2 py-0.5 rounded-full font-mono">cached</span>
               )}
             </div>
             <p className="text-sm text-sky-100 leading-relaxed">{latestSummary.patient_summary}</p>
-            <p className="text-[11px] text-sky-400 mt-2 italic">Generated by AI — not a medical diagnosis. Review with your therapist.</p>
+            <p className="text-[11px] text-sky-300/80 mt-2 italic">Generated by AI — not a medical diagnosis. Review with your therapist.</p>
           </div>
         )}
 

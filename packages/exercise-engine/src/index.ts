@@ -8,3 +8,5 @@ export * from './simulation-engine';
 export * from './exercises/elbow-flexion';
 export * from './exercises/shoulder-flexion';
 export * from './exercises/sit-to-stand';
+export * from './exercises/knee-extension';
+export * from './exercises/shoulder-abduction';

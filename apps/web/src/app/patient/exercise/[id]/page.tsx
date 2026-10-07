@@ -7,6 +7,8 @@ import {
   ElbowFlexionAnalyzer, 
   ShoulderFlexionAnalyzer, 
   SitToStandAnalyzer, 
+  KneeExtensionAnalyzer,
+  ShoulderAbductionAnalyzer,
   KinematicSimulationEngine,
   Point2D 
 } from '@rehabsense/exercise-engine';
@@ -29,7 +31,9 @@ import {
   AlertTriangle,
   Play,
   Pause,
-  Award
+  Award,
+  Activity,
+  Smile
 } from 'lucide-react';
 
 export default function LiveExerciseScreen() {
@@ -59,6 +63,14 @@ export default function LiveExerciseScreen() {
   const [mode, setMode] = useState<'REAL' | 'SIMULATED'>('REAL');
   const [simPattern, setSimPattern] = useState<'NORMAL_REPS' | 'UNDER_RANGE_REP' | 'LOW_CONFIDENCE'>('NORMAL_REPS');
   const [cameraActive, setCameraActive] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [activeSide, setActiveSide] = useState<'left' | 'right'>('left');
+  const [distanceStatus, setDistanceStatus] = useState<{ status: 'optimal' | 'close' | 'far' | 'checking'; message: string }>({
+    status: 'optimal',
+    message: 'Framing: Optimal (6–10 ft) ✓'
+  });
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [painScore, setPainScore] = useState<number>(0);
   const [sessionStartTime] = useState<number>(Date.now());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -90,7 +102,7 @@ export default function LiveExerciseScreen() {
   useEffect(() => {
     let analyzer: any;
     if (exerciseId === 'shoulder-flexion') {
-      analyzer = new ShoulderFlexionAnalyzer(135, 10, voiceEnabled);
+      analyzer = new ShoulderFlexionAnalyzer(135, 10, voiceEnabled, activeSide);
       setExerciseMeta({
         name: 'Shoulder Flexion (Elevations)',
         targetReps: 10,
@@ -100,9 +112,9 @@ export default function LiveExerciseScreen() {
         targetJoint: 'Shoulder',
         isAngleDecreasingOnFlex: false
       });
-      setActiveJointIndices([23, 11, 13]);
+      setActiveJointIndices(activeSide === 'right' ? [24, 12, 14] : [23, 11, 13]);
     } else if (exerciseId === 'sit-to-stand') {
-      analyzer = new SitToStandAnalyzer(165, 10, voiceEnabled);
+      analyzer = new SitToStandAnalyzer(165, 10, voiceEnabled, activeSide);
       setExerciseMeta({
         name: 'Sit-to-Stand Functional Transfer',
         targetReps: 10,
@@ -112,9 +124,33 @@ export default function LiveExerciseScreen() {
         targetJoint: 'Knee & Hip',
         isAngleDecreasingOnFlex: false
       });
-      setActiveJointIndices([23, 25, 27]);
+      setActiveJointIndices(activeSide === 'right' ? [24, 26, 28] : [23, 25, 27]);
+    } else if (exerciseId === 'knee-extension') {
+      analyzer = new KneeExtensionAnalyzer(170, 10, voiceEnabled, activeSide);
+      setExerciseMeta({
+        name: 'Seated Knee Extension (Quad Sets)',
+        targetReps: 10,
+        targetRom: 170.0,
+        minRom: 90.0,
+        maxRom: 180.0,
+        targetJoint: 'Knee',
+        isAngleDecreasingOnFlex: false
+      });
+      setActiveJointIndices(activeSide === 'right' ? [24, 26, 28] : [23, 25, 27]);
+    } else if (exerciseId === 'shoulder-abduction') {
+      analyzer = new ShoulderAbductionAnalyzer(90, 10, voiceEnabled, activeSide);
+      setExerciseMeta({
+        name: 'Shoulder Abduction (Lateral Raise)',
+        targetReps: 10,
+        targetRom: 90.0,
+        minRom: 20.0,
+        maxRom: 120.0,
+        targetJoint: 'Shoulder',
+        isAngleDecreasingOnFlex: false
+      });
+      setActiveJointIndices(activeSide === 'right' ? [24, 12, 14] : [23, 11, 13]);
     } else {
-      analyzer = new ElbowFlexionAnalyzer(120, 10, voiceEnabled);
+      analyzer = new ElbowFlexionAnalyzer(120, 10, voiceEnabled, activeSide);
       setExerciseMeta({
         name: 'Elbow Flexion & Extension',
         targetReps: 10,
@@ -124,17 +160,27 @@ export default function LiveExerciseScreen() {
         targetJoint: 'Elbow',
         isAngleDecreasingOnFlex: true
       });
-      setActiveJointIndices([11, 13, 15]);
+      setActiveJointIndices(activeSide === 'right' ? [12, 14, 16] : [11, 13, 15]);
     }
     analyzerRef.current = analyzer;
-  }, [exerciseId, voiceEnabled]);
+  }, [exerciseId, voiceEnabled, activeSide]);
 
-  // Start Camera Stream or MediaPipe
-  const initCamera = useCallback(async () => {
+  // Start Camera Stream or MediaPipe (supports smartphone front/rear camera flipping)
+  const initCamera = useCallback(async (desiredFacing?: 'user' | 'environment') => {
+    const targetFacing = desiredFacing || facingMode;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: 'user' }
-      });
+      if (videoRef.current && videoRef.current.srcObject) {
+        const currentStream = videoRef.current.srcObject as MediaStream;
+        currentStream.getTracks().forEach(t => t.stop());
+      }
+      const constraints: MediaStreamConstraints = {
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: targetFacing === 'environment' ? { ideal: 'environment' } : 'user'
+        }
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
@@ -163,10 +209,43 @@ export default function LiveExerciseScreen() {
         console.warn('MediaPipe CDN loader fallback:', mpErr);
       }
     } catch (camErr) {
-      console.warn('Webcam permission unavailable. Switching to Simulation Mode:', camErr);
+      console.warn('Webcam permission unavailable or lens toggle error. Switching to Simulation Mode:', camErr);
       setMode('SIMULATED');
     }
-  }, []);
+  }, [facingMode]);
+
+  const toggleCameraFacing = async () => {
+    const next = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(next);
+    await initCamera(next);
+  };
+
+  const handleToggleSide = (newSide: 'left' | 'right') => {
+    setActiveSide(newSide);
+    if (analyzerRef.current?.setSide) {
+      analyzerRef.current.setSide(newSide);
+    }
+    if (exerciseId === 'shoulder-flexion' || exerciseId === 'shoulder-abduction') {
+      setActiveJointIndices(newSide === 'right' ? [24, 12, 14] : [23, 11, 13]);
+    } else if (exerciseId === 'sit-to-stand' || exerciseId === 'knee-extension') {
+      setActiveJointIndices(newSide === 'right' ? [24, 26, 28] : [23, 25, 27]);
+    } else {
+      setActiveJointIndices(newSide === 'right' ? [12, 14, 16] : [11, 13, 15]);
+    }
+  };
+
+  const startCountdown = () => {
+    setCountdown(3);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     initCamera();
@@ -225,6 +304,20 @@ export default function LiveExerciseScreen() {
       if (detectedLandmarks.length === 0) {
         simulatorRef.current.setPattern(simPattern);
         detectedLandmarks = simulatorRef.current.generateNextFrame();
+      } else if (detectedLandmarks.length >= 25) {
+        // Distance & Framing Heuristic based on inter-shoulder span
+        const leftShoulder = detectedLandmarks[11];
+        const rightShoulder = detectedLandmarks[12];
+        if (leftShoulder && rightShoulder) {
+          const span = Math.abs(leftShoulder.x - rightShoulder.x);
+          if (span > 0.45) {
+            setDistanceStatus({ status: 'close', message: 'Step back slightly (optimal 6–10 ft)' });
+          } else if (span < 0.08) {
+            setDistanceStatus({ status: 'far', message: 'Move slightly closer' });
+          } else {
+            setDistanceStatus({ status: 'optimal', message: 'Framing: Optimal (6–10 ft) ✓' });
+          }
+        }
       }
 
       // Execute Exercise Rule Engine
@@ -267,10 +360,12 @@ export default function LiveExerciseScreen() {
   }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted]);
 
   // Handle Session Completion
-  const handleFinishSession = async () => {
+  const handleFinishSession = async (userSelectedPain?: number) => {
     if (isSessionCompleted) return;
     setIsSessionCompleted(true);
     setSavingSession(true);
+
+    const effectivePain = typeof userSelectedPain === 'number' ? userSelectedPain : painScore;
 
     const analyzer = analyzerRef.current;
     const summary = analyzer ? analyzer.getSummary() : {
@@ -303,7 +398,9 @@ export default function LiveExerciseScreen() {
       form_flags: summary.flags,
       compensation_flags: Array.from(sessionCompensationFlagsRef.current),
       joint_metrics: detailedMetrics,
-      patient_notes: 'Completed home session via camera exercise coach.'
+      patient_notes: `Completed home session (${activeSide.toUpperCase()} side) via camera coach. Pain rating: ${effectivePain}/10.`,
+      pain_score: effectivePain,
+      side_trained: activeSide
     };
 
     try {
@@ -331,13 +428,13 @@ export default function LiveExerciseScreen() {
     <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between select-none">
       
       {/* 1. TOP STATUS BAR */}
-      <header className="bg-slate-900/80 backdrop-blur border-b border-slate-800 px-4 py-3 z-30">
+      <header className="glass-card-dark dark-hud border-b border-white/10 px-4 py-3 z-30">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           
           <div className="flex items-center gap-3">
             <Link
               href="/patient/dashboard"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 transition-colors border border-white/10"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -345,7 +442,7 @@ export default function LiveExerciseScreen() {
             <div>
               <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
                 {exerciseMeta.name}
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-800">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-700">
                   Target: {exerciseMeta.targetRom}° ROM
                 </span>
               </h1>
@@ -356,28 +453,77 @@ export default function LiveExerciseScreen() {
           </div>
 
           {/* Demonstration Mode & Resilience Toggles */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             
-            {/* Real vs Sim Mode Switcher */}
-            <div className="flex items-center bg-slate-800/80 rounded-xl p-1 border border-slate-700 text-xs">
+            {/* Active Limb Side Selector (Crucial for bilateral rehabilitation) */}
+            <div className="flex items-center bg-white/10 rounded-xl p-1 border border-white/10 text-xs">
               <button
+                type="button"
+                onClick={() => handleToggleSide('left')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                  activeSide === 'left' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Track left limb"
+              >
+                Left
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleSide('right')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                  activeSide === 'right' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Track right limb"
+              >
+                Right
+              </button>
+            </div>
+
+            {/* Camera Lens Flip Button (For Smartphone Rear or Front Camera) */}
+            <button
+              type="button"
+              onClick={toggleCameraFacing}
+              className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors"
+              title={facingMode === 'user' ? 'Switch to smartphone rear camera' : 'Switch to front camera'}
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{facingMode === 'user' ? 'Rear Cam' : 'Front Cam'}</span>
+            </button>
+
+            {/* Hands-Free Ready Countdown Button */}
+            <button
+              type="button"
+              onClick={startCountdown}
+              disabled={countdown !== null}
+              className="px-2.5 py-1.5 rounded-xl bg-teal-600/90 hover:bg-teal-500 disabled:opacity-50 text-xs text-white font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+              title="Hands-free 3-second preparation countdown"
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Ready (3s)</span>
+            </button>
+
+            {/* Real vs Sim Mode Switcher */}
+            <div className="flex items-center bg-white/10 rounded-xl p-1 border border-white/10 text-xs">
+              <button
+                type="button"
                 onClick={() => setMode('REAL')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
                   mode === 'REAL' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Camera</span>
+                <span>Live</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => setMode('SIMULATED')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
                   mode === 'SIMULATED' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Simulation</span>
+                <span>Sim</span>
               </button>
             </div>
 
@@ -386,7 +532,7 @@ export default function LiveExerciseScreen() {
               <select
                 value={simPattern}
                 onChange={(e: any) => setSimPattern(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-purple-500 font-medium"
+                className="bg-slate-900 border border-purple-500/40 text-xs text-purple-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-purple-400 font-medium"
               >
                 <option value="NORMAL_REPS">Normal Reps (122° Target)</option>
                 <option value="UNDER_RANGE_REP">Under-Range Rep (108° Flag)</option>
@@ -396,9 +542,10 @@ export default function LiveExerciseScreen() {
 
             {/* Audio Toggle */}
             <button
+              type="button"
               onClick={toggleVoice}
               className={`p-2 rounded-xl border transition-colors ${
-                voiceEnabled ? 'bg-slate-800 border-slate-700 text-sky-400' : 'bg-slate-900 border-slate-800 text-slate-500'
+                voiceEnabled ? 'bg-sky-950/80 border-sky-700 text-sky-400' : 'bg-white/10 border-white/10 text-slate-400'
               }`}
               title={voiceEnabled ? 'Mute speech feedback' : 'Enable speech feedback'}
             >
@@ -410,11 +557,39 @@ export default function LiveExerciseScreen() {
       </header>
 
       {/* 2. MAIN CAMERA VIEWPORT WITH HUD OVERLAYS */}
-      <main className="flex-1 relative flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+      <main className="flex-1 relative flex items-center justify-center p-2 sm:p-4 overflow-hidden dark-surface">
         
         {/* Fullscreen Video Viewport */}
-        <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-video rounded-3xl overflow-hidden bg-slate-900 border-2 border-slate-800 shadow-2xl flex items-center justify-center">
+        <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-video rounded-3xl overflow-hidden bg-slate-950 border-2 border-sky-400/40 shadow-2xl flex items-center justify-center dark-surface">
           
+          {/* Real-Time Distance & Framing Guidance Badge */}
+          {mode === 'REAL' && (
+            <div 
+              className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-semibold border shadow-md transition-all"
+              style={{
+                backgroundColor: distanceStatus.status === 'optimal' ? 'rgba(16, 185, 129, 0.25)' : distanceStatus.status === 'close' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(30, 41, 59, 0.8)',
+                borderColor: distanceStatus.status === 'optimal' ? 'rgba(16, 185, 129, 0.5)' : distanceStatus.status === 'close' ? 'rgba(245, 158, 11, 0.6)' : 'rgba(71, 85, 105, 0.5)',
+                color: distanceStatus.status === 'optimal' ? '#34d399' : distanceStatus.status === 'close' ? '#fbbf24' : '#cbd5e1'
+              }}
+            >
+              <span className={`w-2 h-2 rounded-full ${distanceStatus.status === 'optimal' ? 'bg-emerald-400' : distanceStatus.status === 'close' ? 'bg-amber-400 animate-pulse' : 'bg-slate-400'}`} />
+              <span>{distanceStatus.message}</span>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-black/40 text-slate-300">
+                {activeSide.toUpperCase()} LIMB
+              </span>
+            </div>
+          )}
+
+          {/* Hands-Free Countdown Overlay */}
+          {countdown !== null && (
+            <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-xs flex flex-col items-center justify-center z-40 pointer-events-none">
+              <span className="text-8xl font-black text-sky-400 animate-bounce font-mono drop-shadow-lg">{countdown}</span>
+              <p className="text-sm font-bold text-slate-200 mt-4 tracking-wide uppercase">
+                Step into position • Tracking {activeSide.toUpperCase()} side
+              </p>
+            </div>
+          )}
+
           {/* Actual Camera Feed */}
           <video
             ref={videoRef}
@@ -468,7 +643,7 @@ export default function LiveExerciseScreen() {
               sessionTimeSeconds={elapsedSeconds}
               statusMessage={statusMessage}
               isGated={isGated}
-              onFinishSession={handleFinishSession}
+              onFinishSession={() => handleFinishSession()}
             />
           </div>
 
@@ -477,32 +652,32 @@ export default function LiveExerciseScreen() {
       </main>
 
       {/* 3. MOBILE BOTTOM HUD */}
-      <footer className="md:hidden bg-slate-900 border-t border-slate-800 p-4 space-y-3 z-30">
+      <footer className="md:hidden glass-card-dark dark-hud border-t border-white/10 p-4 space-y-3 z-30">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-slate-800/80 p-2 rounded-xl">
+          <div className="bg-white/10 p-2 rounded-xl border border-white/10">
             <p className="text-[10px] text-slate-400 font-semibold">REPS</p>
             <p className="text-xl font-bold font-mono text-white">{completedReps} / {exerciseMeta.targetReps}</p>
           </div>
-          <div className="bg-slate-800/80 p-2 rounded-xl">
+          <div className="bg-white/10 p-2 rounded-xl border border-white/10">
             <p className="text-[10px] text-slate-400 font-semibold">CURRENT ROM</p>
             <p className="text-xl font-bold font-mono text-sky-400">{Math.round(currentAngle)}°</p>
           </div>
-          <div className="bg-slate-800/80 p-2 rounded-xl">
+          <div className="bg-white/10 p-2 rounded-xl border border-white/10">
             <p className="text-[10px] text-slate-400 font-semibold">CONFIDENCE</p>
             <p className="text-xl font-bold font-mono text-emerald-400">{Math.round(trackingConfidence * 100)}%</p>
           </div>
         </div>
 
         <button
-          onClick={handleFinishSession}
-          className="w-full py-3 rounded-xl bg-sky-600 font-bold text-sm text-white"
+          onClick={() => handleFinishSession()}
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 font-bold text-sm text-white shadow-lg cursor-pointer"
         >
           Complete Session
         </button>
       </footer>
 
       {/* 4. SAFETY WARNING DISCLAIMER BANNER */}
-      <div className="bg-slate-900/95 border-t border-slate-800 px-4 py-2 text-center text-[11px] text-amber-300 flex items-center justify-center gap-2">
+      <div className="glass-card-dark dark-hud border-t border-white/10 px-4 py-2 text-center text-[11px] text-amber-300 flex items-center justify-center gap-2">
         <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0" />
         <span>
           Stop immediately if you experience pain or discomfort and follow your clinician&apos;s guidance.
@@ -511,15 +686,15 @@ export default function LiveExerciseScreen() {
 
       {/* 5. SESSION COMPLETE MODAL */}
       {isSessionCompleted && sessionSummary && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 rounded-3xl border border-slate-800 max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl animate-scaleUp">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="glass-card-dark dark-hud rounded-3xl border border-white/20 max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl animate-scaleUp">
             
             <div className="text-center space-y-2">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                 <Award className="w-8 h-8" />
               </div>
               <h2 className="text-2xl font-black text-white">Session Complete</h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-300">
                 Performance recorded for {exerciseMeta.name}
               </p>
             </div>
@@ -574,6 +749,40 @@ export default function LiveExerciseScreen() {
                 <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.round(sessionSummary.tracking_confidence * 100)}%` }} />
                 </div>
+              </div>
+            </div>
+
+            {/* Clinical Post-Session Pain Assessment (VAS 0-10) */}
+            <div className="bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/60 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-200">
+                <span className="uppercase tracking-wider text-[11px] text-slate-400">Joint Pain Rating (VAS Scale)</span>
+                <span className="font-mono text-sky-400">
+                  {painScore === 0 ? '0 / 10 (No Pain)' : `${painScore} / 10`}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Did you experience any discomfort or pain during this routine?
+              </p>
+              <div className="grid grid-cols-4 gap-1.5 pt-1">
+                {[
+                  { val: 0, label: '0: None' },
+                  { val: 2, label: '2: Mild' },
+                  { val: 4, label: '4: Mod' },
+                  { val: 7, label: '7+: High' }
+                ].map(b => (
+                  <button
+                    key={b.val}
+                    type="button"
+                    onClick={() => setPainScore(b.val)}
+                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all border ${
+                      painScore === b.val
+                        ? 'bg-sky-600 border-sky-400 text-white shadow-xs'
+                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {b.label}
+                  </button>
+                ))}
               </div>
             </div>
 

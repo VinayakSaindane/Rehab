@@ -7,29 +7,39 @@ export interface Point2D {
 
 /**
  * Calculates the internal angle in degrees at vertex B formed by line segments BA and BC.
+ * Supports both 3D spatial vectors (when z is available) and 2D planar projection.
  * Uses the dot product: cos(theta) = (BA . BC) / (|BA| * |BC|)
  * Output is in the range [0, 180] degrees.
  */
 export function calculateJointAngle(
   pointA: Point2D,
   vertexB: Point2D,
-  pointC: Point2D
+  pointC: Point2D,
+  use3D: boolean = true
 ): number {
   if (!pointA || !vertexB || !pointC) {
     return 0;
   }
 
+  // Determine whether to use 3D vectors: requires valid z coordinate on all 3 points
+  const hasZ = use3D && 
+    typeof pointA.z === 'number' && 
+    typeof vertexB.z === 'number' && 
+    typeof pointC.z === 'number';
+
   // Vector BA: from vertex B to point A
   const vBAx = pointA.x - vertexB.x;
   const vBAy = pointA.y - vertexB.y;
+  const vBAz = hasZ ? ((pointA.z ?? 0) - (vertexB.z ?? 0)) : 0;
 
   // Vector BC: from vertex B to point C
   const vBCx = pointC.x - vertexB.x;
   const vBCy = pointC.y - vertexB.y;
+  const vBCz = hasZ ? ((pointC.z ?? 0) - (vertexB.z ?? 0)) : 0;
 
-  const dotProduct = vBAx * vBCx + vBAy * vBCy;
-  const magBA = Math.sqrt(vBAx * vBAx + vBAy * vBAy);
-  const magBC = Math.sqrt(vBCx * vBCx + vBCy * vBCy);
+  const dotProduct = (vBAx * vBCx) + (vBAy * vBCy) + (vBAz * vBCz);
+  const magBA = Math.sqrt((vBAx * vBAx) + (vBAy * vBAy) + (vBAz * vBAz));
+  const magBC = Math.sqrt((vBCx * vBCx) + (vBCy * vBCy) + (vBCz * vBCz));
 
   if (magBA === 0 || magBC === 0) {
     return 0;
@@ -41,6 +51,17 @@ export function calculateJointAngle(
   const degrees = (radians * 180) / Math.PI;
 
   return Math.round(degrees * 10) / 10;
+}
+
+/**
+ * Explicit 3D joint angle calculation
+ */
+export function calculateJointAngle3D(
+  pointA: Point2D,
+  vertexB: Point2D,
+  pointC: Point2D
+): number {
+  return calculateJointAngle(pointA, vertexB, pointC, true);
 }
 
 /**

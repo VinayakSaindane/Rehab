@@ -47,22 +47,23 @@ export default function DemoPortalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-10">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 rounded-3xl p-8 text-white shadow-2xl border border-purple-800/40 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-2xl border border-white/20 relative overflow-hidden backdrop-blur-xl">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-purple-200 border border-white/20 text-xs font-semibold backdrop-blur">
+              <Sparkles className="w-3.5 h-3.5 text-purple-300" />
               <span>Judge & Evaluator Demo Portal</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
               RehabSense Live Evaluation Suite
             </h1>
 
-            <p className="text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed">
+            <p className="text-slate-200 text-sm sm:text-base max-w-3xl leading-relaxed">
               Experience the end-to-end rehabilitation workflow without manual registration. Pre-seeded with 10 historical sessions, therapist-configured targets, flagged kinematic events, and real-time computer vision analysis.
             </p>
 
@@ -70,15 +71,15 @@ export default function DemoPortalPage() {
               <button
                 onClick={handleResetData}
                 disabled={resetting}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 flex items-center gap-2 transition-all cursor-pointer shadow-sm backdrop-blur"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin' : ''}`} />
                 <span>{resetting ? 'Resetting Data...' : 'Reset Demo to Clean Baseline'}</span>
               </button>
 
               {resetSuccess && (
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 animate-fadeIn">
-                  <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs text-emerald-300 font-semibold flex items-center gap-1.5 animate-fadeIn">
+                  <Check className="w-4 h-4 text-emerald-300" />
                   <span>Demo state successfully restored!</span>
                 </span>
               )}
@@ -90,25 +91,25 @@ export default function DemoPortalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Patient Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-sky-500/30 hover:border-sky-500 shadow-xl transition-all space-y-4 flex flex-col justify-between">
-            <div className="space-y-3">
+          <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border-2 border-sky-400/60 hover:border-sky-500 shadow-2xl transition-all space-y-4 flex flex-col justify-between group">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950 flex items-center justify-center text-sky-600">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-sky-600 border border-sky-200">
                   <User className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-mono">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-sky-800 font-mono border border-sky-200">
                   DEMO PATIENT
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Aarav Mehta</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Aarav Mehta</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
                   32 y/o • Post-operative upper-limb rehabilitation
                 </p>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 text-xs space-y-1 text-slate-600 dark:text-slate-300">
+              <div className="glass-card rounded-2xl p-4 text-xs space-y-1.5 text-slate-700 border border-sky-100/80">
                 <p><strong>Assigned Plan:</strong> Elbow Flexion & Extension</p>
                 <p><strong>Prescribed Target:</strong> 120° ROM • 10 reps • 2x/day</p>
                 <p><strong>Streak:</strong> 6 days • 10 historical sessions recorded</p>
@@ -116,10 +117,10 @@ export default function DemoPortalPage() {
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2.5 pt-4">
               <button
                 onClick={() => handleSelectRole('PATIENT', '/patient/dashboard')}
-                className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/20"
               >
                 <span>Launch Patient Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
@@ -127,34 +128,34 @@ export default function DemoPortalPage() {
 
               <button
                 onClick={() => handleSelectRole('PATIENT', '/patient/exercise/elbow-flexion')}
-                className="w-full py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950 hover:bg-sky-100 text-sky-700 dark:text-sky-300 font-semibold text-xs border border-sky-200 dark:border-sky-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-xl glass-chip hover:bg-white/80 text-sky-800 font-semibold text-xs border border-sky-200 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                <Video className="w-3.5 h-3.5" />
+                <Video className="w-3.5 h-3.5 text-sky-600" />
                 <span>Jump Directly to Live Camera Exercise</span>
               </button>
             </div>
           </div>
 
           {/* Therapist Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-teal-500/30 hover:border-teal-500 shadow-xl transition-all space-y-4 flex flex-col justify-between">
-            <div className="space-y-3">
+          <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border-2 border-teal-400/60 hover:border-teal-500 shadow-2xl transition-all space-y-4 flex flex-col justify-between group">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-teal-100 dark:bg-teal-950 flex items-center justify-center text-teal-600">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-teal-600 border border-teal-200">
                   <Stethoscope className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-mono">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-teal-800 font-mono border border-teal-200">
                   DEMO THERAPIST
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Dr. Ananya Sharma</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Dr. Ananya Sharma</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Lead Musculoskeletal Physiotherapist • Apex Orthopaedic Center
                 </p>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 text-xs space-y-1 text-slate-600 dark:text-slate-300">
+              <div className="glass-card rounded-2xl p-4 text-xs space-y-1.5 text-slate-700 border border-teal-100/80">
                 <p><strong>Active Clinical Census:</strong> 14 active patients</p>
                 <p><strong>Pending Flagged Sessions:</strong> 1 requiring clinical review</p>
                 <p><strong>Flagged Event:</strong> Aarav Mehta (Session #6: 108° vs 120°)</p>
@@ -162,10 +163,10 @@ export default function DemoPortalPage() {
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2.5 pt-4">
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/dashboard')}
-                className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/20"
               >
                 <span>Launch Therapist Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
@@ -173,7 +174,7 @@ export default function DemoPortalPage() {
 
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/review/session-hist-6')}
-                className="w-full py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 text-amber-800 dark:text-amber-200 font-semibold text-xs border border-amber-300 dark:border-amber-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-amber-100/70 hover:bg-amber-100 text-amber-900 font-semibold text-xs border border-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                 <span>Jump Directly to Flagged Session Review</span>
@@ -184,19 +185,19 @@ export default function DemoPortalPage() {
         </div>
 
         {/* Step-by-Step Judge Walkthrough Script */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-lg space-y-6">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl space-y-6 backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-purple-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-purple-700">
                 Judging Guide
               </span>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+              <h2 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
                 Suggested 3-Minute Live Demo Flow
               </h2>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {[
               {
                 step: 1,
@@ -241,16 +242,16 @@ export default function DemoPortalPage() {
                 href: "/therapist/dashboard"
               }
             ].map((item) => (
-              <div key={item.step} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center shrink-0">
+              <div key={item.step} className="p-4 sm:p-5 rounded-2xl glass-card border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-all">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 font-bold text-sm flex items-center justify-center shrink-0 border border-purple-200">
                     {item.step}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    <h4 className="text-sm font-bold text-slate-900">
                       {item.title}
                     </h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>
@@ -258,7 +259,7 @@ export default function DemoPortalPage() {
 
                 <Link
                   href={item.href}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-950 transition-colors shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-purple-800 glass-chip hover:bg-white/80 border border-purple-200 transition-colors shrink-0"
                 >
                   <span>{item.linkText}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -267,8 +268,8 @@ export default function DemoPortalPage() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );
 }
+

@@ -1,11 +1,11 @@
 import { Point2D, calculateJointAngle, MEDIAPIPE_LANDMARK_INDEX } from '../angle-calculator';
 import { ConfidenceGate } from '../confidence-gate';
-import { CompensationDetector, CompensationResult } from '../compensation-detector';
+import { CompensationDetector } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
 
-export class ShoulderFlexionAnalyzer {
+export class ShoulderAbductionAnalyzer {
   private confidenceGate: ConfidenceGate;
   private compensationDetector: CompensationDetector;
   private stateMachine: RepetitionStateMachine;
@@ -14,7 +14,7 @@ export class ShoulderFlexionAnalyzer {
   private side: 'left' | 'right';
 
   constructor(
-    prescribedTargetRom = 135,
+    prescribedTargetRom = 90,
     targetReps = 10,
     voiceEnabled = true,
     side: 'left' | 'right' = 'left'
@@ -24,13 +24,13 @@ export class ShoulderFlexionAnalyzer {
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
-      startAngle: 30,
-      targetAngle: prescribedTargetRom,
-      returnAngle: 45,
-      hysteresisBuffer: 10,
-      isAngleDecreasingOnFlex: false, // Elevation increases angle
+      startAngle: 20, // Arm hanging at side ~20 degrees
+      targetAngle: prescribedTargetRom, // Abduction horizontal ~90 degrees
+      returnAngle: 35,
+      hysteresisBuffer: 8,
+      isAngleDecreasingOnFlex: false, // Lifting arm laterally increases angle
       prescribedTargetRom,
-      romToleranceDegrees: 10
+      romToleranceDegrees: 8
     });
     this.feedbackEngine = new FeedbackEngine(voiceEnabled);
   }

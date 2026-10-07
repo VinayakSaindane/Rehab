@@ -33,7 +33,7 @@ export default function JointAngleGauge({
   const isAtTarget = progressPct >= 95;
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl p-4 text-white shadow-xl">
+    <div className="glass-card-dark dark-hud rounded-2xl p-4 text-white shadow-2xl border border-white/10 backdrop-blur-xl">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
           Movement Range (ROM)

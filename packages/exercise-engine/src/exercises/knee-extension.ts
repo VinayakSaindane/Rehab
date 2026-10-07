@@ -1,11 +1,11 @@
 import { Point2D, calculateJointAngle, MEDIAPIPE_LANDMARK_INDEX } from '../angle-calculator';
 import { ConfidenceGate } from '../confidence-gate';
-import { CompensationDetector, CompensationResult } from '../compensation-detector';
+import { CompensationDetector } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
 
-export class ShoulderFlexionAnalyzer {
+export class KneeExtensionAnalyzer {
   private confidenceGate: ConfidenceGate;
   private compensationDetector: CompensationDetector;
   private stateMachine: RepetitionStateMachine;
@@ -14,7 +14,7 @@ export class ShoulderFlexionAnalyzer {
   private side: 'left' | 'right';
 
   constructor(
-    prescribedTargetRom = 135,
+    prescribedTargetRom = 170,
     targetReps = 10,
     voiceEnabled = true,
     side: 'left' | 'right' = 'left'
@@ -24,13 +24,13 @@ export class ShoulderFlexionAnalyzer {
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
-      startAngle: 30,
-      targetAngle: prescribedTargetRom,
-      returnAngle: 45,
-      hysteresisBuffer: 10,
-      isAngleDecreasingOnFlex: false, // Elevation increases angle
+      startAngle: 95, // Seated ~90-95 degrees bent knee
+      targetAngle: prescribedTargetRom, // Full terminal extension ~165-175 degrees
+      returnAngle: 110,
+      hysteresisBuffer: 8,
+      isAngleDecreasingOnFlex: false, // Straightening knee increases angle
       prescribedTargetRom,
-      romToleranceDegrees: 10
+      romToleranceDegrees: 8
     });
     this.feedbackEngine = new FeedbackEngine(voiceEnabled);
   }
@@ -49,21 +49,21 @@ export class ShoulderFlexionAnalyzer {
 
   public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
     const prefix = this.side === 'right' ? 'right' : 'left';
-    const requiredLandmarkNames = [`${prefix}_hip`, `${prefix}_shoulder`, `${prefix}_elbow`];
+    const requiredLandmarkNames = [`${prefix}_hip`, `${prefix}_knee`, `${prefix}_ankle`];
     const activeJointIndices = [
       MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`],
-      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`],
-      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`],
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]
     ];
 
     const confidenceResult = this.confidenceGate.evaluate(landmarks, requiredLandmarkNames);
 
     let jointAngle = 0;
-    if (landmarks && landmarks.length > 23) {
+    if (landmarks && landmarks.length > 27) {
       const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
-      const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
-      const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
-      jointAngle = calculateJointAngle(hip, shoulder, elbow, true);
+      const knee = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`]];
+      const ankle = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]];
+      jointAngle = calculateJointAngle(hip, knee, ankle, true);
     }
 
     const repResult = this.stateMachine.update(

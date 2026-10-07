@@ -35,24 +35,24 @@ export default function TopNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-50 glass-card-strong border-b border-white/70 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex flex-wrap items-center justify-between gap-3 py-3">
           
           {/* Logo & Brand */}
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-teal-600 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                 <Activity className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span className="font-black text-lg tracking-tight text-slate-900 flex items-center gap-1.5">
                   RehabSense
-                  <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full glass-chip text-sky-700">
                     PS 05
                   </span>
                 </span>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
+                <p className="text-[11px] text-slate-500 hidden sm:block">
                   Your Recovery. Your Camera. Your Care Team.
                 </p>
               </div>
@@ -60,13 +60,13 @@ export default function TopNavbar() {
           </div>
 
           {/* Navigation Links based on Role */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto pb-1 md:order-none md:w-auto md:pb-0">
             <Link
               href="/"
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname === '/' 
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  ? 'glass-chip text-slate-900' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
               }`}
             >
               Overview
@@ -78,8 +78,8 @@ export default function TopNavbar() {
                   href="/patient/dashboard"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.startsWith('/patient/dashboard') 
-                      ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-sky-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   My Rehab Plan
@@ -88,8 +88,8 @@ export default function TopNavbar() {
                   href="/patient/exercise/elbow-flexion"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.includes('/exercise') 
-                      ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-sky-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   Live Camera Exercise
@@ -98,8 +98,8 @@ export default function TopNavbar() {
                   href="/patient/progress"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.startsWith('/patient/progress') 
-                      ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-sky-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   Progress Trends
@@ -108,8 +108,8 @@ export default function TopNavbar() {
                   href="/patient/manual"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.startsWith('/patient/manual') 
-                      ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-sky-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   Camera-Free Mode
@@ -121,8 +121,8 @@ export default function TopNavbar() {
                   href="/therapist/dashboard"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.startsWith('/therapist/dashboard') 
-                      ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-teal-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   Clinical Census
@@ -131,8 +131,8 @@ export default function TopNavbar() {
                   href="/therapist/review/session-hist-6"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
                     pathname.includes('/review') 
-                      ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-amber-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   <span>Session Review</span>
@@ -142,8 +142,8 @@ export default function TopNavbar() {
                   href="/therapist/exercises"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname.startsWith('/therapist/exercises') 
-                      ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      ? 'glass-chip text-teal-700 font-semibold' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                   }`}
                 >
                   Exercise Config
@@ -155,8 +155,8 @@ export default function TopNavbar() {
               href="/demo"
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                 pathname === '/demo' 
-                  ? 'bg-purple-100 text-purple-800 font-semibold' 
-                  : 'text-purple-700 hover:bg-purple-50'
+                  ? 'glass-chip text-purple-800 font-semibold' 
+                  : 'text-purple-700 hover:bg-white/40'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -165,14 +165,14 @@ export default function TopNavbar() {
           </nav>
 
           {/* Right Controls: Role Switcher & Accessibility */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             
             {/* Accessibility Toggles */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 space-x-1">
+            <div className="flex items-center glass-chip rounded-lg p-1 space-x-1">
               <button
                 onClick={toggleVoice}
                 title={voiceEnabled ? 'Mute voice feedback' : 'Enable voice feedback'}
-                className={`p-1.5 rounded-md transition-colors ${voiceEnabled ? 'text-sky-600 bg-white dark:bg-slate-700 shadow-xs' : 'text-slate-400'}`}
+                className={`p-1.5 rounded-md transition-colors ${voiceEnabled ? 'text-sky-600 bg-white/80 shadow-xs' : 'text-slate-400'}`}
               >
                 {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
@@ -180,7 +180,7 @@ export default function TopNavbar() {
               <button
                 onClick={toggleHighContrast}
                 title="Toggle High Contrast Mode"
-                className={`p-1.5 rounded-md transition-colors ${highContrast ? 'text-amber-600 bg-white dark:bg-slate-700 shadow-xs' : 'text-slate-400'}`}
+                className={`p-1.5 rounded-md transition-colors ${highContrast ? 'text-amber-600 bg-white/80 shadow-xs' : 'text-slate-400'}`}
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -188,7 +188,7 @@ export default function TopNavbar() {
               <button
                 onClick={toggleLargeText}
                 title="Toggle Large Typography"
-                className={`p-1.5 rounded-md transition-colors ${largeText ? 'text-emerald-600 bg-white dark:bg-slate-700 shadow-xs' : 'text-slate-400'}`}
+                className={`p-1.5 rounded-md transition-colors ${largeText ? 'text-emerald-600 bg-white/80 shadow-xs' : 'text-slate-400'}`}
               >
                 <Type className="w-4 h-4" />
               </button>
@@ -198,7 +198,7 @@ export default function TopNavbar() {
             {role === 'PATIENT' && <NotificationBell />}
 
             {/* Quick 1-Click Role Switcher */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center glass-chip rounded-lg p-1 border border-white/70">
               <button
                 onClick={() => handleRoleToggle('PATIENT')}
                 className={`flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${

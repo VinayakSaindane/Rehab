@@ -21,13 +21,16 @@ export class ElbowFlexionAnalyzer {
   private stateMachine: RepetitionStateMachine;
   private feedbackEngine: FeedbackEngine;
   private targetReps: number;
+  private side: 'left' | 'right';
 
   constructor(
     prescribedTargetRom = 120,
     targetReps = 10,
-    voiceEnabled = true
+    voiceEnabled = true,
+    side: 'left' | 'right' = 'left'
   ) {
     this.targetReps = targetReps;
+    this.side = side;
     this.confidenceGate = new ConfidenceGate(0.70, 0.75);
     this.compensationDetector = new CompensationDetector();
     this.stateMachine = new RepetitionStateMachine({
@@ -46,12 +49,21 @@ export class ElbowFlexionAnalyzer {
     this.feedbackEngine.setVoiceEnabled(enabled);
   }
 
+  public setSide(side: 'left' | 'right'): void {
+    this.side = side;
+  }
+
+  public getSide(): 'left' | 'right' {
+    return this.side;
+  }
+
   public processFrame(landmarks: Point2D[]): ExerciseFrameAnalysis {
-    const requiredLandmarkNames = ['left_shoulder', 'left_elbow', 'left_wrist'];
+    const prefix = this.side === 'right' ? 'right' : 'left';
+    const requiredLandmarkNames = [`${prefix}_shoulder`, `${prefix}_elbow`, `${prefix}_wrist`];
     const activeJointIndices = [
-      MEDIAPIPE_LANDMARK_INDEX['left_shoulder'],
-      MEDIAPIPE_LANDMARK_INDEX['left_elbow'],
-      MEDIAPIPE_LANDMARK_INDEX['left_wrist']
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`],
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`],
+      MEDIAPIPE_LANDMARK_INDEX[`${prefix}_wrist`]
     ];
 
     // 1. Evaluate Confidence Gate
@@ -60,10 +72,10 @@ export class ElbowFlexionAnalyzer {
     // 2. Calculate Angle (Shoulder - Elbow - Wrist)
     let jointAngle = 0;
     if (landmarks && landmarks.length > 15) {
-      const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_shoulder']];
-      const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_elbow']];
-      const wrist = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_wrist']];
-      jointAngle = calculateJointAngle(shoulder, elbow, wrist);
+      const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
+      const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
+      const wrist = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_wrist`]];
+      jointAngle = calculateJointAngle(shoulder, elbow, wrist, true);
     }
 
     // 3. Update Repetition State Machine (passes confidence gating result)

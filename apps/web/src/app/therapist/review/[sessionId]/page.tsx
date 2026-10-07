@@ -165,27 +165,27 @@ export default function TherapistSessionReviewPage() {
   const maxRomInSession = Math.max(...(session.joint_metrics?.map((r: any) => r.peak_rom) ?? [session.max_rom ?? 0]));
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
-          <Link href="/therapist/dashboard" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+          <Link href="/therapist/dashboard" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 glass-chip px-3 py-1.5 rounded-lg border border-white/80 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Clinical Census
           </Link>
-          <span className="text-xs font-mono text-slate-400">Session: {session.id}</span>
+          <span className="text-xs font-mono text-slate-500 glass-chip px-2.5 py-1 rounded-lg border border-white/80">Session: {session.id}</span>
         </div>
 
         {/* Header */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-xs font-semibold mb-3">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-xl backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-3 border border-amber-200">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
             Clinical Session Review
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {session.exercise_name} — Aarav Mehta
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             {new Date(session.started_at).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             &nbsp;•&nbsp; Duration: {Math.floor((session.duration_seconds ?? 315) / 60)}m {(session.duration_seconds ?? 315) % 60}s
           </p>
@@ -194,25 +194,25 @@ export default function TherapistSessionReviewPage() {
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'Reps Done', value: `${session.completed_reps}/${session.target_reps}`, color: 'text-slate-900 dark:text-white' },
-            { label: 'Valid Reps', value: session.valid_reps, color: 'text-emerald-600 dark:text-emerald-400' },
-            { label: 'Avg ROM', value: `${session.average_rom}°`, color: 'text-sky-600 dark:text-sky-400' },
-            { label: 'Tracking', value: `${Math.round(session.tracking_confidence * 100)}%`, color: 'text-teal-600 dark:text-teal-400' },
+            { label: 'Reps Done', value: `${session.completed_reps}/${session.target_reps}`, color: 'text-slate-900' },
+            { label: 'Valid Reps', value: session.valid_reps, color: 'text-emerald-700' },
+            { label: 'Avg ROM', value: `${session.average_rom}°`, color: 'text-sky-700' },
+            { label: 'Tracking', value: `${Math.round(session.tracking_confidence * 100)}%`, color: 'text-teal-700' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
-              <p className="text-[11px] text-slate-400 font-bold uppercase">{stat.label}</p>
-              <p className={`text-2xl font-black font-mono mt-1 ${stat.color}`}>{stat.value}</p>
+            <div key={stat.label} className="glass-card rounded-2xl p-4 sm:p-5 border border-white/80 shadow-md text-center">
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{stat.label}</p>
+              <p className={`text-2xl sm:text-3xl font-black font-mono mt-1 ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
         </div>
 
         {/* AI Clinician Summary */}
         {summary?.clinician_summary && (
-          <div className="bg-gradient-to-br from-violet-950/60 to-slate-900 rounded-3xl p-6 border border-violet-800/40 shadow-md">
+          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-teal-950 rounded-3xl p-6 sm:p-7 text-white border border-white/20 shadow-xl backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-3">
-              <Brain className="w-5 h-5 text-violet-400" />
-              <h2 className="text-sm font-bold text-violet-200">AI Clinician Summary</h2>
-              {summary.summary_cached && <span className="text-[10px] text-violet-500 bg-violet-950 px-2 py-0.5 rounded-full">cached</span>}
+              <Brain className="w-5 h-5 text-indigo-300" />
+              <h2 className="text-sm font-bold text-indigo-100">AI Clinician Summary</h2>
+              {summary.summary_cached && <span className="text-[10px] text-indigo-200 bg-white/10 px-2 py-0.5 rounded-full border border-white/20">cached</span>}
             </div>
             <p className="text-sm text-slate-200 leading-relaxed">{summary.clinician_summary}</p>
           </div>
@@ -220,15 +220,15 @@ export default function TherapistSessionReviewPage() {
 
         {/* Flag Analysis Panel */}
         {uniqueFlags.length > 0 && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="glass-card-strong rounded-3xl border border-white/80 shadow-xl overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-sky-100">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-500" />
                 Detected Issues — Clinical Guidance
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">Click each issue to see analysis and suggested coaching cues you can send to the patient.</p>
             </div>
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-sky-100/70">
               {(summary?.flag_analysis ?? uniqueFlags.map((f: string) => ({ flag: f, label: FLAG_META[f]?.label ?? f, guidance: '' }))).map((analysis: any) => {
                 const meta = FLAG_META[analysis.flag] ?? { label: analysis.flag, color: 'text-slate-700', bgColor: 'bg-slate-100', icon: Info };
                 const MetaIcon = meta.icon;
@@ -238,7 +238,7 @@ export default function TherapistSessionReviewPage() {
                   <div key={analysis.flag}>
                     <button
                       onClick={() => setExpandedFlag(isOpen ? null : analysis.flag)}
-                      className="w-full flex items-center justify-between p-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-5 hover:bg-white/60 transition-colors text-left"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-xl border ${meta.bgColor}`}>
@@ -257,15 +257,15 @@ export default function TherapistSessionReviewPage() {
                     {isOpen && (
                       <div className="px-5 pb-5 space-y-3">
                         {analysis.guidance && (
-                          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Clinical Analysis</p>
+                          <div className="glass-card rounded-2xl p-4 text-sm text-slate-800 leading-relaxed border border-sky-100">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Clinical Analysis</p>
                             {analysis.guidance}
                           </div>
                         )}
 
                         {suggestions.length > 0 && (
                           <div>
-                            <p className="text-xs font-bold text-slate-500 mb-2">Quick-add coaching cue to feedback message:</p>
+                            <p className="text-xs font-bold text-slate-600 mb-2">Quick-add coaching cue to feedback message:</p>
                             <div className="flex flex-wrap gap-2">
                               {suggestions.map((cue: string) => (
                                 <button
@@ -273,8 +273,8 @@ export default function TherapistSessionReviewPage() {
                                   onClick={() => { setShowFeedbackPanel(true); addCue(cue); }}
                                   className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                                     coachingCues.includes(cue)
-                                      ? 'bg-emerald-100 border-emerald-300 text-emerald-700 dark:bg-emerald-950 dark:border-emerald-700 dark:text-emerald-300'
-                                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-sky-400'
+                                      ? 'bg-emerald-100 border-emerald-300 text-emerald-800 font-semibold'
+                                      : 'glass-chip border-white/80 text-slate-700 hover:border-sky-400 hover:bg-white/80'
                                   }`}
                                 >
                                   {coachingCues.includes(cue) ? '✓ ' : '+ '}{cue.length > 60 ? cue.slice(0, 60) + '…' : cue}
@@ -294,49 +294,49 @@ export default function TherapistSessionReviewPage() {
 
         {/* Rep-by-Rep Breakdown */}
         {session.joint_metrics?.length > 0 && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-sky-500" />
+          <div className="glass-card rounded-3xl border border-white/80 shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-sky-100">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-sky-600" />
                 Rep-by-Rep Breakdown
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/50">
+                  <tr className="glass-chip">
                     {['Rep', 'Peak ROM', 'Duration', 'Valid', 'Flags'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-sky-100/70">
                   {session.joint_metrics.map((rep: any) => {
                     const repFlags: string[] = rep.flags ?? (rep.flag ? [rep.flag] : []);
                     const hasFlag = !rep.is_valid || repFlags.length > 0;
                     const romPct = maxRomInSession > 0 ? (rep.peak_rom / maxRomInSession) * 100 : 0;
                     return (
-                      <tr key={rep.rep_number} className={`${hasFlag ? 'bg-amber-50/30 dark:bg-amber-950/10' : ''} hover:bg-slate-50/40 dark:hover:bg-slate-800/20 transition-colors`}>
-                        <td className="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#{rep.rep_number}</td>
+                      <tr key={rep.rep_number} className={`${hasFlag ? 'bg-amber-50/40' : ''} hover:bg-white/50 transition-colors`}>
+                        <td className="px-4 py-3 font-bold text-slate-800">#{rep.rep_number}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-20 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                              <div className="h-1.5 rounded-full bg-sky-500 transition-all" style={{ width: `${romPct}%` }} />
+                            <div className="w-20 bg-sky-100 rounded-full h-2">
+                              <div className="h-2 rounded-full bg-sky-500 transition-all" style={{ width: `${romPct}%` }} />
                             </div>
-                            <span className="font-mono font-bold text-sky-700 dark:text-sky-300">{rep.peak_rom}°</span>
+                            <span className="font-mono font-bold text-sky-800">{rep.peak_rom}°</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 font-mono text-slate-500">{rep.duration_seconds.toFixed(1)}s</td>
                         <td className="px-4 py-3">
                           {rep.is_valid
-                            ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            ? <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                         </td>
                         <td className="px-4 py-3">
                           {repFlags.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {repFlags.map((f: string) => (
-                                <span key={f} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                <span key={f} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
                                   {FLAG_META[f]?.label ?? f}
                                 </span>
                               ))}
@@ -355,17 +355,17 @@ export default function TherapistSessionReviewPage() {
         )}
 
         {/* Feedback / Guidance Panel */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="glass-card rounded-3xl border border-white/80 shadow-xl overflow-hidden">
           <button
             onClick={() => setShowFeedbackPanel(p => !p)}
-            className="w-full flex items-center justify-between p-5 hover:bg-slate-50/40 dark:hover:bg-slate-800/20 transition-colors"
+            className="w-full flex items-center justify-between p-5 hover:bg-white/60 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+              <div className="p-2 rounded-xl glass-chip text-sky-700 border border-sky-200">
                 <MessageSquare className="w-4 h-4" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Guidance Message to Patient</p>
+                <p className="text-sm font-bold text-slate-900">Guidance Message to Patient</p>
                 <p className="text-xs text-slate-500">Optional — sent as a notification directly to the patient app</p>
               </div>
             </div>
@@ -373,29 +373,29 @@ export default function TherapistSessionReviewPage() {
           </button>
 
           {showFeedbackPanel && (
-            <div className="border-t border-slate-100 dark:border-slate-800 p-5 space-y-4">
+            <div className="border-t border-sky-100 p-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Guidance Message</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Guidance Message</label>
                 <textarea
                   value={feedbackMessage}
                   onChange={e => setFeedbackMessage(e.target.value)}
                   rows={3}
                   placeholder="e.g. Great effort today! I noticed your shoulder was rising slightly during reps. Focus on keeping both shoulders level and relaxed throughout the movement…"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200/80 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none"
                 />
               </div>
 
               {/* Coaching Cues */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Coaching Cues <span className="font-normal text-slate-400">(shown as bullet points in patient app)</span>
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {coachingCues.map((cue, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 text-xs bg-sky-100 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 rounded-full px-3 py-1">
+                    <span key={i} className="inline-flex items-center gap-1.5 text-xs bg-sky-100 text-sky-800 border border-sky-200 rounded-full px-3 py-1 font-medium">
                       {cue.length > 50 ? cue.slice(0, 50) + '…' : cue}
                       <button onClick={() => setCoachingCues(p => p.filter((_, j) => j !== i))}>
-                        <X className="w-3 h-3" />
+                        <X className="w-3 h-3 hover:text-red-600" />
                       </button>
                     </span>
                   ))}
@@ -406,11 +406,11 @@ export default function TherapistSessionReviewPage() {
                     onChange={e => setNewCue(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && addCue(newCue)}
                     placeholder="Type a coaching cue and press Enter…"
-                    className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                    className="flex-1 px-3 py-2 rounded-xl border border-sky-200/80 glass-card text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
                   />
                   <button
                     onClick={() => addCue(newCue)}
-                    className="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold"
+                    className="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -419,15 +419,15 @@ export default function TherapistSessionReviewPage() {
 
               {/* Priority */}
               <div className="flex items-center gap-3">
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Priority:</label>
+                <label className="text-xs font-bold text-slate-700">Priority:</label>
                 {(['INFO', 'WARNING', 'URGENT'] as const).map(p => (
                   <button
                     key={p}
                     onClick={() => setFeedbackPriority(p)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       feedbackPriority === p
-                        ? p === 'URGENT' ? 'bg-red-600 text-white' : p === 'WARNING' ? 'bg-amber-500 text-white' : 'bg-sky-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        ? p === 'URGENT' ? 'bg-red-600 text-white shadow-xs' : p === 'WARNING' ? 'bg-amber-500 text-white shadow-xs' : 'bg-sky-600 text-white shadow-xs'
+                        : 'glass-chip text-slate-600 hover:bg-white/80'
                     }`}
                   >
                     {p}
@@ -439,24 +439,24 @@ export default function TherapistSessionReviewPage() {
         </div>
 
         {/* Review Decision Panel */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl space-y-6 backdrop-blur-xl">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Clinician Assessment & Target Calibration</h3>
-            <p className="text-xs text-slate-500 mt-1">Accept the flag as normal variance, or override the patient's prescribed ROM target.</p>
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Clinician Assessment & Target Calibration</h3>
+            <p className="text-xs text-slate-500 mt-1">Accept the flag as normal variance, or override the patient&apos;s prescribed ROM target.</p>
           </div>
 
           {reviewSaved ? (
-            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-              <h4 className="text-lg font-bold text-emerald-900 dark:text-emerald-200">Review Saved!</h4>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400">
+            <div className="p-6 rounded-2xl glass-card border border-emerald-300 text-center space-y-3">
+              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+              <h4 className="text-lg font-bold text-emerald-900">Review Saved!</h4>
+              <p className="text-xs text-emerald-800">
                 {actionTaken === 'OVERRIDDEN'
                   ? `Target ROM updated to ${overrideTargetRom}° for Aarav Mehta.`
                   : 'Session flag reviewed and marked as accepted clinical variance.'}
                 {feedbackMessage && ' Guidance message sent to patient.'}
               </p>
               <div className="flex justify-center gap-3 pt-2">
-                <Link href="/therapist/dashboard" className="px-5 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-500 transition-colors">
+                <Link href="/therapist/dashboard" className="px-5 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-500 transition-colors shadow-sm">
                   Return to Census
                 </Link>
               </div>
@@ -464,20 +464,20 @@ export default function TherapistSessionReviewPage() {
           ) : (
             <div className="space-y-5">
               {/* ROM Slider */}
-              <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div className="glass-card rounded-2xl p-4 sm:p-5 border border-teal-200/60 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Calibrate New Target ROM</label>
-                  <span className="text-base font-black font-mono text-teal-600 dark:text-teal-400">{overrideTargetRom}°</span>
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Calibrate New Target ROM</label>
+                  <span className="text-base font-black font-mono text-teal-700 glass-chip px-3 py-0.5 rounded-full border border-teal-200">{overrideTargetRom}°</span>
                 </div>
                 <input
                   type="range" min={80} max={145}
                   value={overrideTargetRom}
                   onChange={e => setOverrideTargetRom(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                  className="w-full h-2.5 bg-teal-100 rounded-lg appearance-none cursor-pointer accent-teal-600"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400">
+                <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                   <span>80° (Conservative)</span>
-                  <span>110° (Adjusted)</span>
+                  <span className="text-teal-700 font-semibold">110° (Adjusted)</span>
                   <span>120° (Original)</span>
                   <span>145°</span>
                 </div>
@@ -485,13 +485,13 @@ export default function TherapistSessionReviewPage() {
 
               {/* Clinical reason */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Clinical Rationale (for override)</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Clinical Rationale (for override)</label>
                 <input
                   type="text"
                   value={clinicalReason}
                   onChange={e => setClinicalReason(e.target.value)}
                   placeholder="e.g. Temporary reduced ROM target to accommodate post-operative stiffness"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200/80 glass-card text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-900"
                 />
               </div>
 
@@ -501,7 +501,7 @@ export default function TherapistSessionReviewPage() {
                   id="override-btn"
                   onClick={() => handleReviewWithFeedback('OVERRIDDEN')}
                   disabled={submitting}
-                  className="flex-1 py-3.5 px-5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md"
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl cursor-pointer border border-white/20"
                 >
                   <Save className="w-4 h-4" />
                   {submitting ? 'Saving…' : `Override to ${overrideTargetRom}° & Update Plan`}
@@ -511,10 +511,10 @@ export default function TherapistSessionReviewPage() {
                   id="accept-btn"
                   onClick={() => handleReviewWithFeedback('ACCEPTED')}
                   disabled={submitting}
-                  className="sm:w-auto py-3.5 px-6 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-sm transition-all"
+                  className="sm:w-auto py-3.5 px-6 rounded-xl glass-chip hover:bg-white/80 text-slate-800 font-semibold text-sm transition-all border border-white/80 shadow-xs cursor-pointer"
                 >
                   Accept Flag (Keep Current Target)
-                  {feedbackMessage && <span className="ml-1 text-xs text-sky-600">+ Send Guidance</span>}
+                  {feedbackMessage && <span className="ml-1 text-xs text-sky-700 font-bold">+ Send Guidance</span>}
                 </button>
               </div>
             </div>

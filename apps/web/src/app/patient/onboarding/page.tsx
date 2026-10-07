@@ -79,16 +79,16 @@ export default function PatientOnboardingPage() {
       <div className="max-w-3xl mx-auto w-full space-y-8">
         
         {/* Step Progress Tracker */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="glass-card rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-md">
           <div className="flex items-center justify-between">
             {steps.map((s, idx) => (
               <div key={s.id} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                     currentStep > s.id
-                      ? 'bg-emerald-600 text-white'
+                      ? 'bg-emerald-600 text-white shadow-xs'
                       : currentStep === s.id
-                        ? 'bg-sky-600 text-white ring-4 ring-sky-100 dark:ring-sky-950'
+                        ? 'bg-sky-600 text-white ring-4 ring-sky-500/20 shadow-md'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                   }`}>
                     {currentStep > s.id ? <CheckCircle2 className="w-4 h-4" /> : s.id}
@@ -108,7 +108,7 @@ export default function PatientOnboardingPage() {
         </div>
 
         {/* Step Content Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl min-h-[420px] flex flex-col justify-between">
+        <div className="glass-card-strong rounded-3xl p-8 border border-sky-500/20 shadow-2xl min-h-[420px] flex flex-col justify-between">
           
           {/* STEP 1: WELCOME */}
           {currentStep === 1 && (
