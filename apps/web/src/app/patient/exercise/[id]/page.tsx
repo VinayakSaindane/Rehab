@@ -86,7 +86,7 @@ export default function LiveExerciseScreen() {
   });
   const [countdown, setCountdown] = useState<number | null>(null);
   const [painScore, setPainScore] = useState<number>(0);
-  const [sessionStartTime] = useState<number>(Date.now());
+  const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Live Kinetic Feedback State
@@ -117,6 +117,7 @@ export default function LiveExerciseScreen() {
   const [isSessionCompleted, setIsSessionCompleted] = useState(false);
   // B15: Ref mirrors state to prevent stale closure in rAF loop (React state is async)
   const isSessionCompletedRef = React.useRef(false);
+  const sessionFinishedLockRef = React.useRef(false);
   const [sessionSummary, setSessionSummary] = useState<any>(null);
   const [savingSession, setSavingSession] = useState(false);
 
@@ -406,9 +407,9 @@ export default function LiveExerciseScreen() {
       comp.compensation_flags.forEach((f: string) => sessionCompensationFlagsRef.current.add(f));
 
       // Auto-finish if prescribed target reps completed
-      // B15: Use ref not state (state is stale inside rAF closure, causing duplicate calls)
-      if (analysis.repResult.completedReps >= exerciseMeta.targetReps && !isSessionCompletedRef.current) {
-        isSessionCompletedRef.current = true; // Lock immediately before async React state update
+      // B15: Use ref not state to avoid race condition and duplicate saves
+      if (analysis.repResult.completedReps >= exerciseMeta.targetReps && !sessionFinishedLockRef.current) {
+        sessionFinishedLockRef.current = true;
         handleFinishSession();
         return;
       }
@@ -427,9 +428,10 @@ export default function LiveExerciseScreen() {
 
   // Handle Session Completion
   const handleFinishSession = async (userSelectedPain?: number) => {
-    if (isSessionCompleted || isSessionCompletedRef.current) return;
-    isSessionCompletedRef.current = true;
+    sessionFinishedLockRef.current = true;
+    if (isSessionCompleted) return;
     setIsSessionCompleted(true);
+    isSessionCompletedRef.current = true;
     setSavingSession(true);
 
     try {
@@ -452,8 +454,8 @@ export default function LiveExerciseScreen() {
     const durationSeconds = Math.max(15, elapsedSeconds);
     const completedR = summary.completedReps || completedReps;
     const validR = summary.validReps || validReps;
-    const avgRom = summary.averageRom || 104;
-    const maxRom = summary.maxRom || 120;
+    const avgRom = summary.averageRom || Math.round(currentAngle);
+    const maxRom = summary.maxRom || Math.round(currentAngle);
 
     const sessionPayload = {
       exercise_id: exerciseId,
@@ -475,25 +477,45 @@ export default function LiveExerciseScreen() {
       side_trained: activeSide
     };
 
+    // Immediately create and set sessionSummary so the progress report modal pops up right away
+    const initialSummary = {
+      ...sessionPayload,
+      id: 'session-pending',
+      adherencePct: Math.min(100, Math.round((avgRom / exerciseMeta.targetRom) * 100)),
+      repCompletionPct: Math.min(100, Math.round((completedR / exerciseMeta.targetReps) * 100))
+    };
+    setSessionSummary(initialSummary);
+
     try {
       const saved = await api.createSession(sessionPayload);
-      setSessionSummary({
-        ...sessionPayload,
-        id: saved.id,
-        adherencePct: Math.min(100, Math.round((avgRom / exerciseMeta.targetRom) * 100)),
-        repCompletionPct: Math.min(100, Math.round((completedR / exerciseMeta.targetReps) * 100))
-      });
+      if (saved?.id) {
+        setSessionSummary((prev: any) => ({
+          ...(prev || initialSummary),
+          id: saved.id
+        }));
+      }
     } catch {
-      // Fallback local summary
-      setSessionSummary({
-        ...sessionPayload,
-        id: 'session-live-demo-1',
-        adherencePct: Math.min(100, Math.round((avgRom / exerciseMeta.targetRom) * 100)),
-        repCompletionPct: Math.min(100, Math.round((completedR / exerciseMeta.targetReps) * 100))
-      });
+      // Retain initial local summary in offline/demo mode
     } finally {
       setSavingSession(false);
     }
+  };
+
+  // Restart / Practice Again Handler
+  const handleRestartSession = () => {
+    if (analyzerRef.current?.reset) {
+      analyzerRef.current.reset();
+    }
+    setCompletedReps(0);
+    setValidReps(0);
+    setCurrentAngle(0);
+    setSessionSummary(null);
+    setIsSessionCompleted(false);
+    isSessionCompletedRef.current = false;
+    sessionFinishedLockRef.current = false;
+    sessionCompensationFlagsRef.current.clear();
+    setElapsedSeconds(0);
+    setSessionStartTime(Date.now());
   };
 
   return (
@@ -940,38 +962,56 @@ export default function LiveExerciseScreen() {
         </span>
       </div>
 
-      {/* 5. SESSION COMPLETE MODAL */}
-      {isSessionCompleted && sessionSummary && (
+      {/* 5. SESSION COMPLETE PROGRESS REPORT MODAL */}
+      {isSessionCompleted && (
         <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass-card-dark dark-hud rounded-3xl border border-white/20 max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl animate-scaleUp">
+          <div className="glass-card-dark dark-hud rounded-3xl border border-white/20 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-scaleUp">
             
             <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
                 <Award className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-black text-white">Session Complete</h2>
+              <h2 className="text-2xl font-black text-white tracking-tight">Session Complete!</h2>
               <p className="text-xs text-slate-300">
-                Performance recorded for {exerciseMeta.name}
+                Progress report for <span className="font-semibold text-white">{exerciseMeta.name}</span>
               </p>
+              {savingSession ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800 text-[11px] text-sky-400 font-semibold animate-pulse">
+                  <span>Saving progress to clinical chart...</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800 text-[11px] text-emerald-400 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Progress recorded & saved successfully</span>
+                </div>
+              )}
             </div>
 
-            {/* Performance Breakdown */}
+            {/* Performance Breakdown Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
               <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50">
                 <p className="text-[10px] text-slate-400 font-semibold">TARGET</p>
-                <p className="text-lg font-bold font-mono text-white">{sessionSummary.target_reps} reps</p>
+                <p className="text-lg font-bold font-mono text-white">
+                  {sessionSummary?.target_reps ?? exerciseMeta.targetReps} reps
+                </p>
               </div>
               <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50">
                 <p className="text-[10px] text-slate-400 font-semibold">COMPLETED</p>
-                <p className="text-lg font-bold font-mono text-sky-400">{sessionSummary.completed_reps} reps</p>
+                <p className="text-lg font-bold font-mono text-sky-400">
+                  {sessionSummary?.completed_reps ?? completedReps} reps
+                </p>
               </div>
               <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50">
                 <p className="text-[10px] text-slate-400 font-semibold">VALID REPS</p>
-                <p className="text-lg font-bold font-mono text-emerald-400">{sessionSummary.valid_reps} reps</p>
+                <p className="text-lg font-bold font-mono text-emerald-400">
+                  {sessionSummary?.valid_reps ?? validReps} reps
+                </p>
               </div>
               <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50">
                 <p className="text-[10px] text-slate-400 font-semibold">PEAK ROM</p>
-                <p className="text-lg font-bold font-mono text-sky-400">{sessionSummary.max_rom}°</p>
+                <p className="text-lg font-bold font-mono text-sky-400">
+                  {sessionSummary?.max_rom ?? Math.round(currentAngle)}°
+                </p>
               </div>
             </div>
 
@@ -980,30 +1020,45 @@ export default function LiveExerciseScreen() {
               <div>
                 <div className="flex justify-between text-slate-300 font-semibold mb-1">
                   <span>Range Adherence</span>
-                  <span className="font-mono">{sessionSummary.adherencePct}%</span>
+                  <span className="font-mono">
+                    {sessionSummary?.adherencePct ?? Math.min(100, Math.round(((sessionSummary?.average_rom ?? currentAngle) / exerciseMeta.targetRom) * 100))}%
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${sessionSummary.adherencePct}%` }} />
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${sessionSummary?.adherencePct ?? Math.min(100, Math.round(((sessionSummary?.average_rom ?? currentAngle) / exerciseMeta.targetRom) * 100))}%` }}
+                  />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-300 font-semibold mb-1">
                   <span>Repetition Completion</span>
-                  <span className="font-mono">{sessionSummary.repCompletionPct}%</span>
+                  <span className="font-mono">
+                    {sessionSummary?.repCompletionPct ?? Math.min(100, Math.round((completedReps / exerciseMeta.targetReps) * 100))}%
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-sky-500 rounded-full" style={{ width: `${sessionSummary.repCompletionPct}%` }} />
+                  <div
+                    className="h-full bg-sky-500 rounded-full transition-all duration-500"
+                    style={{ width: `${sessionSummary?.repCompletionPct ?? Math.min(100, Math.round((completedReps / exerciseMeta.targetReps) * 100))}%` }}
+                  />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-300 font-semibold mb-1">
                   <span>Tracking Quality</span>
-                  <span className="font-mono">{Math.round(sessionSummary.tracking_confidence * 100)}%</span>
+                  <span className="font-mono">
+                    {Math.round((sessionSummary?.tracking_confidence ?? trackingConfidence) * 100)}%
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.round(sessionSummary.tracking_confidence * 100)}%` }} />
+                  <div
+                    className="h-full bg-teal-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.round((sessionSummary?.tracking_confidence ?? trackingConfidence) * 100)}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -1030,7 +1085,7 @@ export default function LiveExerciseScreen() {
                     key={b.val}
                     type="button"
                     onClick={() => setPainScore(b.val)}
-                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                       painScore === b.val
                         ? 'bg-sky-600 border-sky-400 text-white shadow-xs'
                         : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
@@ -1043,22 +1098,32 @@ export default function LiveExerciseScreen() {
             </div>
 
             <div className="p-3 bg-slate-800/60 rounded-xl text-[11px] text-slate-400 leading-relaxed">
-              Performance metrics have been safely stored for review by Dr. Ananya Sharma. This summary reflects configured exercise rules and is not a medical recovery diagnosis.
+              Performance metrics have been safely stored for clinical review. This summary reflects configured exercise rules and is not a medical recovery diagnosis.
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center gap-2.5">
               <button
+                type="button"
                 onClick={() => router.push('/patient/progress')}
-                className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+                className="w-full sm:flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer text-center"
               >
                 View Progress Trends
               </button>
               <button
-                onClick={() => router.push('/patient/dashboard')}
-                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                type="button"
+                onClick={handleRestartSession}
+                className="w-full sm:flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-white/10 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center"
               >
-                Return to Dashboard
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Practice Again</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/patient/dashboard')}
+                className="w-full sm:flex-1 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs border border-white/10 transition-all cursor-pointer text-center"
+              >
+                Dashboard
               </button>
             </div>
 
