@@ -52,6 +52,7 @@ export default function HospitalPatientDetailPage() {
   const [uploadSummary, setUploadSummary] = useState('');
   const [uploadFileName, setUploadFileName] = useState('');
   const [uploadFileSize, setUploadFileSize] = useState('');
+  const [uploadFileData, setUploadFileData] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Document preview modal state
@@ -96,6 +97,10 @@ export default function HospitalPatientDetailPage() {
     if (file) {
       setUploadFileName(file.name);
       setUploadFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+      const reader = new FileReader();
+      reader.onload = () => setUploadFileData(String(reader.result));
+      reader.onerror = () => setUploadError('Unable to read the selected file.');
+      reader.readAsDataURL(file);
       if (!uploadTitle) {
         // Auto-fill title from filename
         const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
@@ -105,10 +110,31 @@ export default function HospitalPatientDetailPage() {
   };
 
   // Handle Document Upload Submit
-  const handleUploadSubmit = (e: React.FormEvent) => {
+  const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadTitle || !patient) {
-      setUploadError('Please provide a document title.');
+    if (!uploadTitle || !patient || !uploadFileName) {
+      setUploadError('Please provide a document title and select a file.');
+      return;
+    }
+
+    try {
+      const fileInput = document.getElementById('upload-doc-file') as HTMLInputElement | null;
+      const file = fileInput?.files?.[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('patient_id', patient.id);
+        const token = localStorage.getItem('rehab_token');
+        const response = await fetch('http://localhost:8000/api/hospital/onboard/upload-report', {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
+        if (!response.ok) throw new Error('The file could not be uploaded.');
+        await response.json();
+      }
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'The file could not be uploaded.');
       return;
     }
 
@@ -121,6 +147,7 @@ export default function HospitalPatientDetailPage() {
       uploadedBy: 'hospital-001',
       uploaderName: 'Demo Hospital',
       summary: uploadSummary || 'Clinical documentation submitted by hospital orthopedic care team.',
+      fileData: uploadFileData || undefined,
     });
 
     setShowUploadModal(false);
@@ -128,6 +155,7 @@ export default function HospitalPatientDetailPage() {
     setUploadSummary('');
     setUploadFileName('');
     setUploadFileSize('');
+    setUploadFileData('');
     setUploadError(null);
     loadData();
   };
@@ -562,8 +590,19 @@ export default function HospitalPatientDetailPage() {
               </button>
             </div>
 
-            {/* Simulated Medical Document Dossier Content */}
+            {/* Document preview and clinical details */}
             <div className="glass-card rounded-2xl p-6 border border-white/50 shadow-inner space-y-4 text-xs text-slate-800">
+              {previewDoc.fileData && (
+                <div className="rounded-xl overflow-hidden border border-white/60 bg-white/60">
+                  {previewDoc.fileData.startsWith('data:image/') ? (
+                    <img src={previewDoc.fileData} alt={previewDoc.name} className="max-h-80 w-full object-contain" />
+                  ) : previewDoc.fileData.startsWith('data:application/pdf') ? (
+                    <iframe title={previewDoc.name} src={previewDoc.fileData} className="h-80 w-full" />
+                  ) : (
+                    <p className="p-4 text-slate-600">This file type cannot be previewed here. Use Download File to open it.</p>
+                  )}
+                </div>
+              )}
               <div className="flex items-center justify-between pb-3 border-b border-white/30 text-[11px] text-slate-500">
                 <span>Patient: <strong className="text-slate-800">{patient.name}</strong></span>
                 <span>Date: <strong className="text-slate-800">{new Date(previewDoc.uploadedAt).toLocaleDateString()}</strong></span>
@@ -597,14 +636,16 @@ export default function HospitalPatientDetailPage() {
               </span>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => alert(`Simulated document download: ${previewDoc.fileName}`)}
+                <a
+                  href={previewDoc.fileData}
+                  download={previewDoc.fileName}
+                  target="_blank"
+                  rel="noreferrer"
                   className="px-4 py-2 rounded-xl glass-button text-xs font-bold text-blue-900 hover:bg-white/40 flex items-center gap-1.5 border border-white/50"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download PDF</span>
-                </button>
+                </a>
                 <button
                   type="button"
                   onClick={() => setPreviewDoc(null)}

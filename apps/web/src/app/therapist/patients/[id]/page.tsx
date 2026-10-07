@@ -65,6 +65,31 @@ export default function TherapistPatientDetailPage() {
     // 2. Get medical documents uploaded by hospital for ONLY this patient
     const localDocs = mockStorage.getDocuments(patientId);
     setDocuments(localDocs);
+    try {
+      const backendDocs = await api.getHospitalPatientDocuments(patientId, localPatient?.email);
+      const normalizedDocs: MockDocument[] = backendDocs.map((doc) => ({
+        id: doc.id,
+        patientId: doc.patient_id,
+        name: doc.name,
+        type: doc.type,
+        fileName: doc.file_name,
+        fileSize: doc.file_size || undefined,
+        uploadedAt: doc.uploaded_at || new Date().toISOString(),
+        uploadedBy: doc.uploaded_by,
+        uploaderName: doc.uploader_name,
+        summary: doc.summary,
+        fileData: doc.file_url?.startsWith('/')
+          ? `http://localhost:8000${doc.file_url}`
+          : doc.file_url,
+      }));
+      if (normalizedDocs.length > 0) {
+        // Backend records are authoritative. Do not show seeded demo records
+        // alongside the real hospital files for this patient.
+        setDocuments(normalizedDocs);
+      }
+    } catch (error) {
+      console.warn('Unable to load hospital documents from the backend:', error);
+    }
 
     // 3. Get treatment plan
     const localPlan = mockStorage.getTreatmentPlan(patientId) || {
@@ -617,6 +642,17 @@ export default function TherapistPatientDetailPage() {
             </div>
 
             <div className="glass-card rounded-2xl p-6 border border-white/50 shadow-inner space-y-4 text-xs text-slate-800">
+              {previewDoc.fileData && (
+                <div className="rounded-xl overflow-hidden border border-white/60 bg-white/60">
+                  {previewDoc.fileData.startsWith('data:image/') ? (
+                    <img src={previewDoc.fileData} alt={previewDoc.name} className="max-h-80 w-full object-contain" />
+                  ) : previewDoc.fileData.startsWith('data:application/pdf') ? (
+                    <iframe title={previewDoc.name} src={previewDoc.fileData} className="h-80 w-full" />
+                  ) : (
+                    <p className="p-4 text-slate-600">This file type cannot be previewed here. Use Download File to open it.</p>
+                  )}
+                </div>
+              )}
               <div className="flex items-center justify-between pb-3 border-b border-white/30 text-[11px] text-slate-500">
                 <span>Patient: <strong className="text-slate-800">{patient.name}</strong></span>
                 <span>Date: <strong className="text-slate-800">{new Date(previewDoc.uploadedAt).toLocaleDateString()}</strong></span>
@@ -640,14 +676,16 @@ export default function TherapistPatientDetailPage() {
               </span>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => alert(`Simulated document download: ${previewDoc.fileName}`)}
+                <a
+                  href={previewDoc.fileData}
+                  download={previewDoc.fileName}
+                  target="_blank"
+                  rel="noreferrer"
                   className="px-4 py-2 rounded-xl glass-button text-xs font-bold text-blue-900 hover:bg-white/40 flex items-center gap-1.5 border border-white/50"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download File</span>
-                </button>
+                </a>
                 <button
                   type="button"
                   onClick={() => setPreviewDoc(null)}

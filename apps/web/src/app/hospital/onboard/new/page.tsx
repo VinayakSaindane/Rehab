@@ -11,11 +11,18 @@ import {
 import { mockStorage } from '@/lib/mock-storage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+type UploadedFile = {
+  url: string;
+  filename: string;
+  sizeBytes: number;
+  fileData: string;
+};
+
 export default function HospitalOnboardNewPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   const [form, setForm] = useState({
     patient_name: '',
@@ -36,6 +43,12 @@ export default function HospitalOnboardNewPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
+    const fileData = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Unable to read the selected file.'));
+      reader.readAsDataURL(file);
+    });
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -47,10 +60,20 @@ export default function HospitalOnboardNewPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setUploadedFiles(prev => [...prev, data.url]);
+        setUploadedFiles(prev => [...prev, {
+          url: data.url,
+          filename: file.name,
+          sizeBytes: file.size,
+          fileData,
+        }]);
       }
     } catch {
-      setUploadedFiles(prev => [...prev, `/uploads/${file.name}`]);
+      setUploadedFiles(prev => [...prev, {
+        url: `/uploads/${file.name}`,
+        filename: file.name,
+        sizeBytes: file.size,
+        fileData,
+      }]);
     }
   };
 
@@ -77,16 +100,17 @@ export default function HospitalOnboardNewPage() {
       });
 
       if (uploadedFiles.length > 0) {
-        uploadedFiles.forEach((fileUrl, idx) => {
+        uploadedFiles.forEach((file, idx) => {
           mockStorage.addDocument({
             patientId: newPatient.id,
             name: `${form.operation_type} Clinical Report #${idx + 1}`,
             type: 'Diagnosis Report',
-            fileName: fileUrl.split('/').pop() || 'report.pdf',
-            fileSize: '1.8 MB',
+            fileName: file.filename,
+            fileSize: `${(file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`,
             uploadedBy: 'hospital-001',
             uploaderName: 'Demo Hospital',
             summary: form.injury_description || 'Pre-operative evaluation documentation.',
+            fileData: file.fileData,
           });
         });
       }
@@ -102,7 +126,7 @@ export default function HospitalOnboardNewPage() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ ...form, uploaded_report_urls: uploadedFiles })
+        body: JSON.stringify({ ...form, uploaded_report_urls: uploadedFiles.map((file) => file.url) })
       });
     } catch {
       // Ignored for local/offline mode
@@ -264,10 +288,10 @@ export default function HospitalOnboardNewPage() {
 
             {uploadedFiles.length > 0 && (
               <div className="mt-2 space-y-1">
-                {uploadedFiles.map((url, i) => (
+                {uploadedFiles.map((file, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg px-3 py-1.5">
                     <FileText className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{url}</span>
+                    <span className="truncate">{file.filename}</span>
                     <button type="button" onClick={() => setUploadedFiles(prev => prev.filter((_, j) => j !== i))} className="ml-auto shrink-0">
                       <X className="w-3 h-3" />
                     </button>

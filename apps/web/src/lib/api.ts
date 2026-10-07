@@ -202,6 +202,12 @@ export const api = {
   getTherapistDashboard: () => request<any>('/therapist/dashboard'),
   getTherapistPatientDetail: (patientId: string) =>
     request<any>(`/therapist/patients/${patientId}`),
+  getHospitalPatientDocuments: (patientId: string, patientEmail?: string) =>
+    request<any[]>(
+      `/hospital/patients/${patientId}/documents${
+        patientEmail ? `?patient_email=${encodeURIComponent(patientEmail)}` : ''
+      }`
+    ),
   reviewSession: (sessionId: string, payload: any) =>
     request<any>(`/therapist/sessions/${sessionId}/review`, {
       method: 'POST',

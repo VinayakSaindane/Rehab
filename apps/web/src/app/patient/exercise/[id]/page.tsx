@@ -121,6 +121,18 @@ export default function LiveExerciseScreen() {
   const [sessionSummary, setSessionSummary] = useState<any>(null);
   const [savingSession, setSavingSession] = useState(false);
 
+  const getBoundarySide = (frameLandmarks: Point2D[]): 'left' | 'right' | null => {
+    const wristIndex = activeSide === 'right' ? 16 : 15;
+    const wrist = frameLandmarks[wristIndex];
+
+    if (!wrist || (wrist.visibility ?? 1) < 0.5) return null;
+    // The live video is mirrored with `-scale-x-100`, so MediaPipe's
+    // normalized x coordinate is opposite to the user's displayed screen side.
+    if (wrist.x >= 0.94) return 'left';
+    if (wrist.x <= 0.06) return 'right';
+    return null;
+  };
+
   // B15: Keep ref in sync with state
   useEffect(() => {
     isSessionCompletedRef.current = isSessionCompleted;
@@ -356,6 +368,16 @@ export default function LiveExerciseScreen() {
         detectedLandmarks = simulatorRef.current.generateNextFrame();
       }
 
+      // Keep directional feedback live even while the confidence gate is
+      // stopping rep analysis: reaching either side of the camera frame is
+      // itself the condition the patient needs to correct.
+      if (mode === 'REAL' && earphoneMode) {
+        const boundarySide = getBoundarySide(detectedLandmarks);
+        if (boundarySide) {
+          spatialAudio.playPostureBuzz(boundarySide, 1200);
+        }
+      }
+
       // Distance & Framing Heuristic (real mode only, skip for simulation)
       if (mode === 'REAL' && detectedLandmarks.length >= 25) {
         const leftShoulder = detectedLandmarks[11];
@@ -424,7 +446,7 @@ export default function LiveExerciseScreen() {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted, activeSide, exerciseId]);
+  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted, activeSide, exerciseId, earphoneMode]);
 
   // Handle Session Completion
   const handleFinishSession = async (userSelectedPain?: number) => {
@@ -523,40 +545,40 @@ export default function LiveExerciseScreen() {
       <div className="min-h-screen bg-slate-950/60 backdrop-blur-2xl text-white flex flex-col justify-between select-none">
       
       {/* 1. TOP STATUS BAR (Requirement 12: Level 1 Glass Ribbon) */}
-      <header className="glass-card-dark border-b border-white/15 px-4 py-3 z-30 backdrop-blur-2xl">
+      <header className="glass-navbar mx-2 sm:mx-4 mt-2 px-3 sm:px-5 py-3 z-30 text-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           
           <div className="flex items-center gap-3">
             <Link
               href="/patient/dashboard"
-              className="p-2 rounded-xl glass-chip hover:bg-white/20 text-slate-200 transition-colors border border-white/20"
+              className="p-2 rounded-xl glass-chip hover:bg-white/50 text-slate-600 transition-colors border border-white/50"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                {exerciseMeta.name}
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-700">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                <span className="truncate">{exerciseMeta.name}</span>
+                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full glass-pill-patient-active">
                   Target: {exerciseMeta.targetRom}° ROM
                 </span>
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Prescribed by Dr. Ananya Sharma • 2 sets × {exerciseMeta.targetReps} repetitions
               </p>
             </div>
           </div>
 
           {/* Demonstration Mode & Resilience Toggles */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex max-w-full flex-1 flex-wrap items-center justify-end gap-1.5">
             
             {/* Active Limb Side Selector (Crucial for bilateral rehabilitation) */}
-            <div className="flex items-center bg-white/10 rounded-xl p-1 border border-white/10 text-xs">
+            <div className="flex items-center glass-chip rounded-xl p-1 border border-white/50 text-xs">
               <button
                 type="button"
                 onClick={() => handleToggleSide('left')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                  activeSide === 'left' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  activeSide === 'left' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Track left limb"
               >
@@ -566,7 +588,7 @@ export default function LiveExerciseScreen() {
                 type="button"
                 onClick={() => handleToggleSide('right')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                  activeSide === 'right' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  activeSide === 'right' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Track right limb"
               >
@@ -578,7 +600,7 @@ export default function LiveExerciseScreen() {
             <button
               type="button"
               onClick={toggleCameraFacing}
-              className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors"
+              className="px-2.5 py-1.5 rounded-xl glass-button border border-white/50 text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition-colors"
               title={facingMode === 'user' ? 'Switch to smartphone rear camera' : 'Switch to front camera'}
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -590,7 +612,7 @@ export default function LiveExerciseScreen() {
               type="button"
               onClick={startCountdown}
               disabled={countdown !== null}
-              className="px-2.5 py-1.5 rounded-xl bg-teal-600/90 hover:bg-teal-500 disabled:opacity-50 text-xs text-white font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-2.5 py-1.5 rounded-xl bg-emerald-500/80 hover:bg-emerald-500 disabled:opacity-50 text-xs text-white font-bold flex items-center gap-1.5 transition-colors shadow-xs border border-white/40"
               title="Hands-free 3-second preparation countdown"
             >
               <Play className="w-3.5 h-3.5" />
@@ -604,7 +626,7 @@ export default function LiveExerciseScreen() {
               className={`px-2.5 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all ${
                 debugMode
                   ? 'bg-amber-500/25 border-amber-400 text-amber-300 font-bold shadow-sm shadow-amber-500/20'
-                  : 'bg-white/10 border-white/10 text-slate-300 hover:text-white'
+                  : 'glass-button border-white/50 text-slate-600 hover:text-slate-900'
               }`}
               title="Toggle Kinematic Telemetry & Biomechanical Diagnostics"
             >
@@ -613,12 +635,12 @@ export default function LiveExerciseScreen() {
             </button>
 
             {/* Real vs Sim Mode Switcher */}
-            <div className="flex items-center bg-white/10 rounded-xl p-1 border border-white/10 text-xs">
+            <div className="flex items-center glass-chip rounded-xl p-1 border border-white/50 text-xs">
               <button
                 type="button"
                 onClick={() => setMode('REAL')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                  mode === 'REAL' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  mode === 'REAL' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -629,7 +651,7 @@ export default function LiveExerciseScreen() {
                 type="button"
                 onClick={() => setMode('SIMULATED')}
                 className={`px-2.5 py-1 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                  mode === 'SIMULATED' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  mode === 'SIMULATED' ? 'bg-purple-500/80 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -642,7 +664,7 @@ export default function LiveExerciseScreen() {
               <select
                 value={simPattern}
                 onChange={(e: any) => setSimPattern(e.target.value)}
-                className="bg-slate-900 border border-purple-500/40 text-xs text-purple-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-purple-400 font-medium"
+                className="glass-input border-purple-300/60 text-xs text-purple-900 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-purple-400 font-medium"
               >
                 <option value="NORMAL_REPS">Normal Reps (122° Target)</option>
                 <option value="UNDER_RANGE_REP">Under-Range Rep (108° Flag)</option>
@@ -651,12 +673,12 @@ export default function LiveExerciseScreen() {
             )}
 
             {/* Audio Language Selector */}
-            <div className="flex items-center bg-white/10 rounded-xl p-0.5 border border-white/10 text-xs">
+            <div className="flex items-center glass-chip rounded-xl p-0.5 border border-white/50 text-xs">
               <button
                 type="button"
                 onClick={() => setLanguage('en')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  language === 'en' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  language === 'en' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Audio Language: English"
               >
@@ -666,7 +688,7 @@ export default function LiveExerciseScreen() {
                 type="button"
                 onClick={() => setLanguage('hi')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  language === 'hi' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  language === 'hi' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Audio Language: हिन्दी (Hindi)"
               >
@@ -676,7 +698,7 @@ export default function LiveExerciseScreen() {
                 type="button"
                 onClick={() => setLanguage('mr')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  language === 'mr' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  language === 'mr' ? 'glass-pill-patient-active font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Audio Language: मराठी (Marathi)"
               >
@@ -685,12 +707,12 @@ export default function LiveExerciseScreen() {
             </div>
 
             {/* Binaural Earphone Posture Coach Toggle & Quick Test */}
-            <div className="flex items-center bg-white/10 rounded-xl p-0.5 border border-white/10 text-xs">
+            <div className="flex items-center glass-chip rounded-xl p-0.5 border border-white/50 text-xs">
               <button
                 type="button"
                 onClick={toggleEarphoneMode}
                 className={`p-1.5 rounded-lg transition-all relative ${
-                  earphoneMode ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                  earphoneMode ? 'bg-emerald-500/80 text-white shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title={earphoneMode ? 'Spatial Earphone Feedback: ON (Left/Right Buzz)' : 'Earphones: OFF'}
               >
@@ -706,7 +728,7 @@ export default function LiveExerciseScreen() {
                     type="button"
                     onClick={() => testEarphone('left')}
                     className={`px-1.5 py-0.5 text-[10px] rounded font-bold transition-all ${
-                      activePanSide === 'left' ? 'bg-amber-400 text-slate-950 animate-pulse font-black' : 'text-slate-300 hover:bg-white/10'
+                      activePanSide === 'left' ? 'bg-amber-300 text-slate-900 animate-pulse font-black' : 'text-slate-500 hover:bg-white/40'
                     }`}
                     title="Test Left Earphone (Buzz Left)"
                   >
@@ -716,7 +738,7 @@ export default function LiveExerciseScreen() {
                     type="button"
                     onClick={() => testEarphone('right')}
                     className={`px-1.5 py-0.5 text-[10px] rounded font-bold transition-all ${
-                      activePanSide === 'right' ? 'bg-amber-400 text-slate-950 animate-pulse font-black' : 'text-slate-300 hover:bg-white/10'
+                      activePanSide === 'right' ? 'bg-amber-300 text-slate-900 animate-pulse font-black' : 'text-slate-500 hover:bg-white/40'
                     }`}
                     title="Test Right Earphone (Buzz Right)"
                   >
@@ -731,7 +753,7 @@ export default function LiveExerciseScreen() {
               type="button"
               onClick={toggleVoice}
               className={`p-2 rounded-xl border transition-colors ${
-                voiceEnabled ? 'bg-sky-950/80 border-sky-700 text-sky-400' : 'bg-white/10 border-white/10 text-slate-400'
+                voiceEnabled ? 'glass-pill-patient-active' : 'glass-button text-slate-500'
               }`}
               title={voiceEnabled ? 'Mute speech feedback' : 'Enable speech feedback'}
             >

@@ -14,17 +14,12 @@ import {
   VolumeX, 
   Eye, 
   Type, 
-  Sparkles,
   Headphones,
   LogIn,
   LogOut,
-  FileText,
   ChevronDown,
   Globe,
-  Sliders,
   Check,
-  MoreHorizontal,
-  Camera
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
@@ -48,11 +43,9 @@ export default function TopNavbar() {
   // Dropdown states
   const [audioMenuOpen, setAudioMenuOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   const audioMenuRef = useRef<HTMLDivElement>(null);
   const roleMenuRef = useRef<HTMLDivElement>(null);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -62,9 +55,6 @@ export default function TopNavbar() {
       }
       if (roleMenuRef.current && !roleMenuRef.current.contains(event.target as Node)) {
         setRoleMenuOpen(false);
-      }
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setMoreMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -97,18 +87,18 @@ export default function TopNavbar() {
 
   return (
     <header className="sticky top-3 z-50 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-4 select-none">
-      <div className="glass-navbar px-4 sm:px-6 py-2.5 rounded-[26px] border border-white/50 shadow-lg backdrop-blur-2xl flex items-center justify-between gap-3">
+      <div className="glass-navbar px-3.5 sm:px-5 py-2.5 rounded-[24px] border border-white/50 shadow-lg backdrop-blur-2xl flex items-center justify-between gap-2.5">
         
         {/* Left: Brand & Logo */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5 shrink-0">
           <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-600/20 group-hover:scale-105 transition-all border border-white/40">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-600/20 group-hover:scale-105 transition-all border border-white/40">
               <Activity className="w-4 h-4 text-white" />
             </div>
             <div>
               <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 flex items-center gap-1.5">
                 RehabSense
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full glass-chip text-blue-700 border-blue-300/40">
+                <span className="hidden sm:inline text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full glass-chip text-blue-700 border-blue-300/40">
                   PS 05
                 </span>
               </span>
@@ -117,17 +107,19 @@ export default function TopNavbar() {
         </div>
 
         {/* Center: Clean, Spaced Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5">
-          <Link
-            href="/"
-            className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-              pathname === '/' 
-                ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
-            }`}
-          >
-            Overview
-          </Link>
+        <nav className="hidden md:flex flex-1 items-center justify-center gap-1">
+          {!isAuthenticated && (
+            <Link
+              href="/"
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                pathname === '/'
+                  ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
+              }`}
+            >
+              Overview
+            </Link>
+          )}
 
           {/* Authenticated Links with breathing space */}
           {isAuthenticated && role === 'PATIENT' && (
@@ -163,50 +155,6 @@ export default function TopNavbar() {
                 Progress
               </Link>
 
-              {/* Patient More Dropdown */}
-              <div className="relative" ref={moreMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                  className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1 ${
-                    pathname.startsWith('/patient/documents') || pathname.startsWith('/patient/manual') || pathname.startsWith('/patient/onboarding')
-                      ? 'glass-chip text-blue-900 border-blue-300/50 font-bold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/30'
-                  }`}
-                >
-                  <span>More</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                {moreMenuOpen && (
-                  <div className="absolute left-0 mt-2 w-56 rounded-2xl glass-card-strong p-2 border border-white/60 shadow-2xl backdrop-blur-3xl z-50 space-y-1">
-                    <Link
-                      href="/patient/documents"
-                      onClick={() => setMoreMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
-                    >
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span>Medical Documents</span>
-                    </Link>
-                    <Link
-                      href="/patient/manual"
-                      onClick={() => setMoreMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
-                    >
-                      <Sliders className="w-4 h-4 text-indigo-600" />
-                      <span>Camera-Free Mode</span>
-                    </Link>
-                    <Link
-                      href="/patient/onboarding"
-                      onClick={() => setMoreMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
-                    >
-                      <Camera className="w-4 h-4 text-sky-600" />
-                      <span>Camera Calibration</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
             </>
           )}
 
@@ -270,17 +218,6 @@ export default function TopNavbar() {
             </>
           )}
 
-          <Link
-            href="/demo"
-            className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 ${
-              pathname === '/demo' 
-                ? 'glass-chip text-blue-900 border-blue-300/50 shadow-xs font-bold' 
-                : 'text-blue-700 hover:text-blue-900 hover:bg-white/30'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Demo Hub</span>
-          </Link>
         </nav>
 
         {/* Right: Consolidated Audio & Role Menus */}
@@ -492,6 +429,35 @@ export default function TopNavbar() {
                       {role === 'HOSPITAL' && <Check className="w-3.5 h-3.5 text-indigo-600" />}
                     </button>
                   </div>
+
+                  {role === 'PATIENT' && (
+                    <div className="space-y-1 pt-2 border-t border-white/30">
+                      <p className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider">
+                        Patient tools
+                      </p>
+                      <Link
+                        href="/patient/documents"
+                        onClick={() => setRoleMenuOpen(false)}
+                        className="block px-2 py-1.5 rounded-xl text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                      >
+                        Medical documents
+                      </Link>
+                      <Link
+                        href="/patient/manual"
+                        onClick={() => setRoleMenuOpen(false)}
+                        className="block px-2 py-1.5 rounded-xl text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                      >
+                        Camera-free mode
+                      </Link>
+                      <Link
+                        href="/patient/onboarding"
+                        onClick={() => setRoleMenuOpen(false)}
+                        className="block px-2 py-1.5 rounded-xl text-slate-700 hover:bg-white/40 hover:text-blue-900 transition-all"
+                      >
+                        Camera calibration
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Logout Button */}
                   <div className="pt-2 border-t border-white/30">

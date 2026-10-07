@@ -77,6 +77,7 @@ async def onboard_patient(
     """
     users_col = get_db_collection("users")
     records_col = get_db_collection("hospital_onboarding")
+    patients_col = get_db_collection("patients")
 
     # Check if patient already exists
     existing = await users_col.find_one({"email": payload.patient_email})
@@ -97,6 +98,24 @@ async def onboard_patient(
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await users_col.insert_one(user_doc)
+
+    # Keep the clinical patient profile in sync with the hospital account so a
+    # therapist can load this patient from a separate session or device.
+    patient_profile = {
+        "id": patient_id,
+        "user_id": patient_id,
+        "name": payload.patient_name,
+        "email": payload.patient_email,
+        "age": 0,
+        "gender": "Not specified",
+        "condition_label": payload.operation_type,
+        "hospital_id": payload.hospital_id,
+        "current_streak_days": 0,
+        "total_sessions_completed": 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if not await patients_col.find_one({"id": patient_id}):
+        await patients_col.insert_one(patient_profile)
 
     record_id = f"hosp-rec-{uuid.uuid4().hex[:8]}"
     record_doc = {
@@ -120,6 +139,7 @@ async def onboard_patient(
 @router.post("/onboard/upload-report")
 async def upload_report(
     file: UploadFile = File(...),
+    patient_id: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -132,7 +152,8 @@ async def upload_report(
     upload_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
     os.makedirs(upload_dir, exist_ok=True)
 
-    safe_filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+    original_filename = os.path.basename(file.filename or "report")
+    safe_filename = f"{uuid.uuid4().hex[:8]}_{original_filename}"
     file_path = os.path.join(upload_dir, safe_filename)
 
     content = await file.read()
@@ -141,13 +162,86 @@ async def upload_report(
 
     # Return a mock URL \u2014 in production this would be a real signed S3/GCS URL
     mock_url = f"/uploads/{safe_filename}"
+    if patient_id:
+        documents_col = get_db_collection("hospital_documents")
+        await documents_col.insert_one({
+            "id": f"hosp-doc-{uuid.uuid4().hex[:8]}",
+            "patient_id": patient_id,
+            "name": original_filename,
+            "file_name": original_filename,
+            "file_url": mock_url,
+            "file_size": len(content),
+            "uploaded_at": datetime.now(timezone.utc).isoformat(),
+            "uploaded_by": current_user.get("id", "hospital"),
+            "uploader_name": current_user.get("hospital_name", "Hospital"),
+        })
     return {
         "url": mock_url,
-        "filename": file.filename,
+        "filename": original_filename,
         "size_bytes": len(content),
         "stub": True,  # Clearly marked: this is a local-only URL, not a real hosted file
         "note": "TODO: replace with real cloud storage URL before production deployment"
     }
+
+
+@router.get("/patients/{patient_id}/documents")
+async def get_patient_documents(
+    patient_id: str,
+    patient_email: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Return hospital-uploaded files for a patient so assigned clinicians can open them."""
+    records_col = get_db_collection("hospital_onboarding")
+    documents_col = get_db_collection("hospital_documents")
+    patient_ids = [patient_id]
+    if patient_email:
+        users_col = get_db_collection("users")
+        user = await users_col.find_one({"email": patient_email})
+        if user and user.get("id") not in patient_ids:
+            patient_ids.append(user["id"])
+
+    records = []
+    for candidate_id in patient_ids:
+        candidate_cursor = records_col.find({"patient_id": candidate_id}).sort("created_at", -1)
+        records.extend(await candidate_cursor.to_list(length=100))
+    records.sort(key=lambda record: record.get("created_at", ""), reverse=True)
+    uploaded_documents = []
+    for candidate_id in patient_ids:
+        document_cursor = documents_col.find({"patient_id": candidate_id})
+        uploaded_documents.extend(await document_cursor.to_list(length=100))
+
+    documents = []
+    for uploaded in uploaded_documents:
+        documents.append({
+            "id": uploaded["id"],
+            "patient_id": patient_id,
+            "name": uploaded.get("name", uploaded.get("file_name", "Clinical document")),
+            "type": "Clinical Document",
+            "file_name": uploaded.get("file_name"),
+            "file_url": uploaded.get("file_url"),
+            "file_size": uploaded.get("file_size"),
+            "uploaded_at": uploaded.get("uploaded_at"),
+            "uploaded_by": uploaded.get("uploaded_by", "hospital"),
+            "uploader_name": uploaded.get("uploader_name", "Hospital"),
+            "summary": "Clinical document uploaded by the hospital.",
+        })
+    for record in records:
+        for index, url in enumerate(record.get("uploaded_report_urls", [])):
+            filename = os.path.basename(url.split("?", 1)[0]) or f"clinical-report-{index + 1}"
+            documents.append({
+                "id": f"{record['id']}-document-{index}",
+                "patient_id": patient_id,
+                "name": f"{record.get('operation_type', 'Clinical')} Report #{index + 1}",
+                "type": "Diagnosis Report",
+                "file_name": filename,
+                "file_url": url,
+                "file_size": None,
+                "uploaded_at": record.get("created_at"),
+                "uploaded_by": record.get("hospital_id", "hospital"),
+                "uploader_name": record.get("hospital_name", "Hospital"),
+                "summary": record.get("injury_description") or "Clinical report uploaded by the hospital.",
+            })
+    return documents
 
 
 # ══════════════════════════════════════════════════════════════════

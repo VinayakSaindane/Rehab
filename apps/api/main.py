@@ -1,7 +1,9 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from config import settings
 from database import db_manager, get_db_collection
 from seed import seed_database
@@ -32,6 +34,14 @@ app = FastAPI(
     description="Camera-Assisted Home Rehabilitation Platform API — PS 05 (TechHives)",
     version=settings.VERSION,
     lifespan=lifespan
+)
+
+# Uploads are intentionally local for the demo deployment. Mounting the
+# directory makes the URL returned by the upload endpoint usable by both roles.
+app.mount(
+    "/uploads",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "uploads"), check_dir=False),
+    name="uploads",
 )
 
 # CORS — allow local dev origins (expand this list for production domains)
