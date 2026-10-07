@@ -61,6 +61,8 @@ export default function PatientDashboardPage() {
     };
 
     try {
+      const backendDocs = await api.getHospitalPatientDocuments(patientId, user?.email);
+      setDocumentsCount(backendDocs.length);
       const res = await api.getPatientDashboard();
       setData({
         ...res,

@@ -10,6 +10,9 @@ function getToken(): string | null {
 
 function getAuthHeader(): Record<string, string> {
   const token = getToken();
+  if (token && token.split('.').length !== 3) {
+    return {};
+  }
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

@@ -124,7 +124,9 @@ export default function HospitalPatientDetailPage() {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('patient_id', patient.id);
-        const token = localStorage.getItem('rehab_token');
+        formData.append('patient_email', patient.email);
+        const storedToken = localStorage.getItem('rehab_token');
+        const token = storedToken && storedToken.split('.').length === 3 ? storedToken : null;
         const response = await fetch('http://localhost:8000/api/hospital/onboard/upload-report', {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},

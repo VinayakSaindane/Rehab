@@ -27,6 +27,42 @@ from routers.auth import get_current_user
 
 router = APIRouter(prefix="/hospital", tags=["Hospital & Marketplace"])
 
+
+async def resolve_patient_id(patient_id: Optional[str], patient_email: Optional[str]) -> Optional[str]:
+    """Resolve frontend/demo identifiers to the canonical clinical patient id."""
+    users_col = get_db_collection("users")
+    patients_col = get_db_collection("patients")
+
+    if patient_email:
+        user = await users_col.find_one({"email": patient_email})
+        if user:
+            patient = await patients_col.find_one(
+                {"$or": [{"id": user.get("id")}, {"user_id": user.get("id")}]}
+            )
+            return (patient or user).get("id")
+
+    if patient_id:
+        patient = await patients_col.find_one(
+            {"$or": [{"id": patient_id}, {"user_id": patient_id}]}
+        )
+        if patient:
+            return patient.get("id")
+
+        # The browser demo seed uses a separate local-storage identity for
+        # the same backend demo patient.
+        if patient_id == "patient-001":
+            patient = await patients_col.find_one({"id": "patient-1"})
+            if patient:
+                return patient["id"]
+
+    if patient_email == "patient@demo.com":
+        patient = await patients_col.find_one({"id": "patient-1"})
+        if patient:
+            return patient["id"]
+
+    return patient_id
+
+
 # ══════════════════════════════════════════════════════════════════
 # HOSPITAL DASHBOARD
 # ══════════════════════════════════════════════════════════════════
@@ -140,6 +176,7 @@ async def onboard_patient(
 async def upload_report(
     file: UploadFile = File(...),
     patient_id: Optional[str] = Form(None),
+    patient_email: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -162,11 +199,12 @@ async def upload_report(
 
     # Return a mock URL \u2014 in production this would be a real signed S3/GCS URL
     mock_url = f"/uploads/{safe_filename}"
-    if patient_id:
+    if patient_id or patient_email:
         documents_col = get_db_collection("hospital_documents")
+        resolved_patient_id = await resolve_patient_id(patient_id, patient_email)
         await documents_col.insert_one({
             "id": f"hosp-doc-{uuid.uuid4().hex[:8]}",
-            "patient_id": patient_id,
+            "patient_id": resolved_patient_id,
             "name": original_filename,
             "file_name": original_filename,
             "file_url": mock_url,
@@ -194,11 +232,33 @@ async def get_patient_documents(
     records_col = get_db_collection("hospital_onboarding")
     documents_col = get_db_collection("hospital_documents")
     patient_ids = [patient_id]
+    users_col = get_db_collection("users")
+    patients_col = get_db_collection("patients")
+
+    # A patient can be addressed by the UI user id, the clinical profile id,
+    # or (for older demo records) the local mock id. Resolve all known aliases
+    # so every care-team surface reads the same document set.
+    patient = await patients_col.find_one(
+        {"$or": [{"id": patient_id}, {"user_id": patient_id}]}
+    )
+    if patient:
+        for candidate_id in (patient.get("id"), patient.get("user_id")):
+            if candidate_id and candidate_id not in patient_ids:
+                patient_ids.append(candidate_id)
+    resolved_patient_id = await resolve_patient_id(patient_id, patient_email)
+    if resolved_patient_id and resolved_patient_id not in patient_ids:
+        patient_ids.append(resolved_patient_id)
     if patient_email:
-        users_col = get_db_collection("users")
         user = await users_col.find_one({"email": patient_email})
-        if user and user.get("id") not in patient_ids:
-            patient_ids.append(user["id"])
+        if user:
+            for candidate_id in (user.get("id"),):
+                if candidate_id and candidate_id not in patient_ids:
+                    patient_ids.append(candidate_id)
+            patient = await patients_col.find_one({"user_id": user.get("id")})
+            if patient:
+                for candidate_id in (patient.get("id"), patient.get("user_id")):
+                    if candidate_id and candidate_id not in patient_ids:
+                        patient_ids.append(candidate_id)
 
     records = []
     for candidate_id in patient_ids:

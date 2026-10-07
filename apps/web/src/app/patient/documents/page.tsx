@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { api } from '@/lib/api';
 import { mockStorage, MockDocument } from '@/lib/mock-storage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
@@ -26,12 +27,43 @@ export default function PatientDocumentsPage() {
   const [previewDoc, setPreviewDoc] = useState<MockDocument | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     mockStorage.init();
-    // Privacy guarantee: ONLY retrieve documents for the currently authenticated patient!
+    // Keep local mock data as an offline fallback, but use the backend as the
+    // source of truth whenever the hospital has uploaded a real document.
     const myDocs = mockStorage.getDocuments(patientId);
     setDocuments(myDocs);
-    setLoading(false);
-  }, [patientId]);
+    const loadDocuments = async () => {
+      try {
+        const backendDocs = await api.getHospitalPatientDocuments(patientId, user?.email);
+        if (!cancelled) {
+          setDocuments(backendDocs.map((doc) => ({
+            id: doc.id,
+            patientId: doc.patient_id || patientId,
+            name: doc.name,
+            type: 'Other',
+            fileName: doc.file_name || doc.name,
+            fileSize: doc.file_size ? `${Math.round(doc.file_size / 1024)} KB` : undefined,
+            uploadedAt: doc.uploaded_at || new Date().toISOString(),
+            uploadedBy: doc.uploaded_by || 'hospital',
+            uploaderName: doc.uploader_name || 'Hospital',
+            summary: doc.summary,
+            fileData: doc.file_url?.startsWith('/')
+              ? `http://localhost:8000${doc.file_url}`
+              : doc.file_url,
+          })));
+        }
+      } catch (error) {
+        console.warn('Unable to load hospital documents from the backend:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void loadDocuments();
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId, user?.email]);
 
   return (
     <ProtectedRoute allowedRoles={['PATIENT']}>
