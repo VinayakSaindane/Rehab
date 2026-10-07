@@ -18,6 +18,7 @@ import {
   Calendar,
   Sparkles
 } from 'lucide-react';
+import AudioCoachWidget from '@/components/AudioCoachWidget';
 
 export default function PatientDashboardPage() {
   const router = useRouter();
@@ -178,6 +179,9 @@ export default function PatientDashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Multi-Language Voice & Spatial Earphone Calibration Widget */}
+        <AudioCoachWidget />
 
         {/* 3 Metric Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -19,6 +19,7 @@ export interface CompensationResult {
   hasCompensation: boolean;
   compensation_flags: string[];         // snake_case strings matching SessionCreate.compensation_flags
   reasons: string[];                    // Human-readable explanations for HUD display
+  faultSide?: 'left' | 'right' | null;  // Identifies whether left or right body posture is compromised
 }
 
 // ── Thresholds ──────────────────────────────────────────────────────────────
@@ -48,9 +49,11 @@ export class CompensationDetector {
     const flags: string[] = [];
     const reasons: string[] = [];
 
+    let faultSide: 'left' | 'right' | null = null;
+
     if (!landmarks || landmarks.length < 29) {
       // Not enough landmarks to evaluate secondary metrics.
-      return { hasCompensation: false, compensation_flags: [], reasons: [] };
+      return { hasCompensation: false, compensation_flags: [], reasons: [], faultSide: null };
     }
 
     const leftShoulder  = landmarks[MEDIAPIPE_LANDMARK_INDEX['left_shoulder']];
@@ -59,7 +62,7 @@ export class CompensationDetector {
     const rightHip      = landmarks[MEDIAPIPE_LANDMARK_INDEX['right_hip']];
 
     if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) {
-      return { hasCompensation: false, compensation_flags: [], reasons: [] };
+      return { hasCompensation: false, compensation_flags: [], reasons: [], faultSide: null };
     }
 
     // ── 1. Trunk Lean ──────────────────────────────────────────────────────
@@ -83,8 +86,10 @@ export class CompensationDetector {
 
       if (inRep && trunkLeanDeg > TRUNK_LEAN_THRESHOLD_DEG) {
         flags.push('trunk_lean');
+        const leanSide: 'left' | 'right' = spineVecX < 0 ? 'left' : 'right';
+        faultSide = faultSide || leanSide;
         reasons.push(
-          `Trunk lean detected (${trunkLeanDeg.toFixed(1)}° from vertical). Keep your back straight and avoid leaning.`
+          `Trunk lean detected (${trunkLeanDeg.toFixed(1)}° towards ${leanSide}). Keep your back straight and avoid leaning.`
         );
       }
     }
@@ -97,8 +102,9 @@ export class CompensationDetector {
       const shoulderDeltaY = rightShoulder.y - leftShoulder.y; // positive → left shoulder hiked
       const absDelta = Math.abs(shoulderDeltaY);
       if (absDelta > SHOULDER_HIKE_THRESHOLD) {
-        const hikedSide = shoulderDeltaY > 0 ? 'left' : 'right';
+        const hikedSide: 'left' | 'right' = shoulderDeltaY > 0 ? 'left' : 'right';
         flags.push('shoulder_hike');
+        faultSide = faultSide || hikedSide;
         reasons.push(
           `Shoulder hike detected on ${hikedSide} side. Relax your shoulder and keep it level.`
         );
@@ -113,11 +119,13 @@ export class CompensationDetector {
       // Between reps — reset baseline to current position.
       this.baselineHipMidX = currentHipMidX;
     } else if (this.baselineHipMidX !== null) {
-      const hipDrift = Math.abs(currentHipMidX - this.baselineHipMidX);
-      if (hipDrift > PELVIC_SHIFT_THRESHOLD) {
+      const hipDrift = currentHipMidX - this.baselineHipMidX;
+      if (Math.abs(hipDrift) > PELVIC_SHIFT_THRESHOLD) {
+        const shiftSide: 'left' | 'right' = hipDrift > 0 ? 'right' : 'left';
         flags.push('pelvic_shift');
+        faultSide = faultSide || shiftSide;
         reasons.push(
-          `Uneven weight shift detected. Keep your hips stable and distribute weight evenly.`
+          `Uneven weight shift detected towards ${shiftSide}. Keep your hips stable and distribute weight evenly.`
         );
       }
     }
@@ -125,7 +133,8 @@ export class CompensationDetector {
     return {
       hasCompensation: flags.length > 0,
       compensation_flags: flags,
-      reasons
+      reasons,
+      faultSide
     };
   }
 

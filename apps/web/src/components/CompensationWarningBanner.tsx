@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Activity, TriangleAlert } from 'lucide-react';
+import { Activity, TriangleAlert, Headphones } from 'lucide-react';
 
 interface CompensationWarningBannerProps {
   hasCompensation: boolean;
   compensationFlags: string[];
   reasons: string[];
+  faultSide?: 'left' | 'right' | null;
 }
 
 /** User-friendly label mapping for compensation flag strings */
@@ -20,6 +21,7 @@ export default function CompensationWarningBanner({
   hasCompensation,
   compensationFlags,
   reasons,
+  faultSide,
 }: CompensationWarningBannerProps) {
   if (!hasCompensation || compensationFlags.length === 0) return null;
 
@@ -34,7 +36,13 @@ export default function CompensationWarningBanner({
             Movement Compensation Detected
           </h4>
           {/* Flag chips */}
-          <div className="flex gap-1 flex-wrap">
+          <div className="flex gap-1 items-center flex-wrap">
+            {faultSide && (
+              <span className="text-[10px] bg-amber-950 text-amber-200 border border-amber-500/60 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 animate-pulse">
+                <Headphones className="w-3 h-3 text-amber-400" />
+                <span>Buzzing {faultSide === 'left' ? '⬅️ Left Earphone' : 'Right Earphone ➡️'}</span>
+              </span>
+            )}
             {compensationFlags.map((flag) => (
               <span
                 key={flag}

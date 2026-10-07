@@ -132,13 +132,19 @@ export interface TherapistReview {
   notes?: string;
 }
 
+export type SupportedLanguage = 'en' | 'hi' | 'mr';
+
 export type FeedbackSeverity = 'info' | 'warning' | 'success';
 
 export interface FeedbackEvent {
-  type: 'RANGE_LOW' | 'RANGE_GOOD' | 'REP_COMPLETE' | 'PAUSED_CONFIDENCE' | 'REST' | 'COMPLETED' | 'CAMERA_ADJUST';
+  type: 'RANGE_LOW' | 'RANGE_GOOD' | 'REP_COMPLETE' | 'PAUSED_CONFIDENCE' | 'REST' | 'COMPLETED' | 'CAMERA_ADJUST' | 'COMPENSATION_ALERT';
   message: string;
   severity: FeedbackSeverity;
   timestamp: number;
+  side?: 'left' | 'right' | 'center';
+  faultSide?: 'left' | 'right' | null;
+  compensationFlag?: string;
+  language?: SupportedLanguage;
 }
 
 export interface CameraReadinessResult {

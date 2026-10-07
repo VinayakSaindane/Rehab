@@ -3,7 +3,7 @@ import { ConfidenceGate, ConfidenceGateResult } from '../confidence-gate';
 import { CompensationDetector, CompensationResult } from '../compensation-detector';
 import { RepetitionStateMachine, RepTransitionResult } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
-import { FeedbackEvent } from '@rehabsense/types';
+import { FeedbackEvent, SupportedLanguage } from '@rehabsense/types';
 
 export interface ExerciseFrameAnalysis {
   jointAngle: number;
@@ -27,7 +27,8 @@ export class ElbowFlexionAnalyzer {
     prescribedTargetRom = 120,
     targetReps = 10,
     voiceEnabled = true,
-    side: 'left' | 'right' = 'left'
+    side: 'left' | 'right' = 'left',
+    language: SupportedLanguage = 'en'
   ) {
     this.targetReps = targetReps;
     this.side = side;
@@ -42,11 +43,15 @@ export class ElbowFlexionAnalyzer {
       prescribedTargetRom,
       romToleranceDegrees: 8
     });
-    this.feedbackEngine = new FeedbackEngine(voiceEnabled);
+    this.feedbackEngine = new FeedbackEngine(voiceEnabled, language);
   }
 
   public setVoiceEnabled(enabled: boolean): void {
     this.feedbackEngine.setVoiceEnabled(enabled);
+  }
+
+  public setLanguage(lang: SupportedLanguage): void {
+    this.feedbackEngine.setLanguage(lang);
   }
 
   public setSide(side: 'left' | 'right'): void {
@@ -95,7 +100,9 @@ export class ElbowFlexionAnalyzer {
     const feedbackEvent = this.feedbackEngine.generateFeedback(
       confidenceResult,
       repResult,
-      this.targetReps
+      this.targetReps,
+      compensationResult,
+      this.side
     );
 
     return {

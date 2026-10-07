@@ -4,6 +4,7 @@ import { CompensationDetector } from '../compensation-detector';
 import { RepetitionStateMachine } from '../rep-state-machine';
 import { FeedbackEngine } from '../feedback-engine';
 import { ExerciseFrameAnalysis } from './elbow-flexion';
+import { SupportedLanguage } from '@rehabsense/types';
 
 export class ShoulderAbductionAnalyzer {
   private confidenceGate: ConfidenceGate;
@@ -17,7 +18,8 @@ export class ShoulderAbductionAnalyzer {
     prescribedTargetRom = 90,
     targetReps = 10,
     voiceEnabled = true,
-    side: 'left' | 'right' = 'left'
+    side: 'left' | 'right' = 'left',
+    language: SupportedLanguage = 'en'
   ) {
     this.targetReps = targetReps;
     this.side = side;
@@ -32,11 +34,15 @@ export class ShoulderAbductionAnalyzer {
       prescribedTargetRom,
       romToleranceDegrees: 8
     });
-    this.feedbackEngine = new FeedbackEngine(voiceEnabled);
+    this.feedbackEngine = new FeedbackEngine(voiceEnabled, language);
   }
 
   public setVoiceEnabled(enabled: boolean): void {
     this.feedbackEngine.setVoiceEnabled(enabled);
+  }
+
+  public setLanguage(lang: SupportedLanguage): void {
+    this.feedbackEngine.setLanguage(lang);
   }
 
   public setSide(side: 'left' | 'right'): void {
@@ -80,7 +86,9 @@ export class ShoulderAbductionAnalyzer {
     const feedbackEvent = this.feedbackEngine.generateFeedback(
       confidenceResult,
       repResult,
-      this.targetReps
+      this.targetReps,
+      compensationResult,
+      this.side
     );
 
     return {

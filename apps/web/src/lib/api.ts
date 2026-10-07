@@ -149,8 +149,12 @@ export const api = {
   getPrescriptions: (patientId?: string) =>
     request<any[]>(`/prescriptions${patientId ? `?patient_id=${patientId}` : ''}`),
   updatePrescription: (prescriptionId: string, payload: {
+    exercise_id?: string;
+    exercise_name?: string;
     target_rom?: number;
     target_reps?: number;
+    min_rom?: number;
+    max_rom?: number;
     notes?: string;
     status?: string;
     frequency_per_day?: number;

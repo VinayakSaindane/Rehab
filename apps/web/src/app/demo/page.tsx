@@ -16,6 +16,7 @@ import {
   ExternalLink,
   AlertTriangle
 } from 'lucide-react';
+import AudioCoachWidget from '@/components/AudioCoachWidget';
 
 export default function DemoPortalPage() {
   const router = useRouter();
@@ -178,6 +179,9 @@ export default function DemoPortalPage() {
           </div>
 
         </div>
+
+        {/* Live Audio Coach & Binaural Earphone Posture Calibration */}
+        <AudioCoachWidget />
 
         {/* Step-by-Step Judge Walkthrough Script */}
         <div className="glass-card-strong rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-xl space-y-6 backdrop-blur-3xl">

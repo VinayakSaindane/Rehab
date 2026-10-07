@@ -13,7 +13,9 @@ import {
   VolumeX, 
   Eye, 
   Type, 
-  Sparkles
+  Sparkles,
+  Headphones,
+  Globe
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
@@ -21,7 +23,18 @@ export default function TopNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { role, switchRole } = useAuth();
-  const { highContrast, largeText, voiceEnabled, toggleHighContrast, toggleLargeText, toggleVoice } = useAccessibility();
+  const { 
+    highContrast, 
+    largeText, 
+    voiceEnabled, 
+    language,
+    earphoneMode,
+    toggleHighContrast, 
+    toggleLargeText, 
+    toggleVoice,
+    setLanguage,
+    toggleEarphoneMode
+  } = useAccessibility();
 
   const handleRoleToggle = async (newRole: UserRole) => {
     await switchRole(newRole);
@@ -164,7 +177,32 @@ export default function TopNavbar() {
         {/* Right Controls: Role Switcher & Accessibility */}
         <div className="flex items-center gap-2">
           
-          {/* Accessibility Toggles */}
+          {/* Multi-Language Voice Selector */}
+          <div className="hidden sm:flex items-center glass-chip rounded-xl p-0.5 space-x-0.5 border border-white/80 text-[11px] font-bold">
+            <button
+              onClick={() => setLanguage('en')}
+              className={`px-2 py-1 rounded-lg transition-all ${language === 'en' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
+              title="Audio Coach: English"
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLanguage('hi')}
+              className={`px-2 py-1 rounded-lg transition-all ${language === 'hi' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
+              title="Audio Coach: हिन्दी (Hindi)"
+            >
+              हिन्दी
+            </button>
+            <button
+              onClick={() => setLanguage('mr')}
+              className={`px-2 py-1 rounded-lg transition-all ${language === 'mr' ? 'bg-[#244b38] text-white shadow-xs' : 'text-[#435147] hover:text-[#1a2620]'}`}
+              title="Audio Coach: मराठी (Marathi)"
+            >
+              मराठी
+            </button>
+          </div>
+
+          {/* Accessibility Toggles & Spatial Audio */}
           <div className="flex items-center glass-chip rounded-xl p-1 space-x-1 border border-white/80">
             <button
               onClick={toggleVoice}
@@ -172,6 +210,17 @@ export default function TopNavbar() {
               className={`p-1.5 rounded-lg transition-colors ${voiceEnabled ? 'text-[#244b38] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
             >
               {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+
+            <button
+              onClick={toggleEarphoneMode}
+              title={earphoneMode ? 'Directional Earphone Feedback: ON (Left/Right Buzz)' : 'Directional Earphone Feedback: OFF'}
+              className={`p-1.5 rounded-lg transition-colors relative ${earphoneMode ? 'text-[#244b38] bg-white shadow-xs' : 'text-stone-400 hover:text-stone-600'}`}
+            >
+              <Headphones className="w-4 h-4" />
+              {earphoneMode && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
             </button>
 
             <button

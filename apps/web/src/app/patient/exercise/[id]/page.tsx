@@ -19,6 +19,8 @@ import JointAngleGauge from '@/components/JointAngleGauge';
 import RepProgressCard from '@/components/RepProgressCard';
 import ConfidenceGateBanner from '@/components/ConfidenceGateBanner';
 import CompensationWarningBanner from '@/components/CompensationWarningBanner';
+import { audioCoach } from '@/lib/audio-coach';
+import { spatialAudio } from '@/lib/spatial-audio';
 import { 
   Camera, 
   Volume2, 
@@ -33,14 +35,26 @@ import {
   Pause,
   Award,
   Activity,
-  Smile
+  Smile,
+  Headphones,
+  Globe
 } from 'lucide-react';
 
 export default function LiveExerciseScreen() {
   const params = useParams();
   const router = useRouter();
   const exerciseId = (params?.id as string) || 'elbow-flexion';
-  const { voiceEnabled, toggleVoice } = useAccessibility();
+  const { 
+    voiceEnabled, 
+    toggleVoice, 
+    language, 
+    setLanguage, 
+    earphoneMode, 
+    toggleEarphoneMode, 
+    activePanSide, 
+    testEarphone, 
+    playSuccessChime 
+  } = useAccessibility();
 
   // Engine & Video References
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -90,6 +104,7 @@ export default function LiveExerciseScreen() {
   const [hasCompensation, setHasCompensation] = useState(false);
   const [compensationFlags, setCompensationFlags] = useState<string[]>([]);
   const [compensationReasons, setCompensationReasons] = useState<string[]>([]);
+  const [faultSide, setFaultSide] = useState<'left' | 'right' | null>(null);
   // Aggregated compensation flags across this session (sent in payload)
   const sessionCompensationFlagsRef = React.useRef<Set<string>>(new Set());
 
@@ -102,7 +117,7 @@ export default function LiveExerciseScreen() {
   useEffect(() => {
     let analyzer: any;
     if (exerciseId === 'shoulder-flexion') {
-      analyzer = new ShoulderFlexionAnalyzer(135, 10, voiceEnabled, activeSide);
+      analyzer = new ShoulderFlexionAnalyzer(135, 10, voiceEnabled, activeSide, language);
       setExerciseMeta({
         name: 'Shoulder Flexion (Elevations)',
         targetReps: 10,
@@ -114,7 +129,7 @@ export default function LiveExerciseScreen() {
       });
       setActiveJointIndices(activeSide === 'right' ? [24, 12, 14] : [23, 11, 13]);
     } else if (exerciseId === 'sit-to-stand') {
-      analyzer = new SitToStandAnalyzer(165, 10, voiceEnabled, activeSide);
+      analyzer = new SitToStandAnalyzer(165, 10, voiceEnabled, activeSide, language);
       setExerciseMeta({
         name: 'Sit-to-Stand Functional Transfer',
         targetReps: 10,
@@ -126,7 +141,7 @@ export default function LiveExerciseScreen() {
       });
       setActiveJointIndices(activeSide === 'right' ? [24, 26, 28] : [23, 25, 27]);
     } else if (exerciseId === 'knee-extension') {
-      analyzer = new KneeExtensionAnalyzer(170, 10, voiceEnabled, activeSide);
+      analyzer = new KneeExtensionAnalyzer(170, 10, voiceEnabled, activeSide, language);
       setExerciseMeta({
         name: 'Seated Knee Extension (Quad Sets)',
         targetReps: 10,
@@ -138,7 +153,7 @@ export default function LiveExerciseScreen() {
       });
       setActiveJointIndices(activeSide === 'right' ? [24, 26, 28] : [23, 25, 27]);
     } else if (exerciseId === 'shoulder-abduction') {
-      analyzer = new ShoulderAbductionAnalyzer(90, 10, voiceEnabled, activeSide);
+      analyzer = new ShoulderAbductionAnalyzer(90, 10, voiceEnabled, activeSide, language);
       setExerciseMeta({
         name: 'Shoulder Abduction (Lateral Raise)',
         targetReps: 10,
@@ -150,7 +165,7 @@ export default function LiveExerciseScreen() {
       });
       setActiveJointIndices(activeSide === 'right' ? [24, 12, 14] : [23, 11, 13]);
     } else {
-      analyzer = new ElbowFlexionAnalyzer(120, 10, voiceEnabled, activeSide);
+      analyzer = new ElbowFlexionAnalyzer(120, 10, voiceEnabled, activeSide, language);
       setExerciseMeta({
         name: 'Elbow Flexion & Extension',
         targetReps: 10,
@@ -163,7 +178,7 @@ export default function LiveExerciseScreen() {
       setActiveJointIndices(activeSide === 'right' ? [12, 14, 16] : [11, 13, 15]);
     }
     analyzerRef.current = analyzer;
-  }, [exerciseId, voiceEnabled, activeSide]);
+  }, [exerciseId, voiceEnabled, activeSide, language]);
 
   // Start Camera Stream or MediaPipe (supports smartphone front/rear camera flipping)
   const initCamera = useCallback(async (desiredFacing?: 'user' | 'environment') => {
@@ -236,13 +251,18 @@ export default function LiveExerciseScreen() {
 
   const startCountdown = () => {
     setCountdown(3);
+    audioCoach.speak(audioCoach.getPhrase('countdown_3'));
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev === null || prev <= 1) {
           clearInterval(interval);
+          audioCoach.speak(audioCoach.getPhrase('countdown_begin'));
           return null;
         }
-        return prev - 1;
+        const next = prev - 1;
+        if (next === 2) audioCoach.speak(audioCoach.getPhrase('countdown_2'));
+        if (next === 1) audioCoach.speak(audioCoach.getPhrase('countdown_1'));
+        return next;
       });
     }, 1000);
   };
@@ -338,6 +358,15 @@ export default function LiveExerciseScreen() {
       setHasCompensation(comp.hasCompensation);
       setCompensationFlags(comp.compensation_flags);
       setCompensationReasons(comp.reasons);
+      const activeFault = comp.faultSide || (comp.hasCompensation ? activeSide : null);
+      setFaultSide(activeFault);
+
+      // Trigger Directional Earphone Buzz if compensation is detected and confidence passes
+      if (comp.hasCompensation && !analysis.confidenceResult.isGated && activeFault) {
+        const flagKey = (comp.compensation_flags[0] as any) || 'general';
+        audioCoach.triggerDirectionalCorrection(activeFault, flagKey);
+      }
+
       // Accumulate unique flags for session payload
       comp.compensation_flags.forEach((f: string) => sessionCompensationFlagsRef.current.add(f));
 
@@ -357,13 +386,18 @@ export default function LiveExerciseScreen() {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted]);
+  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted, activeSide]);
 
   // Handle Session Completion
   const handleFinishSession = async (userSelectedPain?: number) => {
     if (isSessionCompleted) return;
     setIsSessionCompleted(true);
     setSavingSession(true);
+
+    try {
+      playSuccessChime();
+      audioCoach.speak(audioCoach.getPhrase('target_completed', { targetReps: exerciseMeta.targetReps }));
+    } catch {}
 
     const effectivePain = typeof userSelectedPain === 'number' ? userSelectedPain : painScore;
 
@@ -540,6 +574,82 @@ export default function LiveExerciseScreen() {
               </select>
             )}
 
+            {/* Audio Language Selector */}
+            <div className="flex items-center bg-white/10 rounded-xl p-0.5 border border-white/10 text-xs">
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  language === 'en' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Audio Language: English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('hi')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  language === 'hi' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Audio Language: हिन्दी (Hindi)"
+              >
+                हिन्दी
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('mr')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  language === 'mr' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Audio Language: मराठी (Marathi)"
+              >
+                मराठी
+              </button>
+            </div>
+
+            {/* Binaural Earphone Posture Coach Toggle & Quick Test */}
+            <div className="flex items-center bg-white/10 rounded-xl p-0.5 border border-white/10 text-xs">
+              <button
+                type="button"
+                onClick={toggleEarphoneMode}
+                className={`p-1.5 rounded-lg transition-all relative ${
+                  earphoneMode ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title={earphoneMode ? 'Spatial Earphone Feedback: ON (Left/Right Buzz)' : 'Earphones: OFF'}
+              >
+                <Headphones className="w-3.5 h-3.5" />
+                {earphoneMode && (
+                  <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${activePanSide !== 'center' ? 'bg-amber-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
+                )}
+              </button>
+
+              {earphoneMode && (
+                <div className="flex items-center gap-0.5 px-1">
+                  <button
+                    type="button"
+                    onClick={() => testEarphone('left')}
+                    className={`px-1.5 py-0.5 text-[10px] rounded font-bold transition-all ${
+                      activePanSide === 'left' ? 'bg-amber-400 text-slate-950 animate-pulse font-black' : 'text-slate-300 hover:bg-white/10'
+                    }`}
+                    title="Test Left Earphone (Buzz Left)"
+                  >
+                    L ⬅️
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => testEarphone('right')}
+                    className={`px-1.5 py-0.5 text-[10px] rounded font-bold transition-all ${
+                      activePanSide === 'right' ? 'bg-amber-400 text-slate-950 animate-pulse font-black' : 'text-slate-300 hover:bg-white/10'
+                    }`}
+                    title="Test Right Earphone (Buzz Right)"
+                  >
+                    ➡️ R
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Audio Toggle */}
             <button
               type="button"
@@ -623,6 +733,7 @@ export default function LiveExerciseScreen() {
             hasCompensation={hasCompensation && !isGated}
             compensationFlags={compensationFlags}
             reasons={compensationReasons}
+            faultSide={faultSide}
           />
 
           {/* Floating HUD Side Panel (Desktop Overlay) */}
