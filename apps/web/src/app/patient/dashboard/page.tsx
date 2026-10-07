@@ -204,7 +204,7 @@ export default function PatientDashboardPage() {
                 Estimated duration: ~{data.todays_rehab?.estimated_minutes || 12} minutes
               </p>
             </div>
-            <div className="pt-3 border-t border-sky-100/80 text-xs text-slate-700 flex items-center gap-2">
+            <div className="pt-3 border-t border-white/70 text-xs text-slate-700 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span className="font-medium">{data.todays_rehab?.yesterday_completion || '8 / 10 reps completed yesterday'}</span>
             </div>
@@ -232,7 +232,7 @@ export default function PatientDashboardPage() {
                 Consistent adherence to prescribed home exercises
               </p>
             </div>
-            <div className="pt-3 border-t border-amber-100/80 text-xs text-slate-700 flex items-center gap-2">
+            <div className="pt-3 border-t border-white/70 text-xs text-slate-700 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               <span className="font-medium">Target: 7-day consistency goal</span>
             </div>
@@ -240,18 +240,18 @@ export default function PatientDashboardPage() {
 
           {/* Movement Progress (Neutral Language) */}
           <div className="glass-card rounded-3xl p-6 border border-white/80 shadow-lg hover:shadow-xl transition-all space-y-3 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-400/20 transition-all" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-sky-400/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-400/20 transition-all" />
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Movement Range Trend
               </span>
-              <div className="w-8 h-8 rounded-xl glass-chip flex items-center justify-center text-emerald-600">
+              <div className="w-8 h-8 rounded-xl glass-chip flex items-center justify-center text-sky-600">
                 <TrendingUp className="w-4 h-4" />
               </div>
             </div>
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono tracking-tight">
+                <span className="text-2xl sm:text-3xl font-black text-sky-700 tracking-tight">
                   {data.movement_progress?.label || '+18% ROM'}
                 </span>
               </div>
@@ -259,8 +259,8 @@ export default function PatientDashboardPage() {
                 Measured across last 4 recorded sessions
               </p>
             </div>
-            <div className="pt-3 border-t border-emerald-100/80 text-xs text-slate-700 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="pt-3 border-t border-white/70 text-xs text-slate-700 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-sky-500" />
               <span className="font-medium">Prescribed target: 120° ROM</span>
             </div>
           </div>

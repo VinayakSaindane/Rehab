@@ -11,19 +11,15 @@ import {
   Stethoscope, 
   RotateCcw, 
   ArrowRight, 
-  CheckCircle2, 
   Video, 
-  Sliders, 
-  Eye, 
   Check, 
   ExternalLink,
-  ShieldCheck,
   AlertTriangle
 } from 'lucide-react';
 
 export default function DemoPortalPage() {
   const router = useRouter();
-  const { role, switchRole } = useAuth();
+  const { switchRole } = useAuth();
   const [resetting, setResetting] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
 
@@ -47,23 +43,22 @@ export default function DemoPortalPage() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-10">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-2xl border border-white/20 relative overflow-hidden backdrop-blur-xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+        {/* Floating Light Glass Header Card */}
+        <div className="glass-card-strong rounded-[32px] p-8 sm:p-10 shadow-xl border border-white/90 relative overflow-hidden backdrop-blur-3xl">
           <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-purple-200 border border-white/20 text-xs font-semibold backdrop-blur">
-              <Sparkles className="w-3.5 h-3.5 text-purple-300" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-chip text-sky-800 border border-white/90 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
               <span>Judge & Evaluator Demo Portal</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900">
               RehabSense Live Evaluation Suite
             </h1>
 
-            <p className="text-slate-200 text-sm sm:text-base max-w-3xl leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base max-w-3xl leading-relaxed">
               Experience the end-to-end rehabilitation workflow without manual registration. Pre-seeded with 10 historical sessions, therapist-configured targets, flagged kinematic events, and real-time computer vision analysis.
             </p>
 
@@ -71,15 +66,15 @@ export default function DemoPortalPage() {
               <button
                 onClick={handleResetData}
                 disabled={resetting}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 flex items-center gap-2 transition-all cursor-pointer shadow-sm backdrop-blur"
+                className="px-5 py-2.5 rounded-[18px] glass-chip hover:bg-white text-slate-800 text-xs font-bold border border-white/90 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin' : ''}`} />
                 <span>{resetting ? 'Resetting Data...' : 'Reset Demo to Clean Baseline'}</span>
               </button>
 
               {resetSuccess && (
-                <span className="text-xs text-emerald-300 font-semibold flex items-center gap-1.5 animate-fadeIn">
-                  <Check className="w-4 h-4 text-emerald-300" />
+                <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5 animate-fadeIn">
+                  <Check className="w-4 h-4 text-emerald-600" />
                   <span>Demo state successfully restored!</span>
                 </span>
               )}
@@ -87,17 +82,17 @@ export default function DemoPortalPage() {
           </div>
         </div>
 
-        {/* 1-Click Role Switcher Cards */}
+        {/* 1-Click Role Switcher Floating Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Patient Card */}
-          <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border-2 border-sky-400/60 hover:border-sky-500 shadow-2xl transition-all space-y-4 flex flex-col justify-between group">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/85 hover:border-white shadow-xl transition-all space-y-5 flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-sky-600 border border-sky-200">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-sky-600 border border-white/90">
                   <User className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-sky-800 font-mono border border-sky-200">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-sky-800 font-mono border border-white/90">
                   DEMO PATIENT
                 </span>
               </div>
@@ -109,26 +104,26 @@ export default function DemoPortalPage() {
                 </p>
               </div>
 
-              <div className="glass-card rounded-2xl p-4 text-xs space-y-1.5 text-slate-700 border border-sky-100/80">
-                <p><strong>Assigned Plan:</strong> Elbow Flexion & Extension</p>
-                <p><strong>Prescribed Target:</strong> 120° ROM • 10 reps • 2x/day</p>
-                <p><strong>Streak:</strong> 6 days • 10 historical sessions recorded</p>
-                <p><strong>Supervising Clinician:</strong> Dr. Ananya Sharma</p>
+              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/80">
+                <p><strong className="text-slate-900">Assigned Plan:</strong> Elbow Flexion & Extension</p>
+                <p><strong className="text-slate-900">Prescribed Target:</strong> 120° ROM • 10 reps • 2x/day</p>
+                <p><strong className="text-slate-900">Streak:</strong> 6 days • 10 historical sessions recorded</p>
+                <p><strong className="text-slate-900">Supervising Clinician:</strong> Dr. Ananya Sharma</p>
               </div>
             </div>
 
-            <div className="space-y-2.5 pt-4">
+            <div className="space-y-3 pt-2">
               <button
                 onClick={() => handleSelectRole('PATIENT', '/patient/dashboard')}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/20"
+                className="w-full py-4 rounded-[20px] bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-black text-sm shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
               >
                 <span>Launch Patient Dashboard</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => handleSelectRole('PATIENT', '/patient/exercise/elbow-flexion')}
-                className="w-full py-3 rounded-xl glass-chip hover:bg-white/80 text-sky-800 font-semibold text-xs border border-sky-200 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full py-3.5 rounded-[20px] glass-chip hover:bg-white text-sky-800 font-bold text-xs border border-white/90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <Video className="w-3.5 h-3.5 text-sky-600" />
                 <span>Jump Directly to Live Camera Exercise</span>
@@ -137,13 +132,13 @@ export default function DemoPortalPage() {
           </div>
 
           {/* Therapist Card */}
-          <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border-2 border-teal-400/60 hover:border-teal-500 shadow-2xl transition-all space-y-4 flex flex-col justify-between group">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/85 hover:border-white shadow-xl transition-all space-y-5 flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-teal-600 border border-teal-200">
+                <div className="w-12 h-12 rounded-2xl glass-chip flex items-center justify-center text-teal-600 border border-white/90">
                   <Stethoscope className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-teal-800 font-mono border border-teal-200">
+                <span className="text-xs font-bold px-3 py-1 rounded-full glass-chip text-teal-800 font-mono border border-white/90">
                   DEMO THERAPIST
                 </span>
               </div>
@@ -155,26 +150,26 @@ export default function DemoPortalPage() {
                 </p>
               </div>
 
-              <div className="glass-card rounded-2xl p-4 text-xs space-y-1.5 text-slate-700 border border-teal-100/80">
-                <p><strong>Active Clinical Census:</strong> 14 active patients</p>
-                <p><strong>Pending Flagged Sessions:</strong> 1 requiring clinical review</p>
-                <p><strong>Flagged Event:</strong> Aarav Mehta (Session #6: 108° vs 120°)</p>
-                <p><strong>Authority:</strong> Review, Override Targets & Configure Exercises</p>
+              <div className="glass-card rounded-[22px] p-4 text-xs space-y-1.5 text-slate-700 border border-white/80">
+                <p><strong className="text-slate-900">Active Clinical Census:</strong> 14 active patients</p>
+                <p><strong className="text-slate-900">Pending Flagged Sessions:</strong> 1 requiring clinical review</p>
+                <p><strong className="text-slate-900">Flagged Event:</strong> Aarav Mehta (Session #6: 108° vs 120°)</p>
+                <p><strong className="text-slate-900">Authority:</strong> Review, Override Targets & Configure Exercises</p>
               </div>
             </div>
 
-            <div className="space-y-2.5 pt-4">
+            <div className="space-y-3 pt-2">
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/dashboard')}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/20"
+                className="w-full py-4 rounded-[20px] bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-black text-sm shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
               >
                 <span>Launch Therapist Dashboard</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => handleSelectRole('THERAPIST', '/therapist/review/session-hist-6')}
-                className="w-full py-3 rounded-xl bg-amber-100/70 hover:bg-amber-100 text-amber-900 font-semibold text-xs border border-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full py-3.5 rounded-[20px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 font-bold text-xs border border-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs backdrop-blur"
               >
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                 <span>Jump Directly to Flagged Session Review</span>
@@ -185,7 +180,7 @@ export default function DemoPortalPage() {
         </div>
 
         {/* Step-by-Step Judge Walkthrough Script */}
-        <div className="glass-card-strong rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl space-y-6 backdrop-blur-xl">
+        <div className="glass-card-strong rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-xl space-y-6 backdrop-blur-3xl">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-purple-700">
@@ -242,9 +237,9 @@ export default function DemoPortalPage() {
                 href: "/therapist/dashboard"
               }
             ].map((item) => (
-              <div key={item.step} className="p-4 sm:p-5 rounded-2xl glass-card border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-all">
+              <div key={item.step} className="p-4 sm:p-5 rounded-[22px] glass-card border border-white/85 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white transition-all">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 font-bold text-sm flex items-center justify-center shrink-0 border border-purple-200">
+                  <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 font-black text-sm flex items-center justify-center shrink-0 border border-purple-200">
                     {item.step}
                   </div>
                   <div>
@@ -259,7 +254,7 @@ export default function DemoPortalPage() {
 
                 <Link
                   href={item.href}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-purple-800 glass-chip hover:bg-white/80 border border-purple-200 transition-colors shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-purple-800 glass-chip hover:bg-white/90 border border-white/90 transition-colors shrink-0"
                 >
                   <span>{item.linkText}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -272,4 +267,3 @@ export default function DemoPortalPage() {
     </div>
   );
 }
-

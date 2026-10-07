@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col text-slate-900 antialiased">
+      <body className="min-h-screen flex flex-col text-slate-900 antialiased selection:bg-sky-400/30 selection:text-sky-950">
         <AccessibilityProvider>
           <AuthProvider>
             <TopNavbar />
@@ -26,28 +26,28 @@ export default function RootLayout({
               {children}
             </main>
 
-            {/* Medical Disclaimer & Safety Footer */}
-            <footer className="glass-card-strong text-slate-500 text-xs py-8 border-t border-white/70 mt-10">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-sky-100/80">
+            {/* Medical Disclaimer & Safety Floating Glass Footer */}
+            <footer className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-16 mb-8">
+              <div className="glass-card-strong rounded-[28px] p-6 sm:p-8 border border-white/85 shadow-xl backdrop-blur-3xl text-slate-700">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-white/80">
                   <div className="flex items-center gap-2">
-                    <HeartHandshake className="w-5 h-5 text-sky-400" />
+                    <HeartHandshake className="w-5 h-5 text-sky-600" />
                     <span className="text-slate-900 font-black text-sm tracking-tight">RehabSense</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-slate-500 font-medium">Team TechHives (PS 05)</span>
+                    <span className="text-slate-400">|</span>
+                    <span className="text-slate-600 font-medium text-xs">Team TechHives (PS 05)</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-amber-700 bg-amber-50/70 px-3 py-1.5 rounded-lg border border-amber-200/70 backdrop-blur">
-                    <ShieldAlert className="w-4 h-4 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-amber-900 bg-amber-500/15 px-3.5 py-1.5 rounded-full border border-amber-300/60 backdrop-blur-md text-xs font-semibold">
+                    <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600" />
                     <span>Investigational Clinical Prototype — Not for Unsupervised Medical Diagnosis</span>
                   </div>
                 </div>
 
-                <div className="pt-6 space-y-2 text-[11px] leading-relaxed text-slate-500">
+                <div className="pt-6 space-y-2 text-[12px] leading-relaxed text-slate-600">
                   <p>
-                    <strong className="text-slate-700">Safety Notice:</strong> RehabSense is an assistive movement tracking and feedback tool designed to support home rehabilitation. It does not provide medical diagnoses, treatment prescriptions, or replace licensed physiotherapists.
+                    <strong className="text-slate-900 font-bold">Safety Notice:</strong> RehabSense is an assistive movement tracking and feedback tool designed to support home rehabilitation. It does not provide medical diagnoses, treatment prescriptions, or replace licensed physiotherapists.
                   </p>
                   <p>
-                    <strong className="text-slate-700">Clinician Guidance:</strong> Exercise targets and range-of-motion limits are configured directly by your care team. Always discontinue exercise immediately if you experience pain or discomfort, and consult your treating physiotherapist.
+                    <strong className="text-slate-900 font-bold">Clinician Guidance:</strong> Exercise targets and range-of-motion limits are configured directly by your care team. Always discontinue exercise immediately if you experience pain or discomfort, and consult your treating physiotherapist.
                   </p>
                   <p className="text-slate-500 pt-2">
                     Privacy by Design: Computer vision pose estimation runs directly in your browser. Raw camera imagery is never recorded or streamed to remote servers. Only structured session performance metrics are preserved.

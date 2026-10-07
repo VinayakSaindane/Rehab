@@ -3,62 +3,36 @@
 @tailwind utilities;
 
 :root {
-  --background: #EEF8FF;
-  --foreground: #0B1B34;
-  --card: rgba(255, 255, 255, 0.68);
-  --card-foreground: #0B1B34;
-  --primary: #0477C7;
-  --primary-foreground: #FFFFFF;
-  --border: rgba(125, 183, 232, 0.34);
-  --muted: #53657E;
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-strong: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.72);
-  --glass-shadow: 0 24px 70px rgba(32, 103, 160, 0.16), 0 8px 24px rgba(15, 48, 88, 0.08);
-  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(112, 180, 230, 0.16);
+  --background: #f0f4f9;
+  --foreground: #0b1e3b;
+  --card: rgba(255, 255, 255, 0.55);
+  --card-foreground: #0b1e3b;
+  --primary: #0284c7;
+  --primary-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.85);
+  --muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.52);
+  --glass-bg-strong: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-border-strong: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), 0 4px 16px rgba(12, 45, 95, 0.03);
+  --glass-inner: inset 0 1px 1.5px rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(186, 230, 253, 0.2);
 }
 
 html {
   min-height: 100%;
-  background: #eef8ff;
+  background: #edf2f7;
+  color-scheme: light;
 }
 
 body {
-  color: var(--foreground);
+  color: #0b1e3b;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 16%, rgba(56, 189, 248, 0.34), transparent 30rem),
-    radial-gradient(circle at 88% 8%, rgba(20, 184, 166, 0.22), transparent 28rem),
-    radial-gradient(circle at 72% 78%, rgba(99, 102, 241, 0.18), transparent 34rem),
-    linear-gradient(135deg, #f8fcff 0%, #eaf7ff 42%, #f7fbff 100%);
+  background: url('/user_glass_bg.jpg') center center / cover no-repeat fixed;
   background-attachment: fixed;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -2;
-  background-image:
-    linear-gradient(rgba(14, 116, 144, 0.075) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14, 116, 144, 0.075) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.2));
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.42), transparent 32%),
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.75), transparent 34rem);
 }
 
 main,
@@ -69,65 +43,93 @@ footer {
 }
 
 ::selection {
-  background: rgba(14, 165, 233, 0.22);
-  color: #082f49;
+  background: rgba(56, 189, 248, 0.28);
+  color: #0369a1;
 }
 
 @layer components {
+  /* Iconic Glassmorphism Floating Card (Matched 1:1 to User's Light Glass Reference) */
   .glass-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow), var(--glass-inner);
-    backdrop-filter: blur(22px) saturate(155%);
-    -webkit-backdrop-filter: blur(22px) saturate(155%);
-  }
-
-  .glass-card-strong {
-    background: var(--glass-bg-strong);
-    border: 1px solid rgba(255, 255, 255, 0.82);
-    box-shadow: 0 30px 90px rgba(29, 94, 149, 0.2), 0 10px 28px rgba(15, 48, 88, 0.1), var(--glass-inner);
-    backdrop-filter: blur(28px) saturate(165%);
-    -webkit-backdrop-filter: blur(28px) saturate(165%);
-  }
-
-  .glass-chip {
     background: rgba(255, 255, 255, 0.52);
-    border: 1px solid rgba(255, 255, 255, 0.72);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(35, 108, 168, 0.08);
-    backdrop-filter: blur(16px) saturate(145%);
-    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.38) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(32px) saturate(190%) brightness(102%);
+    -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%);
+    border-radius: 28px;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #0b1e3b;
   }
 
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 26px 65px rgba(12, 45, 95, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 1), 0 0 20px rgba(56, 189, 248, 0.12);
+    transform: translateY(-2px);
+  }
+
+  /* Elevated Primary Light Glass Panel */
+  .glass-card-strong {
+    background: rgba(255, 255, 255, 0.68);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.50) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 24px 60px rgba(12, 45, 95, 0.10), inset 0 1px 2px rgba(255, 255, 255, 1);
+    backdrop-filter: blur(36px) saturate(200%) brightness(103%);
+    -webkit-backdrop-filter: blur(36px) saturate(200%) brightness(103%);
+    border-radius: 28px;
+    color: #0b1e3b;
+  }
+
+  /* Frosted Pill / Badge / Chip */
+  .glass-chip {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(12, 45, 95, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: #0b1e3b;
+  }
+
+  /* Dark HUD Card for Live Camera Viewports */
   .glass-card-dark {
     background: rgba(11, 27, 52, 0.88) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
-    backdrop-filter: blur(24px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
     color: #ffffff !important;
+    border-radius: 28px;
   }
 }
 
-/* Premium light glass pass over the existing Tailwind-heavy UI. */
-:where(section, .min-h-screen) {
+/* Ensure all page containers allow the fixed fluid background to shine through */
+:where(section, main, .min-h-screen) {
   background: transparent !important;
 }
 
+/* Glassify background utility containers */
 :where(
   [class*="bg-white"],
   [class*="bg-slate-50"],
   [class*="bg-slate-100"]
-) {
-  background-color: var(--glass-bg) !important;
-  border-color: var(--glass-border) !important;
+):not(.dark-hud *):not([class*="bg-gradient-"]):not([data-opaque]):not(button[class*="bg-"]):not([class*="bg-emerald-"]):not([class*="bg-sky-"]):not([class*="bg-teal-"]):not([class*="bg-amber-"]):not([class*="bg-purple-"]):not([class*="bg-red-"]):not(input):not(select):not(textarea) {
+  background: rgba(255, 255, 255, 0.52) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.38) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
+  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(
   [class*="bg-slate-800"],
   [class*="bg-slate-900"]
-):not(.dark-surface):not(.dark-hud):not(.dark-surface *):not(.dark-hud *):not([class*="bg-gradient-"]):not([data-dark]) {
-  background-color: var(--glass-bg) !important;
-  border-color: var(--glass-border) !important;
+):not(.dark-surface):not(.dark-hud):not(.dark-surface *):not(.dark-hud *):not([class*="bg-gradient-"]):not([data-dark]):not(input):not(select):not(textarea) {
+  background: rgba(255, 255, 255, 0.65) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.48) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
+  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(
@@ -138,51 +140,56 @@ footer {
   [class*="bg-white"],
   [class*="bg-slate-50"],
   [class*="bg-slate-100"]
-) {
-  box-shadow: var(--glass-shadow), var(--glass-inner) !important;
-  backdrop-filter: blur(22px) saturate(155%);
-  -webkit-backdrop-filter: blur(22px) saturate(155%);
+):not(.dark-hud):not([class*="bg-gradient-"]):not(input):not(select):not(textarea) {
+  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(32px) saturate(190%) brightness(102%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%);
 }
 
+/* Form Controls with Frosted Glass Backdrop */
 :where(input, select, textarea) {
-  background: rgba(255, 255, 255, 0.64) !important;
-  border-color: rgba(132, 184, 226, 0.54) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 10px 24px rgba(32, 103, 160, 0.08);
-  color: #0b1b34 !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: inset 0 1px 2px rgba(12, 45, 95, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  color: #0b1e3b !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+:where(input, select, textarea)::placeholder {
+  color: #64748b !important;
 }
 
 :where(input, select, textarea):focus {
-  border-color: rgba(14, 165, 233, 0.74) !important;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(2, 132, 199, 0.9) !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3), inset 0 1px 2px rgba(12, 45, 95, 0.04) !important;
+  outline: none !important;
 }
 
-:where(h1, h2, h3) {
-  color: #0b1b34;
-  letter-spacing: 0;
+/* Crisp Clean Light Typography */
+:where(h1, h2, h3, h4, h5, h6) {
+  color: #0b1e3b;
+  letter-spacing: -0.02em;
 }
 
-:where(p, li, span, label) {
-  letter-spacing: 0;
+:where(.text-slate-900, .text-slate-800) {
+  color: #0b1e3b !important;
 }
 
-:where(.text-slate-900, .dark\:text-white, .dark\:text-slate-100) {
-  color: #0b1b34 !important;
+:where(.text-slate-700, .text-slate-600) {
+  color: #334155 !important;
 }
 
-:where(.text-slate-800, .text-slate-700, .dark\:text-slate-300) {
-  color: #20344f !important;
+:where(.text-slate-500, .text-slate-400) {
+  color: #64748b !important;
 }
 
-:where(.text-slate-600, .text-slate-500, .dark\:text-slate-400) {
-  color: #53657e !important;
-}
-
-:where(.border-slate-100, .border-slate-200, .border-slate-700, .border-slate-800) {
-  border-color: rgba(125, 183, 232, 0.34) !important;
+:where(.border-slate-100, .border-slate-200, .border-slate-300) {
+  border-color: rgba(255, 255, 255, 0.8) !important;
 }
 
 :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
-  box-shadow: var(--glass-shadow) !important;
+  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(button, a) {
@@ -193,29 +200,29 @@ footer {
 :where(button, a)[class*="bg-teal-600"],
 :where(button, a)[class*="bg-emerald-600"],
 :where(button, a)[class*="bg-amber-600"] {
-  box-shadow: 0 18px 42px rgba(14, 116, 144, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
 }
-
 
 /* High Contrast Mode */
 .high-contrast {
   --background: #000000;
-  --foreground: #FFFFFF;
+  --foreground: #ffffff;
   --card: #121212;
-  --card-foreground: #FFFFFF;
-  --border: #FFFFFF;
-  --muted: #E2E8F0;
+  --card-foreground: #ffffff;
+  --border: #ffffff;
+  --muted: #e2e8f0;
 }
 
 .high-contrast body {
   background-color: #000000 !important;
-  color: #FFFFFF !important;
+  background-image: none !important;
+  color: #ffffff !important;
 }
 
 .high-contrast .card-panel {
-  border: 2px solid #FFFFFF !important;
+  border: 2px solid #ffffff !important;
   background-color: #121212 !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
 }
 
 /* Large Text Mode */
@@ -235,28 +242,18 @@ footer {
   font-size: 1.15rem !important;
 }
 
-/* Clinical Glow and Skeleton animations */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s ease-in-out infinite;
-}
-
 /* Custom crisp scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(240, 246, 255, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: rgba(148, 163, 184, 0.6);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: rgba(2, 132, 199, 0.8);
 }
