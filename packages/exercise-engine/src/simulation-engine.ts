@@ -6,31 +6,28 @@ export class KinematicSimulationEngine {
   private frameCount: number = 0;
   private currentRep: number = 1;
   private pattern: SimulationPattern = 'NORMAL_REPS';
+  private activeSide: 'left' | 'right' = 'right';
 
-  constructor(initialPattern: SimulationPattern = 'NORMAL_REPS') {
+  constructor(initialPattern: SimulationPattern = 'NORMAL_REPS', side: 'left' | 'right' = 'right') {
     this.pattern = initialPattern;
+    this.activeSide = side;
   }
 
   public setPattern(pattern: SimulationPattern): void {
     this.pattern = pattern;
   }
 
+  public setActiveSide(side: 'left' | 'right'): void {
+    this.activeSide = side;
+  }
+
   /**
    * Generates a 33-point MediaPipe-compatible normalized landmark set
-   * simulating realistic patient posture during elbow flexion.
+   * simulating realistic posture during elbow flexion and extension.
    */
   public generateNextFrame(): Point2D[] {
     this.frameCount++;
     const t = this.frameCount * 0.05; // ~20-30 fps cadence
-
-    // Base body coordinates (standing facing camera)
-    // Left shoulder ~ (0.42, 0.35)
-    // Left elbow ~ (0.42, 0.55)
-    // Left wrist moves along an arc around elbow
-    const shoulderX = 0.42;
-    const shoulderY = 0.35;
-    const elbowX = 0.43;
-    const elbowY = 0.54;
 
     // Default landmark visibility
     let visibility = 0.96;
@@ -39,8 +36,8 @@ export class KinematicSimulationEngine {
     }
 
     // Kinematic arm angle generation:
-    // When extended: wrist is down at (0.43, 0.74) -> angle ~160 deg
-    // When flexed: wrist moves up towards shoulder (0.42, 0.38) -> angle ~45-120 deg
+    // When extended: wrist is down -> angle ~160 deg
+    // When flexed: wrist moves up towards shoulder -> angle ~45-120 deg
     const cycle = (Math.sin(t) + 1) / 2; // 0.0 to 1.0
 
     let targetFlexionFactor = cycle;
@@ -49,12 +46,8 @@ export class KinematicSimulationEngine {
       targetFlexionFactor = cycle * 0.65;
     }
 
-    // Compute wrist coordinates based on angle
     const armLength = 0.20;
-    // Angle in radians from vertical down
     const flexAngleRad = targetFlexionFactor * 2.1; // ~120 degrees arc
-    const wristX = elbowX + armLength * Math.sin(flexAngleRad) * 0.4;
-    const wristY = elbowY + armLength * Math.cos(flexAngleRad);
 
     // Build standard 33 MediaPipe landmarks
     const landmarks: Point2D[] = [];
@@ -68,22 +61,42 @@ export class KinematicSimulationEngine {
     landmarks[5] = { x: 0.52, y: 0.16, z: 0, visibility }; // right eye
 
     // Shoulders
-    landmarks[11] = { x: shoulderX, y: shoulderY, z: 0, visibility }; // left shoulder
-    landmarks[12] = { x: 0.58, y: shoulderY, z: 0, visibility }; // right shoulder
+    landmarks[11] = { x: 0.42, y: 0.35, z: 0, visibility }; // left shoulder
+    landmarks[12] = { x: 0.58, y: 0.35, z: 0, visibility }; // right shoulder
 
-    // Left Arm (Active)
-    landmarks[13] = { x: elbowX, y: elbowY, z: 0, visibility }; // left elbow
-    landmarks[15] = { x: wristX, y: wristY, z: 0, visibility }; // left wrist
+    if (this.activeSide === 'right') {
+      // Active Right Arm (moving through flexion & extension)
+      const rElbowX = 0.58;
+      const rElbowY = 0.54;
+      const rWristX = rElbowX + armLength * Math.sin(flexAngleRad) * 0.4;
+      const rWristY = rElbowY + armLength * Math.cos(flexAngleRad);
 
-    // Right Arm (Resting)
-    landmarks[14] = { x: 0.60, y: 0.54, z: 0, visibility }; // right elbow
-    landmarks[16] = { x: 0.61, y: 0.74, z: 0, visibility }; // right wrist
+      landmarks[14] = { x: rElbowX, y: rElbowY, z: 0, visibility }; // right elbow
+      landmarks[16] = { x: rWristX, y: rWristY, z: 0, visibility }; // right wrist
 
-    // Hips
+      // Left Arm (Resting at side)
+      landmarks[13] = { x: 0.42, y: 0.54, z: 0, visibility }; // left elbow
+      landmarks[15] = { x: 0.41, y: 0.74, z: 0, visibility }; // left wrist
+    } else {
+      // Active Left Arm
+      const lElbowX = 0.42;
+      const lElbowY = 0.54;
+      const lWristX = lElbowX - armLength * Math.sin(flexAngleRad) * 0.4;
+      const lWristY = lElbowY + armLength * Math.cos(flexAngleRad);
+
+      landmarks[13] = { x: lElbowX, y: lElbowY, z: 0, visibility }; // left elbow
+      landmarks[15] = { x: lWristX, y: lWristY, z: 0, visibility }; // left wrist
+
+      // Right Arm (Resting)
+      landmarks[14] = { x: 0.58, y: 0.54, z: 0, visibility }; // right elbow
+      landmarks[16] = { x: 0.59, y: 0.74, z: 0, visibility }; // right wrist
+    }
+
+    // Hips (stable upright posture)
     landmarks[23] = { x: 0.44, y: 0.65, z: 0, visibility }; // left hip
     landmarks[24] = { x: 0.56, y: 0.65, z: 0, visibility }; // right hip
 
-    // Knees
+    // Knees (stable upright posture)
     landmarks[25] = { x: 0.44, y: 0.82, z: 0, visibility }; // left knee
     landmarks[26] = { x: 0.56, y: 0.82, z: 0, visibility }; // right knee
 

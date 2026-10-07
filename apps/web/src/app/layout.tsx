@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col text-slate-900 antialiased selection:bg-sky-400/30 selection:text-sky-950">
+      <body className="min-h-screen flex flex-col text-[#1c2620] antialiased selection:bg-emerald-600/20 selection:text-emerald-950">
         <AccessibilityProvider>
           <AuthProvider>
             <TopNavbar />
@@ -28,16 +28,16 @@ export default function RootLayout({
 
             {/* Medical Disclaimer & Safety Floating Glass Footer */}
             <footer className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-16 mb-8">
-              <div className="glass-card-strong rounded-[28px] p-6 sm:p-8 border border-white/85 shadow-xl backdrop-blur-3xl text-slate-700">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-white/80">
+              <div className="glass-card-strong rounded-[28px] p-6 sm:p-8 border border-white/85 shadow-xl backdrop-blur-3xl text-[#435147]">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-stone-200/60">
                   <div className="flex items-center gap-2">
-                    <HeartHandshake className="w-5 h-5 text-sky-600" />
-                    <span className="text-slate-900 font-black text-sm tracking-tight">RehabSense</span>
-                    <span className="text-slate-400">|</span>
-                    <span className="text-slate-600 font-medium text-xs">Team TechHives (PS 05)</span>
+                    <HeartHandshake className="w-5 h-5 text-[#244b38]" />
+                    <span className="text-[#1a2620] font-black text-sm tracking-tight">RehabSense</span>
+                    <span className="text-stone-300">|</span>
+                    <span className="text-[#6d7b71] font-medium text-xs">Team TechHives (PS 05)</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-amber-900 bg-amber-500/15 px-3.5 py-1.5 rounded-full border border-amber-300/60 backdrop-blur-md text-xs font-semibold">
-                    <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600" />
+                  <div className="flex items-center gap-1.5 text-[#7a3f22] bg-[#fbf1eb] px-3.5 py-1.5 rounded-full border border-[#ebd0c2] backdrop-blur-md text-xs font-semibold">
+                    <ShieldAlert className="w-4 h-4 shrink-0 text-[#b86b45]" />
                     <span>Investigational Clinical Prototype — Not for Unsupervised Medical Diagnosis</span>
                   </div>
                 </div>

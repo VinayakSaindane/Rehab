@@ -386,8 +386,12 @@ export default function TherapistExercisesPage() {
       const active = prescriptions?.find((p: any) => p.status === 'ACTIVE');
       if (active) {
         await api.updatePrescription(active.id, {
+          exercise_id: selectedExercise.id,
+          exercise_name: selectedExercise.name,
           target_rom: targetRom,
           target_reps: targetReps,
+          min_rom: selectedExercise.default_rom?.min ?? 40,
+          max_rom: selectedExercise.default_rom?.max ?? 140,
           notes: `Active protocol changed to ${selectedExercise.name} (${targetRom}° ROM, ${targetReps} reps).`
         });
       }

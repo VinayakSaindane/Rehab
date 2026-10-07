@@ -3,32 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --background: #f0f4f9;
-  --foreground: #0b1e3b;
-  --card: rgba(255, 255, 255, 0.55);
-  --card-foreground: #0b1e3b;
-  --primary: #0284c7;
+  --background: #f8f6f0;
+  --foreground: #1c2620;
+  --card: rgba(255, 253, 249, 0.72);
+  --card-foreground: #1c2620;
+  --primary: #2d5542;
   --primary-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.85);
-  --muted: #64748b;
-  --glass-bg: rgba(255, 255, 255, 0.52);
-  --glass-bg-strong: rgba(255, 255, 255, 0.68);
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-border-strong: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), 0 4px 16px rgba(12, 45, 95, 0.03);
-  --glass-inner: inset 0 1px 1.5px rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(186, 230, 253, 0.2);
+  --border: rgba(228, 222, 210, 0.85);
+  --muted: #6e7d73;
+  --glass-bg: rgba(255, 253, 249, 0.70);
+  --glass-bg-strong: rgba(255, 254, 251, 0.86);
+  --glass-border: rgba(232, 226, 215, 0.85);
+  --glass-border-strong: rgba(242, 237, 228, 0.95);
+  --glass-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), 0 3px 12px rgba(35, 45, 38, 0.02);
+  --glass-inner: inset 0 1px 1.5px rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(220, 214, 202, 0.25);
 }
 
 html {
   min-height: 100%;
-  background: #edf2f7;
+  background: #f8f6f0;
   color-scheme: light;
 }
 
 body {
-  color: #0b1e3b;
+  color: #1c2620;
   min-height: 100vh;
-  background: url('/user_glass_bg.jpg') center center / cover no-repeat fixed;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(220, 235, 224, 0.65) 0%, transparent 60%),
+    radial-gradient(circle at 10% 25%, rgba(246, 238, 228, 0.85) 0%, transparent 40%),
+    radial-gradient(circle at 90% 40%, rgba(228, 239, 231, 0.65) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(246, 238, 227, 0.75) 0%, transparent 50%),
+    #f8f6f0;
   background-attachment: fixed;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -43,57 +48,57 @@ footer {
 }
 
 ::selection {
-  background: rgba(56, 189, 248, 0.28);
-  color: #0369a1;
+  background: rgba(45, 85, 66, 0.2);
+  color: #1c3d2e;
 }
 
 @layer components {
-  /* Iconic Glassmorphism Floating Card (Matched 1:1 to User's Light Glass Reference) */
+  /* Warm Nordic Wellness Frosted Floating Card */
   .glass-card {
-    background: rgba(255, 255, 255, 0.52);
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.38) 100%);
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(32px) saturate(190%) brightness(102%);
-    -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%);
+    background: rgba(255, 253, 249, 0.68);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(250, 246, 240, 0.50) 100%);
+    border: 1.5px solid rgba(232, 226, 215, 0.85);
+    box-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(28px) saturate(160%) brightness(101%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(101%);
     border-radius: 28px;
     transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    color: #0b1e3b;
+    color: #1c2620;
   }
 
   .glass-card:hover {
-    border-color: rgba(255, 255, 255, 1);
-    box-shadow: 0 26px 65px rgba(12, 45, 95, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 1), 0 0 20px rgba(56, 189, 248, 0.12);
+    border-color: rgba(215, 206, 192, 1);
+    box-shadow: 0 24px 60px rgba(35, 45, 38, 0.09), inset 0 1px 1.5px rgba(255, 255, 255, 1), 0 0 20px rgba(77, 124, 102, 0.10);
     transform: translateY(-2px);
   }
 
-  /* Elevated Primary Light Glass Panel */
+  /* Elevated Primary Warm Nordic Glass Panel */
   .glass-card-strong {
-    background: rgba(255, 255, 255, 0.68);
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.50) 100%);
-    border: 1.5px solid rgba(255, 255, 255, 0.95);
-    box-shadow: 0 24px 60px rgba(12, 45, 95, 0.10), inset 0 1px 2px rgba(255, 255, 255, 1);
-    backdrop-filter: blur(36px) saturate(200%) brightness(103%);
-    -webkit-backdrop-filter: blur(36px) saturate(200%) brightness(103%);
+    background: rgba(255, 254, 251, 0.82);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 243, 236, 0.68) 100%);
+    border: 1.5px solid rgba(240, 235, 225, 0.95);
+    box-shadow: 0 22px 55px rgba(35, 45, 38, 0.06), inset 0 1px 2px rgba(255, 255, 255, 1);
+    backdrop-filter: blur(32px) saturate(170%) brightness(102%);
+    -webkit-backdrop-filter: blur(32px) saturate(170%) brightness(102%);
     border-radius: 28px;
-    color: #0b1e3b;
+    color: #1c2620;
   }
 
   /* Frosted Pill / Badge / Chip */
   .glass-chip {
-    background: rgba(255, 255, 255, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 8px rgba(12, 45, 95, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    color: #0b1e3b;
+    background: rgba(255, 253, 249, 0.85);
+    border: 1px solid rgba(230, 224, 212, 0.9);
+    box-shadow: 0 2px 8px rgba(35, 45, 38, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    color: #1c2620;
   }
 
-  /* Dark HUD Card for Live Camera Viewports */
+  /* Deep Pine Obsidian HUD Card for Live Camera Viewports */
   .glass-card-dark {
-    background: rgba(11, 27, 52, 0.88) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    background: rgba(16, 29, 23, 0.92) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 24px 70px rgba(10, 20, 15, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(30px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
     color: #ffffff !important;
@@ -112,24 +117,24 @@ footer {
   [class*="bg-slate-50"],
   [class*="bg-slate-100"]
 ):not(.dark-hud *):not([class*="bg-gradient-"]):not([data-opaque]):not(button[class*="bg-"]):not([class*="bg-emerald-"]):not([class*="bg-sky-"]):not([class*="bg-teal-"]):not([class*="bg-amber-"]):not([class*="bg-purple-"]):not([class*="bg-red-"]):not(input):not(select):not(textarea) {
-  background: rgba(255, 255, 255, 0.52) !important;
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.38) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
-  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 253, 249, 0.70) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(250, 246, 240, 0.52) 100%) !important;
+  border-color: rgba(232, 226, 215, 0.85) !important;
+  backdrop-filter: blur(28px) saturate(160%) brightness(101%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(101%) !important;
+  box-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(
   [class*="bg-slate-800"],
   [class*="bg-slate-900"]
 ):not(.dark-surface):not(.dark-hud):not(.dark-surface *):not(.dark-hud *):not([class*="bg-gradient-"]):not([data-dark]):not(input):not(select):not(textarea) {
-  background: rgba(255, 255, 255, 0.65) !important;
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.48) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%) !important;
-  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 254, 251, 0.82) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 243, 236, 0.68) 100%) !important;
+  border-color: rgba(238, 232, 222, 0.9) !important;
+  backdrop-filter: blur(28px) saturate(160%) brightness(101%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(101%) !important;
+  box-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(
@@ -141,66 +146,67 @@ footer {
   [class*="bg-slate-50"],
   [class*="bg-slate-100"]
 ):not(.dark-hud):not([class*="bg-gradient-"]):not(input):not(select):not(textarea) {
-  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(32px) saturate(190%) brightness(102%);
-  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(102%);
+  box-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(28px) saturate(160%) brightness(101%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(101%);
 }
 
 /* Form Controls with Frosted Glass Backdrop */
 :where(input, select, textarea) {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: inset 0 1px 2px rgba(12, 45, 95, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  color: #0b1e3b !important;
+  background: rgba(255, 254, 251, 0.85) !important;
+  border: 1.5px solid rgba(228, 222, 210, 0.9) !important;
+  box-shadow: inset 0 1px 2px rgba(35, 45, 38, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  color: #1c2620 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
 }
 
 :where(input, select, textarea)::placeholder {
-  color: #64748b !important;
+  color: #79867c !important;
 }
 
 :where(input, select, textarea):focus {
-  border-color: rgba(2, 132, 199, 0.9) !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3), inset 0 1px 2px rgba(12, 45, 95, 0.04) !important;
+  border-color: rgba(59, 110, 87, 0.9) !important;
+  box-shadow: 0 0 0 3px rgba(77, 124, 102, 0.25), inset 0 1px 2px rgba(35, 45, 38, 0.03) !important;
   outline: none !important;
 }
 
-/* Crisp Clean Light Typography */
+/* Warm Nordic Typography */
 :where(h1, h2, h3, h4, h5, h6) {
-  color: #0b1e3b;
+  color: #1a2620;
   letter-spacing: -0.02em;
 }
 
 :where(.text-slate-900, .text-slate-800) {
-  color: #0b1e3b !important;
+  color: #1a2620 !important;
 }
 
 :where(.text-slate-700, .text-slate-600) {
-  color: #334155 !important;
+  color: #435147 !important;
 }
 
 :where(.text-slate-500, .text-slate-400) {
-  color: #64748b !important;
+  color: #6e7d73 !important;
 }
 
 :where(.border-slate-100, .border-slate-200, .border-slate-300) {
-  border-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(230, 224, 212, 0.8) !important;
 }
 
 :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
-  box-shadow: 0 20px 50px rgba(12, 45, 95, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 18px 45px rgba(35, 45, 38, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
 }
 
 :where(button, a) {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(button, a)[class*="bg-sky-600"],
-:where(button, a)[class*="bg-teal-600"],
 :where(button, a)[class*="bg-emerald-600"],
-:where(button, a)[class*="bg-amber-600"] {
-  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+:where(button, a)[class*="bg-teal-600"],
+:where(button, a)[class*="bg-emerald-700"],
+:where(button, a)[class*="bg-emerald-800"],
+:where(button, a)[class*="bg-sky-600"] {
+  box-shadow: 0 12px 28px rgba(45, 85, 66, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 /* High Contrast Mode */
@@ -248,12 +254,12 @@ footer {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(240, 246, 255, 0.4);
+  background: rgba(240, 236, 228, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.6);
+  background: rgba(180, 194, 184, 0.6);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(2, 132, 199, 0.8);
+  background: rgba(45, 85, 66, 0.8);
 }
