@@ -18,7 +18,7 @@ export function calculateJointAngle(
   use3D: boolean = true
 ): number {
   if (!pointA || !vertexB || !pointC) {
-    return 0;
+    return NaN;
   }
 
   // Determine whether to use 3D vectors: requires valid z coordinate on all 3 points

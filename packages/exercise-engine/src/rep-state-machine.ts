@@ -150,7 +150,8 @@ export class RepetitionStateMachine {
     let completedRepMetric: SessionRepMetric | null = null;
     let statusMessage = 'Maintain starting position';
 
-    const dtMs = this.lastTimestampMs > 0 ? Math.max(1, timestampMs - this.lastTimestampMs) : 33;
+    // B22: Use 0 for the very first frame — was 33, which advanced repStartTimeMs artifically
+    const dtMs = this.lastTimestampMs > 0 ? Math.max(1, timestampMs - this.lastTimestampMs) : 0;
     this.lastTimestampMs = timestampMs;
 
     // 1. Landmark Smoothing
@@ -239,14 +240,15 @@ export class RepetitionStateMachine {
       }
 
       case 'READY': {
-        this.startRomThisRep = currentAngle;
-        this.peakRomThisRep = currentAngle;
         statusMessage = 'Ready — begin movement smoothly';
 
         // Check if user initiated movement in the prescribed anatomical direction past hysteresis boundary
+        // B6: Compare to this.startRomThisRep (captured from user's actual resting posture)
+        //     NOT config.startAngle (nominal default). Fixes reps never triggering when user's
+        //     natural rest angle differs from the clinical default (e.g. 165° vs 170°).
         const hasCrossedThreshold = isAngleDecreasingOnFlex
-          ? currentAngle < (startAngle - hysteresisBuffer - 2)
-          : currentAngle > (startAngle + hysteresisBuffer + 2);
+          ? currentAngle < (this.startRomThisRep - hysteresisBuffer - 2)
+          : currentAngle > (this.startRomThisRep + hysteresisBuffer + 2);
 
         const isCorrectDirection = isAngleDecreasingOnFlex
           ? (motionResult.direction === 'FLEXING' || angularVelocity < -8)
@@ -266,6 +268,14 @@ export class RepetitionStateMachine {
           }
         } else {
           this.movingFrameCount = 0;
+          // While stationary or relaxing at rest, keep calibrated to resting posture
+          const isAtRestOrRelaxing = isAngleDecreasingOnFlex
+            ? currentAngle >= this.startRomThisRep
+            : currentAngle <= this.startRomThisRep;
+          if (motionResult.direction === 'STATIONARY' || isAtRestOrRelaxing) {
+            this.startRomThisRep = currentAngle;
+            this.peakRomThisRep = currentAngle;
+          }
           // Drift check: if drifted away from start without moving direction, reset to REST
           const hasDriftedFar = isAngleDecreasingOnFlex
             ? currentAngle < (startAngle - hysteresisBuffer - 12)
@@ -288,9 +298,11 @@ export class RepetitionStateMachine {
           : currentAngle >= (targetAngle - romToleranceDegrees / 2);
 
         // Check whether user reversed movement prematurely before reaching target
+        // B7: Removed extra +8 from both sides — that bonus caused micro-jitter past peak to
+        //     abort reps mid-movement. hysteresisBuffer alone is sufficient reversal confirmation.
         const returningPrematurely = isAngleDecreasingOnFlex
-          ? currentAngle > (this.peakRomThisRep + hysteresisBuffer + 8)
-          : currentAngle < (this.peakRomThisRep - hysteresisBuffer - 8);
+          ? currentAngle > (this.peakRomThisRep + hysteresisBuffer)
+          : currentAngle < (this.peakRomThisRep - hysteresisBuffer);
 
         // Check for movement timeout (e.g. held halfway or abandoned)
         const isTimedOut = (timestampMs - this.repStartTimeMs) > this.maxRepDurationMs;
@@ -435,9 +447,11 @@ export class RepetitionStateMachine {
         // Must wait out cooldown duration (anti-double counting)
         if (elapsedCooldown >= this.cooldownMs) {
           // In addition, user MUST be back in resting zone before starting next rep
+          // B8: Removed -4/+4 bonus — it let user stay 12° away from start and still count as
+          //     rested, causing double-counting on knee/shoulder exercises.
           const isBackInRest = isAngleDecreasingOnFlex
-            ? currentAngle >= (startAngle - hysteresisBuffer - 4)
-            : currentAngle <= (startAngle + hysteresisBuffer + 4);
+            ? currentAngle >= (startAngle - hysteresisBuffer)
+            : currentAngle <= (startAngle + hysteresisBuffer);
 
           if (isBackInRest) {
             this.state = 'READY';
@@ -540,7 +554,10 @@ export class RepetitionStateMachine {
       };
     }
 
-    const romSum = this.allRepMetrics.reduce((sum, r) => sum + r.peakRom, 0);
+    // B17: averageRom MUST be mean excursion (|peak - start| per rep), NOT mean peak angle.
+    //      The old code reported raw peak angle (e.g. 118°) to the therapist dashboard as
+    //      "average ROM", which is clinically wrong (should be the arc, e.g. 37°).
+    const romSum = this.allRepMetrics.reduce((sum, r) => sum + Math.abs(r.peakRom - r.startRom), 0);
     const averageRom = Math.round(romSum / total);
     const maxRom = this.config.isAngleDecreasingOnFlex
       ? Math.min(...this.allRepMetrics.map(r => r.peakRom)) // More flexion = smaller angle

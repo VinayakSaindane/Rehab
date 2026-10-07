@@ -56,14 +56,16 @@ export class ConfidenceGate {
 
       const lm = landmarks[idx];
       const vis = lm.visibility !== undefined ? lm.visibility : 1.0;
-      visibilitySum += vis;
-      checkedCount++;
 
       // Check if landmark is too close to frame boundary (camera clipping)
       const isOutOfBounds = lm.x < 0.02 || lm.x > 0.98 || lm.y < 0.02 || lm.y > 0.98;
 
       if (vis < this.minLandmarkVisibility || isOutOfBounds) {
         missingLandmarks.push(name);
+      } else {
+        // B11: Only count toward confidence when visible AND fully within frame
+        visibilitySum += vis;
+        checkedCount++;
       }
     }
 
@@ -105,7 +107,8 @@ export class ConfidenceGate {
   }
 
   public reset(): void {
-    this.smoothedConfidence = 0.9;
+    // B19: Cold start — require real passes to open (was 0.9, which pre-passed the gate)
+    this.smoothedConfidence = 0;
     this.consecutivePassingFrames = 0;
   }
 }

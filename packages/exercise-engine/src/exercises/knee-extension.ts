@@ -80,6 +80,8 @@ export class KneeExtensionAnalyzer {
       const knee = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_knee`]];
       const ankle = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_ankle`]];
       rawAngle = calculateJointAngle(hip, knee, ankle, true);
+      // B20: Guard NaN returned when a landmark is null/undefined
+      if (!isFinite(rawAngle)) rawAngle = 0;
     }
 
     const repResult = this.stateMachine.update(

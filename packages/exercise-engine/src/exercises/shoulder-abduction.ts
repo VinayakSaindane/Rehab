@@ -79,7 +79,11 @@ export class ShoulderAbductionAnalyzer {
       const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
       const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
       const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
-      rawAngle = calculateJointAngle(hip, shoulder, elbow, true);
+      // B4: use3D=false — frontal camera's elbow z-axis is unreliable (depth noise corrupts
+      //     abduction angle by 30–60°). Project onto 2D x/y frontal plane instead.
+      rawAngle = calculateJointAngle(hip, shoulder, elbow, false);
+      // B20: Guard NaN returned when a landmark is null/undefined
+      if (!isFinite(rawAngle)) rawAngle = 0;
     }
 
     const repResult = this.stateMachine.update(

@@ -79,7 +79,11 @@ export class ShoulderFlexionAnalyzer {
       const hip = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_hip`]];
       const shoulder = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_shoulder`]];
       const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
-      rawAngle = calculateJointAngle(hip, shoulder, elbow, true);
+      // B5: use3D=false — frontal camera z-axis unreliable for sagittal-plane flexion.
+      //     2D projection gives accurate apparent elevation angle from a frontal view.
+      rawAngle = calculateJointAngle(hip, shoulder, elbow, false);
+      // B20: Guard NaN returned when a landmark is null/undefined
+      if (!isFinite(rawAngle)) rawAngle = 0;
     }
 
     const repResult = this.stateMachine.update(

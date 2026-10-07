@@ -81,8 +81,11 @@ export class MotionDetector {
     const speed = Math.abs(angularVelocity);
 
     // Determine direction
+    // B14: Use same 0.6× threshold as isMovingCandidate to prevent direction=STATIONARY
+    //      when the displacement branch triggers motion (was speed >= velocityThreshold, which
+    //      left direction STATIONARY for slow but accumulated moves).
     let direction: MotionDirection = 'STATIONARY';
-    if (speed >= this.velocityThreshold) {
+    if (speed >= this.velocityThreshold * 0.6) {
       if (this.isAngleDecreasingOnFlex) {
         // Lower angle = flexing (e.g. elbow)
         direction = angularVelocity < 0 ? 'FLEXING' : 'EXTENDING';

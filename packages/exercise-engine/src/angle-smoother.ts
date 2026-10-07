@@ -72,7 +72,11 @@ export class KinematicAngleSmoother {
     let isGlitchRejected = false;
 
     // Scale allowed delta by time elapsed (normalizing for frame rate, baseline 33ms)
-    const allowedDelta = Math.max(10, this.maxRealisticDeltaPerFrame * (dtMs / 33.3));
+    // B13: Cap at 3× base to prevent spike gate disabling after tab-background (dtMs can be 500ms+)
+    const allowedDelta = Math.min(
+      this.maxRealisticDeltaPerFrame * 3,
+      Math.max(10, this.maxRealisticDeltaPerFrame * (dtMs / 33.3))
+    );
     if (Math.abs(rawDelta) > allowedDelta) {
       // Single-frame spike detected — clamp to max realistic change
       clampedAngle = this.previousSmoothedAngle + Math.sign(rawDelta) * allowedDelta;

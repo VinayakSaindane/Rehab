@@ -115,11 +115,23 @@ export default function LiveExerciseScreen() {
 
   // Session Completed State
   const [isSessionCompleted, setIsSessionCompleted] = useState(false);
+  // B15: Ref mirrors state to prevent stale closure in rAF loop (React state is async)
+  const isSessionCompletedRef = React.useRef(false);
   const [sessionSummary, setSessionSummary] = useState<any>(null);
   const [savingSession, setSavingSession] = useState(false);
 
+  // B15: Keep ref in sync with state
+  useEffect(() => {
+    isSessionCompletedRef.current = isSessionCompleted;
+  }, [isSessionCompleted]);
+
   // Initialize Exercise Engine
   useEffect(() => {
+    // B21: Reset old analyzer state before replacing — prevents stale ROM/rep state
+    //      from a previous exercise/side leaking into the new instance.
+    if (analyzerRef.current?.reset) {
+      analyzerRef.current.reset();
+    }
     let analyzer: any;
     if (exerciseId === 'shoulder-flexion') {
       analyzer = new ShoulderFlexionAnalyzer(135, 10, voiceEnabled, activeSide, language);
@@ -307,13 +319,23 @@ export default function LiveExerciseScreen() {
         return;
       }
 
+      // B2 + B10: Revamped frame acquisition.
+      // - B2: Only process frames when video.currentTime advances. If unchanged (rAF
+      //        fires at 60fps but camera is 30fps), skip the tick entirely — previously
+      //        we fell through to simulation, mixing fake data with live camera data.
+      // - B10: Pass video.currentTime*1000 (media timestamp) to detectForVideo — NOT
+      //         performance.now() (wall-clock). MediaPipe requires monotonically increasing
+      //         media timestamps; wall-clock caused sporadic landmark dropouts.
       let detectedLandmarks: Point2D[] = [];
+      let frameDecoded = false;
 
       if (mode === 'REAL' && videoRef.current && landmarkerRef.current && videoRef.current.readyState >= 2) {
         const video = videoRef.current;
         if (video.currentTime !== lastVideoTime) {
           lastVideoTime = video.currentTime;
-          const poseResults = landmarkerRef.current.detectForVideo(video, performance.now());
+          frameDecoded = true;
+          // B10: media timestamp, not wall-clock
+          const poseResults = landmarkerRef.current.detectForVideo(video, video.currentTime * 1000);
           if (poseResults.landmarks && poseResults.landmarks.length > 0) {
             detectedLandmarks = poseResults.landmarks[0].map((lm: any) => ({
               x: lm.x,
@@ -323,14 +345,18 @@ export default function LiveExerciseScreen() {
             }));
           }
         }
-      }
-
-      // Fallback to Simulation Mode if no landmarks detected or mode is SIMULATED
-      if (detectedLandmarks.length === 0) {
+        // B2: No new video frame — skip tick, do NOT inject simulation data
+        if (!frameDecoded) {
+          animFrameIdRef.current = requestAnimationFrame(processLoop);
+          return;
+        }
+      } else if (mode === 'SIMULATED') {
         simulatorRef.current.setPattern(simPattern);
         detectedLandmarks = simulatorRef.current.generateNextFrame();
-      } else if (detectedLandmarks.length >= 25) {
-        // Distance & Framing Heuristic based on inter-shoulder span
+      }
+
+      // Distance & Framing Heuristic (real mode only, skip for simulation)
+      if (mode === 'REAL' && detectedLandmarks.length >= 25) {
         const leftShoulder = detectedLandmarks[11];
         const rightShoulder = detectedLandmarks[12];
         if (leftShoulder && rightShoulder) {
@@ -345,8 +371,9 @@ export default function LiveExerciseScreen() {
         }
       }
 
-      // Execute Exercise Rule Engine
-      const analysis = analyzer.processFrame(detectedLandmarks);
+      // B1: Pass performance.now() so velocity/timing calculations use accurate timestamps
+      //     (previously processFrame() used Date.now() internally as fallback)
+      const analysis = analyzer.processFrame(detectedLandmarks, performance.now());
 
       setCurrentAngle(analysis.jointAngle);
       setLandmarks(analysis.landmarks);
@@ -379,7 +406,9 @@ export default function LiveExerciseScreen() {
       comp.compensation_flags.forEach((f: string) => sessionCompensationFlagsRef.current.add(f));
 
       // Auto-finish if prescribed target reps completed
-      if (analysis.repResult.completedReps >= exerciseMeta.targetReps && !isSessionCompleted) {
+      // B15: Use ref not state (state is stale inside rAF closure, causing duplicate calls)
+      if (analysis.repResult.completedReps >= exerciseMeta.targetReps && !isSessionCompletedRef.current) {
+        isSessionCompletedRef.current = true; // Lock immediately before async React state update
         handleFinishSession();
         return;
       }
@@ -394,11 +423,12 @@ export default function LiveExerciseScreen() {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted, activeSide]);
+  }, [mode, simPattern, exerciseMeta.targetReps, isSessionCompleted, activeSide, exerciseId]);
 
   // Handle Session Completion
   const handleFinishSession = async (userSelectedPain?: number) => {
-    if (isSessionCompleted) return;
+    if (isSessionCompleted || isSessionCompletedRef.current) return;
+    isSessionCompletedRef.current = true;
     setIsSessionCompleted(true);
     setSavingSession(true);
 

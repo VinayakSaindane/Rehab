@@ -94,6 +94,8 @@ export class ElbowFlexionAnalyzer {
       const elbow = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_elbow`]];
       const wrist = landmarks[MEDIAPIPE_LANDMARK_INDEX[`${prefix}_wrist`]];
       rawAngle = calculateJointAngle(shoulder, elbow, wrist, true);
+      // B20: Guard NaN returned when a landmark is null/undefined
+      if (!isFinite(rawAngle)) rawAngle = 0;
     }
 
     // 3. Update Repetition State Machine (passes confidence gating result & timestamp)

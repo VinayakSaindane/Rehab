@@ -149,7 +149,12 @@ export function getExerciseConfig(
   exerciseId: string,
   prescribedTargetRom?: number
 ): ExerciseKinematicProfile {
-  const profile = EXERCISE_CONFIGS[exerciseId] || EXERCISE_CONFIGS['elbow-flexion'];
+  // B3: Throw on unknown ID — silent elbow-flexion fallback caused wrong isAngleDecreasingOnFlex
+  //     for knee/shoulder exercises, inverting the entire state machine.
+  if (!EXERCISE_CONFIGS[exerciseId]) {
+    throw new Error(`[ExerciseEngine] Unknown exerciseId: "${exerciseId}". Did you mean one of: ${Object.keys(EXERCISE_CONFIGS).join(', ')}?`);
+  }
+  const profile = EXERCISE_CONFIGS[exerciseId];
   if (prescribedTargetRom !== undefined && !isNaN(prescribedTargetRom)) {
     return {
       ...profile,
